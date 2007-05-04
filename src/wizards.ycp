@@ -1,0 +1,122 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2006 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	include/kdump/wizards.ycp
+ * Package:	Configuration of kdump
+ * Summary:	Wizards definitions
+ * Authors:	Jozef Uhliarik <juhliarik@suse.com>
+ *
+ * $Id: wizards.ycp 27914 2006-02-13 14:32:08Z locilka $
+ */
+
+{
+
+textdomain "kdump";
+
+import "Sequencer";
+import "Wizard";
+
+include "kdump/complex.ycp";
+include "kdump/dialogs.ycp";
+
+
+/**
+ * Main workflow of the kdump configuration
+ * @return sequence result
+ */
+any MainSequence() {
+
+  map aliases = $[
+      "conf"	: ``( RunKdumpDialogs()),
+  ];
+
+  map sequence = $[
+      "ws_start": "conf",
+      "conf" 	: $[
+	   `abort	: `abort,
+	   `next	: `next,
+      ]
+
+  ];
+
+  any ret = Sequencer::Run(aliases, sequence);
+  return ret;
+}
+
+/**
+ * Whole configuration of kdump
+ * @return sequence result
+ */
+any KdumpSequence() {
+
+  map aliases = $[
+      "read"	: [ ``( ReadDialog() ), true ],
+      "main"	:   ``( MainSequence() ),
+      "write"	: [ ``( WriteDialog() ), true ]
+  ];
+
+  map sequence = $[
+      "ws_start": "read",
+      "read" 	: $[
+	   `abort	: `abort,
+	   `next	: "main"
+      ],
+      "main" 	: $[
+	   `abort	: `abort,
+	   `next	: "write"
+      ],
+      "write" 	: $[
+	   `abort	: `abort,
+	   `next	: `next
+      ]
+  ];
+
+  Wizard::CreateDialog();
+  Wizard::SetTitleIcon("yast-sysconfig");
+  any ret = Sequencer::Run(aliases, sequence);
+  UI::CloseDialog();
+  return ret;
+}
+
+/**
+ * Whole configuration of kdump but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+any KdumpAutoSequence() {
+
+    /* Initialization dialog caption */
+    string caption = _("Kdump Configuration");
+    /* Initialization dialog contents */
+    term contents = `Label(_("Initializing..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetContentsButtons(caption, contents, "",
+	    Label::BackButton(), Label::NextButton());
+
+    any ret = MainSequence();
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/* EOF */
+}

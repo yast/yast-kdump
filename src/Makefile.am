@@ -1,0 +1,30 @@
+# Makefile.am for kdump/src
+
+yncludedir = @yncludedir@/kdump
+
+client_DATA =			\
+	kdump.ycp		\
+	kdump_auto.ycp	\
+	kdump_proposal.ycp
+
+ynclude_DATA =			\
+	helps.ycp		\
+	wizards.ycp		\
+	dialogs.ycp		\
+	complex.ycp
+
+desktop_DATA =			\
+	kdump.desktop
+
+module_DATA =			\
+	Kdump.ycp		\
+	Kdump2.pm
+
+# create a symlink for local build, #145327
+kdump:
+	ln -sf . $@
+ycpchook = kdump
+
+EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
+
+include $(top_srcdir)/Makefile.am.common

@@ -1,0 +1,421 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2006 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	include/kdump/dialogs.ycp
+ * Package:	Configuration of kdump
+ * Summary:	Dialogs definitions
+ * Authors:	Jozef Uhliarik <juhliarik@suse.com>
+ *
+ * $Id: dialogs.ycp 27914 2006-02-13 14:32:08Z locilka $
+ */
+
+{
+
+textdomain "kdump";
+
+import "CWM";
+import "Label";
+import "Wizard";
+import "Kdump";
+import "DialogTree";
+import "CWMTab";
+
+include "kdump/helps.ycp";
+
+void DisBackButton (string key) {
+  Wizard::SetTitleIcon("yast-sysconfig");
+  UI::ChangeWidget(`id(`back), `Enabled, false);
+}
+
+
+list local_partitions_list = [
+  "/dev/sda2",
+  "/dev/sda5",
+  "/dev/sda7",
+];
+
+
+list raw_partitions_list = [
+  "/dev/sda2",
+  "/dev/sda5",
+  "/dev/sda7",
+];
+
+
+term local_filesystem = `VBox(
+
+  `ComboBox(`id("local_partitions"), "&Select Partition", local_partitions_list)
+
+);
+
+
+term raw_disk = `VBox(
+
+  `ComboBox(`id("raw_partitions"), "&Select Partition", raw_partitions_list)
+
+);
+
+map<string,map<string,any> > wid_handling = $[
+  "DisBackButton" 	: $[
+     "widget"		: `custom,
+     "custom_widget"	: `Empty(),
+     "init"		: DisBackButton,
+     "help"		: " ",
+  ],
+
+  "EnableDisalbeKdump"	: $[
+     //TRANSLATORS: RadioButtonGroup Label
+     "label" 		: _("Enable/Disable kdump"),
+     "widget" 		: `radio_buttons,
+     "items" 		: [
+        ["enable_kdump",  _("Enable kd&ump")  ],
+        ["disable_kdump", _("&Disable kdump") ],
+     ],
+     "orientation" 	: `horizontal,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("StartRadioBut"),
+
+  ],
+
+  "BootOption"		: $[
+     //TRANSLATORS: RadioButtonGroup Label
+     "label" 		: _("Boot Option (crashkernel) for Kdump"),
+     "widget" 		: `radio_buttons,
+     "items" 		: [
+        ["add_boot", 	  _("A&dd Boot Option")  ],
+        ["remove_boot",   _("&Remove Boot Option") ],
+     ],
+     "orientation" 	: `horizontal,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("StartRadioBut"),
+
+  ],
+  "RunLevel" 		: $[
+     //TRANSLATORS: ComboBox Label
+     "label" 		: _("&The Run-level to Boot the Kdump Kernel"),
+     "widget" 		: `combobox,
+     "items" 		: [
+        [ "run_level1", _("1 - Single User Mode") ],
+        [ "run_level2", _("2 - Local Multiuser Without Remote Network") ],
+        [ "run_level3", _("3 - Full Multiuser With Network") ],
+        [ "run_level5", _("5 - Full Multiuser With Network and xdm") ],
+        [ "run_levelS", _("s - ") ],
+     ],
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("RunLevel"),
+  ],
+
+  "EnableReboot" 	: $[
+     //TRANSLATORS: CheckBox Label
+     "label" 		: _("&Enable Immediate Reboot After Saving the Core"),
+     "widget" 		: `checkbox,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("EnableReboot"),
+  ],
+
+  "FreeDiskSize"	: $[
+     //TRANSLATORS: IntField Label
+     "label" 		: _("Fr&ee Disk Size [MB]"),
+     "widget" 		: `intfield,
+     "minimum" 		: 0,
+     "maximum" 		: 10,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("FreeDiskSize"),
+  ],
+
+
+  "TargetKdump"		: $[
+     "widget"		: `custom,
+     "custom_widget"	: `VBox(
+           `RadioButtonGroup(`id("DumpTarget"),
+           `HBox(`VBox(
+	      `Left(`RadioButton(`id("local_filesystem"), "&Local Filesytem", true)),
+	      `Left(`RadioButton(`id("raw_disk"), "&Raw Disk" ))))
+            ),
+           `Left(`ReplacePoint(`id("Targets"), local_filesystem))								    
+     ),
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("TargetKdump"),
+
+  ],
+
+  "DirectoryDumps" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("&Directory for Saving Dumps"),
+     "widget" 		: `textentry,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("DirectoryDumps"),
+  ],
+
+  "SelectDirDumps" 	: $[
+     //TRANSLATORS: PushButton Label
+     "label" 		: _("Bro&wse"),
+     "widget" 		: `push_button,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("SelectDirDumps"),
+  ],
+  
+  "NumberDumps"		: $[
+     //TRANSLATORS: IntField Label
+     "label" 		: _("N&umber of Old Dumps"),
+     "widget" 		: `intfield,
+     "minimum" 		: 0,
+     "maximum" 		: 10,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("NumberDumps"),
+  ],
+
+  "KernelCommandLine" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("&Kernel Command Line"),
+     "widget" 		: `textentry,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("KernelCommandLine"),
+  ],
+  
+  "KdumpCommandLine" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Kdump Co&mmand Line"),
+     "widget" 		: `textentry,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("KdumpCommandLine"),
+  ],
+
+  "SwitchKdumpComLine"	: $[
+
+     "widget"		: `custom,
+     "custom_widget"	: `VBox(
+           `RadioButtonGroup(`id("switch_kdum_comm_line"),
+             `HBox(`HSpacing(1),`VBox(
+	      `Left(`Label("")),
+	      `Left(`CheckBox(`id("enable_append"), "A&ppend kdump Commandline"))
+             ))
+           )
+     ),
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("SwitchKdumpComLine"),
+
+  ],
+
+  "KdumpKernel" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Kdump Ke&rnel"),
+     "widget" 		: `textentry,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("KdumpKernel"),
+  ],
+
+  "SelectKdumpKernel" 		: $[
+     //TRANSLATORS: PushButton Label
+     "label" 		: _("Bro&wse"),
+     "widget" 		: `push_button,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("SelectDirKdumpKernel"),
+  ],
+
+  "KdumpKernelInitrd" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Kdump Kernel &Initrd"),
+     "widget" 		: `textentry,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("KdumpKernelInitrd"),
+  ],
+
+  "SelectKdumpKernelInitrd" 		: $[
+     //TRANSLATORS: PushButton Label
+     "label" 		: _("Br&owse"),
+     "widget" 		: `push_button,
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("SelectKdumpKernelInitrd"),
+  ],
+
+  "KdumpMemory" 		: $[
+     "widget" 		: `custom,
+     "custom_widget"	: `HSquash(`VBox(
+           `Left(`HBox(
+	      `Left(`Label("Total System Memory [MB]:")),
+	      `Left(`Label(`id("total_memory"),"4096")),
+	      `HStretch ()
+           )),
+           `Left(`HBox(
+	      `Left(`Label("Usable Memory [MB]:")),
+	      `Left(`Label(`id("usable_memory"),"3968")),
+	      `HStretch ()
+           )),
+	   `Left(`IntField(`id("memory_buffer"), _("Kdump Memor&y [MB]"),128,4096,128))
+     )),
+     //"init"		: 
+     //"handle"		: 
+     //"store"		: 
+     "help"		: HelpKdump("KdumpMemory"),
+  ],
+];
+
+map<string, map<string,any> > tabs = $[
+  
+  "gen_settings"	: $[
+     "contents"		: `VBox(
+  	"EnableDisalbeKdump",
+	`VSpacing(1),
+	"BootOption",
+	`VSpacing(1),
+	`Frame ( _("The Run-level to Boot"),`HBox(`HSpacing(1),`VBox(
+          `Left("RunLevel"),          
+	  `HStretch ()
+        ))),
+	`VStretch ()
+     ),
+     "caption"		: _("Kdump General Settings"),
+     "tree_item_label"	: _("Start-Up"),
+     "widget_names"	: [
+        "DisBackButton", "EnableDisalbeKdump", 
+        "RunLevel","BootOption"
+     ],    
+  ],
+
+  "dump_settings"	: $[
+     "contents"		: `VBox(
+	/*`Frame ( _("Dump Target"),`HBox(`HSpacing(1),`VBox(
+          `Left("TargetKdump")
+        ))),
+	`VSpacing(1),*/
+	`Frame ( _("Dump Settings"),`HBox(`HSpacing(1),`VBox(
+	  /*`Left(`HBox(
+	    `Left("DirectoryDumps"),
+	    `Left(`VBox(
+		`Label(""),
+ 		"SelectDirDumps"
+            )),
+	    `HStretch ()
+           )),*/
+	   `Left("NumberDumps"),
+	   `Left("EnableReboot")
+        ))),
+	`VStretch ()
+     		
+     ),
+     "caption"		: _("Kdump Dump to File"),
+     "tree_item_label"	: _("Dumping"),
+     "widget_names"	: [
+	"DisBackButton", "TargetKdump", "DirectoryDumps", 
+	"SelectDirDumps", "NumberDumps", "EnableReboot"
+     ]    
+  ],
+  
+  "exp_settings" 	: $[
+     "contents"		: `VBox(
+       /*`Frame ( _("Kdump Kernel"),`HBox(`HSpacing(1),`VBox(
+	  `Left(`HBox(
+            `Left("KdumpKernel"),
+	    `Left(`VBox(
+		`Label(""),
+ 		"SelectKdumpKernel"
+            )),
+	    `HStretch ()
+	  )),
+	  `Left(`HBox(
+            `Left("KdumpKernelInitrd"),
+	    `Left(`VBox(
+		`Label(""),
+                "SelectKdumpKernelInitrd"
+ 	    )),
+	    `HStretch ()
+	  ))
+         
+        ))),
+	`VSpacing(1),*/
+	`Frame ( _("Command Line"),`HBox(`HSpacing(1),`VBox(
+          //`Left("KernelCommandLine"),
+	  `Left(`HBox(
+            `Left("KdumpCommandLine"),
+	    `Left("SwitchKdumpComLine"),
+	    `HStretch ()
+	  ))         
+        ))),
+	`VSpacing(1),
+	`Frame ( _("Kdump Memory"),`HBox(`HSpacing(1),`VBox(
+          `Left("KdumpMemory") 
+        ))),
+  	`VStretch ()
+     ),
+     "caption"		: _("Kdump Expert Settings"),
+     "tree_item_label"	: _("Expert Settings"),
+     "widget_names"	: [
+        "DisBackButton","KernelCommandLine", 
+        "KdumpCommandLine", "SwitchKdumpComLine","KdumpKernel",
+	"SelectKdumpKernel", "KdumpKernelInitrd", 
+	"SelectKdumpKernelInitrd","KdumpMemory",
+     ]    
+  ],
+
+];
+
+symbol RunKdumpDialogs() {
+  list<string> sim_dialogs = [ "gen_settings", "dump_settings", "exp_settings"];
+
+  return DialogTree::ShowAndRun ($[ 
+  //return CWMTab::CreateWidget($[ 
+    "ids_order"		: sim_dialogs,
+    "initial_screen"	: "gen_settings",
+    "screens"		: tabs,
+    "widget_descr"	: wid_handling,
+    "back_button"	: Label::BackButton(),
+    "abort_button"	: Label::AbortButton(),
+    "next_button"	: Label::AcceptButton(),
+    //"functions"	: " ",
+  ]);
+}
+
+
+/* EOF */
+}

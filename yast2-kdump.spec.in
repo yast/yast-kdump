@@ -1,0 +1,31 @@
+@HEADER-COMMENT@
+
+@HEADER@
+Requires:	yast2
+BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite
+
+BuildArchitectures:	noarch
+
+Summary:	Configuration of kdump
+
+%description
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+
+@CLEAN@
+
+%files
+%defattr(-,root,root)
+%dir @yncludedir@/kdump
+@yncludedir@/kdump/*
+@clientdir@/kdump.ycp
+@clientdir@/kdump_*.ycp
+@moduledir@/Kdump.*
+@moduledir@/Kdump2.*
+@desktopdir@/kdump.desktop
+%doc @docdir@
