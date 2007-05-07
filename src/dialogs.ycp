@@ -39,6 +39,7 @@ import "DialogTree";
 import "CWMTab";
 
 include "kdump/helps.ycp";
+include "kdump/uifunctions.ycp";
 
 void DisBackButton (string key) {
   Wizard::SetTitleIcon("yast-sysconfig");
@@ -46,32 +47,7 @@ void DisBackButton (string key) {
 }
 
 
-list local_partitions_list = [
-  "/dev/sda2",
-  "/dev/sda5",
-  "/dev/sda7",
-];
 
-
-list raw_partitions_list = [
-  "/dev/sda2",
-  "/dev/sda5",
-  "/dev/sda7",
-];
-
-
-term local_filesystem = `VBox(
-
-  `ComboBox(`id("local_partitions"), "&Select Partition", local_partitions_list)
-
-);
-
-
-term raw_disk = `VBox(
-
-  `ComboBox(`id("raw_partitions"), "&Select Partition", raw_partitions_list)
-
-);
 
 map<string,map<string,any> > wid_handling = $[
   "DisBackButton" 	: $[
@@ -97,21 +73,6 @@ map<string,map<string,any> > wid_handling = $[
 
   ],
 
-  "BootOption"		: $[
-     //TRANSLATORS: RadioButtonGroup Label
-     "label" 		: _("Boot Option (crashkernel) for Kdump"),
-     "widget" 		: `radio_buttons,
-     "items" 		: [
-        ["add_boot", 	  _("A&dd Boot Option")  ],
-        ["remove_boot",   _("&Remove Boot Option") ],
-     ],
-     "orientation" 	: `horizontal,
-     //"init"		: 
-     //"handle"		: 
-     //"store"		: 
-     "help"		: HelpKdump("StartRadioBut"),
-
-  ],
   "RunLevel" 		: $[
      //TRANSLATORS: ComboBox Label
      "label" 		: _("&The Run-level to Boot the Kdump Kernel"),
@@ -155,15 +116,22 @@ map<string,map<string,any> > wid_handling = $[
   "TargetKdump"		: $[
      "widget"		: `custom,
      "custom_widget"	: `VBox(
-           `RadioButtonGroup(`id("DumpTarget"),
-           `HBox(`VBox(
-	      `Left(`RadioButton(`id("local_filesystem"), "&Local Filesytem", true)),
-	      `Left(`RadioButton(`id("raw_disk"), "&Raw Disk" ))))
-            ),
-           `Left(`ReplacePoint(`id("Targets"), local_filesystem))								    
+           `Frame(_("Saving Target for kdump Image"),`HBox(`HSpacing(1),`VBox(
+             `RadioButtonGroup(`id("DumpTarget"), `VBox(
+	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem", true)),
+	        `Left(`RadioButton(`id("raw_disk"), `opt(`notify), "&Raw Disk")),
+                `Left(`RadioButton(`id("network"), `opt(`notify), "&Network"))
+             ))
+             
+           ))),
+
+           `ReplacePoint(`id("Network"), network),
+           `VSpacing(1),
+           `ReplacePoint(`id("Targets"), ftp),
+           `VStretch()								    
      ),
      //"init"		: 
-     //"handle"		: 
+     "handle"		: HandleTargetKdump,
      //"store"		: 
      "help"		: HelpKdump("TargetKdump"),
 
@@ -303,11 +271,9 @@ map<string,map<string,any> > wid_handling = $[
 
 map<string, map<string,any> > tabs = $[
   
-  "gen_settings"	: $[
+  "start_up"	: $[
      "contents"		: `VBox(
   	"EnableDisalbeKdump",
-	`VSpacing(1),
-	"BootOption",
 	`VSpacing(1),
 	`Frame ( _("The Run-level to Boot"),`HBox(`HSpacing(1),`VBox(
           `Left("RunLevel"),          
@@ -315,15 +281,15 @@ map<string, map<string,any> > tabs = $[
         ))),
 	`VStretch ()
      ),
-     "caption"		: _("Kdump General Settings"),
+     "caption"		: _("Kdump Start-Up"),
      "tree_item_label"	: _("Start-Up"),
      "widget_names"	: [
         "DisBackButton", "EnableDisalbeKdump", 
-        "RunLevel","BootOption"
+        "RunLevel",
      ],    
   ],
 
-  "dump_settings"	: $[
+  "dumping"	: $[
      "contents"		: `VBox(
 	/*`Frame ( _("Dump Target"),`HBox(`HSpacing(1),`VBox(
           `Left("TargetKdump")
@@ -347,8 +313,18 @@ map<string, map<string,any> > tabs = $[
      "caption"		: _("Kdump Dump to File"),
      "tree_item_label"	: _("Dumping"),
      "widget_names"	: [
-	"DisBackButton", "TargetKdump", "DirectoryDumps", 
+	"DisBackButton", "DirectoryDumps", 
 	"SelectDirDumps", "NumberDumps", "EnableReboot"
+     ]    
+  ],
+
+  "save_dump"	: $[
+     "contents"		: `VBox(
+     	"TargetKdump"
+     ),
+     "caption"		: _("Save Dump Image"),
+     "tree_item_label"	: _("Save Dump Image"),
+     "widget_names"	: [ "TargetKdump"
      ]    
   ],
   
@@ -401,12 +377,12 @@ map<string, map<string,any> > tabs = $[
 ];
 
 symbol RunKdumpDialogs() {
-  list<string> sim_dialogs = [ "gen_settings", "dump_settings", "exp_settings"];
+  list<string> sim_dialogs = [ "start_up", "dumping", "save_dump" ,"exp_settings"];
 
   return DialogTree::ShowAndRun ($[ 
   //return CWMTab::CreateWidget($[ 
     "ids_order"		: sim_dialogs,
-    "initial_screen"	: "gen_settings",
+    "initial_screen"	: "start_up",
     "screens"		: tabs,
     "widget_descr"	: wid_handling,
     "back_button"	: Label::BackButton(),

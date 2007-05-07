@@ -11,14 +11,14 @@ ynclude_DATA =			\
 	helps.ycp		\
 	wizards.ycp		\
 	dialogs.ycp		\
-	complex.ycp
+	complex.ycp		\
+	uifunctions.ycp
 
 desktop_DATA =			\
 	kdump.desktop
 
 module_DATA =			\
-	Kdump.ycp		\
-	Kdump2.pm
+	Kdump.ycp
 
 # create a symlink for local build, #145327
 kdump:
