@@ -12,6 +12,28 @@
 textdomain "kdump";
 
 import "Popup";
+import "Kdump";
+
+
+    // EXAMPLE FUNCTIONS
+/*
+ *    void ExampleInit(string key) {
+ *	y2milestone("Example Init");
+ *    }
+ *
+ *    symbol ExampleHandle(string key, map event) {
+ *	any ret = event["ID"]:nil;
+ *	y2milestone("Example Handle");
+ *	return nil;
+ *    }
+ *
+ *    void ExampleStore(string key, map event) {
+ *	any ret = event["ID"]:nil;
+ *	y2milestone("Example Store");
+ *    }
+ *
+ */
+
 
 list local_partitions_list = [
   "/dev/sda2",
@@ -108,11 +130,11 @@ term smb = `VBox(
 
 );
 
-//term empty = `VBox();
+
 
 symbol HandleTargetKdump (string key, map event) {
   any radiobutton = UI::QueryWidget(`id("DumpTarget"), `CurrentButton);
-  any net = UI::QueryWidget(`id("NetworkRB"), `CurrentButton);
+  
   if (radiobutton == "local_filesystem") {
      UI::ReplaceWidget (`id ("Network"), `Empty());
      UI::ReplaceWidget (`id ("Targets"), local_filesystem);
@@ -121,11 +143,12 @@ symbol HandleTargetKdump (string key, map event) {
      UI::ReplaceWidget (`id ("Network"), `Empty());
      UI::ReplaceWidget (`id ("Targets"), raw_disk);
      set_network = false;
-  } else if (radiobutton == "network") {
+  } else if (radiobutton == "network") {    
      UI::ReplaceWidget (`id ("Targets"), `Empty());
      if (!set_network)
         UI::ReplaceWidget (`id ("Network"), network);
      set_network = true;
+      any net = UI::QueryWidget(`id("NetworkRB"), `CurrentButton);
      if (net == "ftp") {
         UI::ReplaceWidget (`id ("Targets"), ftp);
      } else if (net == "ssh") {
@@ -139,6 +162,42 @@ symbol HandleTargetKdump (string key, map event) {
   return nil;
 
 }
+
+
+symbol HandleSwitchKdumpComLine (string key, map event) {
+  boolean checkbox = (boolean) UI::QueryWidget(`id("enable_append"), `Value);
+  string value = "";
+  if (checkbox) {
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line Append");
+     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"]:nil;
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
+  } else {
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line");
+     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"]:nil;
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
+  }
+
+  return nil;
+}
+
+
+void InitNumberDumps (string key) {
+
+  UI::ChangeWidget(`id("NumberDumps"), `Value, tointeger(Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"]:nil));
+
+
+   //y2milestone("Example Init");
+}
+
+
+void StoreNumberDumps(string key, map event) {
+
+  Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"] = tostring(UI::QueryWidget(`id("NumberDumps"), `Value));
+
+}
+
+
+
 
 
 

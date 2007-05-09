@@ -163,9 +163,9 @@ map<string,map<string,any> > wid_handling = $[
      "widget" 		: `intfield,
      "minimum" 		: 0,
      "maximum" 		: 10,
-     //"init"		: 
+     "init"		: InitNumberDumps,
      //"handle"		: 
-     //"store"		: 
+     "store"		: StoreNumberDumps,
      "help"		: HelpKdump("NumberDumps"),
   ],
 
@@ -196,12 +196,12 @@ map<string,map<string,any> > wid_handling = $[
            `RadioButtonGroup(`id("switch_kdum_comm_line"),
              `HBox(`HSpacing(1),`VBox(
 	      `Left(`Label("")),
-	      `Left(`CheckBox(`id("enable_append"), "A&ppend kdump Commandline"))
+	      `Left(`CheckBox(`id("enable_append"), `opt(`notify), "A&ppend kdump Commandline"))
              ))
            )
      ),
      //"init"		: 
-     //"handle"		: 
+     "handle"		: HandleSwitchKdumpComLine,
      //"store"		: 
      "help"		: HelpKdump("SwitchKdumpComLine"),
 
