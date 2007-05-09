@@ -1,0 +1,145 @@
+/**
+ * File:	include/kdump/dialogs.ycp
+ * Package:	Configuration of kdump
+ * Summary:	Dialogs definitions
+ * Authors:	Jozef Uhliarik <juhliarik@suse.com>
+ *
+ * $Id: dialogs.ycp 27914 2006-02-13 14:32:08Z locilka $
+ */
+
+{
+
+textdomain "kdump";
+
+import "Popup";
+
+list local_partitions_list = [
+  "/dev/sda2",
+  "/dev/sda5",
+  "/dev/sda7",
+];
+
+
+list raw_partitions_list = [
+  "/dev/sda2",
+  "/dev/sda5",
+  "/dev/sda7",
+];
+
+boolean set_network = false;
+
+term local_filesystem = `VBox(
+  `Frame(_("Local Filesystem"),`HBox(`HSpacing(1),`VBox(
+    `Left(`ComboBox(`id("local_partitions"), "&Select Partition", local_partitions_list))
+  )))
+);
+
+
+term raw_disk = `VBox(
+  `Frame(_("Raw Disk"),`HBox(`HSpacing(1),`VBox(
+    `Left(`ComboBox(`id("raw_partitions"), "&Select Partition", raw_partitions_list))
+  )))
+
+);
+
+term network = `VBox(
+  `VSpacing(1),
+  `Frame(_("Network"),`HBox(`HSpacing(1),
+    `RadioButtonGroup(`id("NetworkRB"), `HBox(
+       `Left(`RadioButton(`id("ftp"), `opt(`notify), "&FTP")),
+       `Left(`RadioButton(`id("ssh"), `opt(`notify), "&SSH (scp)")),
+       `Left(`RadioButton(`id("nfs"), `opt(`notify), "&NFS")),
+       `Left(`RadioButton(`id("smb"), `opt(`notify), "&SMB (CIPS)"))
+    ))
+  ))
+
+);
+
+
+term ftp = `VBox(
+  `Frame(_("FTP"),`HBox(`HSpacing(1),`VBox(
+    `Left(`TextEntry(`id ("server"), _("Server &Name"))),
+    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
+    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("&Anonymous"))),
+    // text entry
+    `Left(`TextEntry(`id ("username"), _("&User Name"))),
+    // password entry
+    `Left(`Password(`id ("password"), _("&Password")))    
+  )))
+
+);
+
+term ssh = `VBox(
+  `Frame(_("SSH (scp)"),`HBox(`HSpacing(1),`VBox(
+    `Left(`TextEntry(`id ("server"), _("Server &Name"))),
+    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
+     // text entry
+    `Left(`TextEntry(`id ("port"), _("&Port"))),
+    // text entry
+    `Left(`TextEntry(`id ("username"), _("&User Name"))),
+    // password entry
+    `Left(`Password(`id ("password"), _("&Password")))    
+  )))
+
+);
+
+term nfs = `VBox(
+  `Frame(_("NFS"),`HBox(`HSpacing(1),`VBox(
+    `Left(`TextEntry(`id ("server"), _("Server &Name"))),
+     // text entry
+    `Left(`TextEntry(`id ("share"), _("&Share"))),
+    `Left(`TextEntry( `id("dir"), _("&Directory on Server")))  
+  )))
+
+);
+
+
+term smb = `VBox(
+  `Frame(_("SMB (CIPS)"),`HBox(`HSpacing(1),`VBox(
+    `Left(`TextEntry(`id ("server"), _("Server &Name"))),
+     // text entry
+    `Left(`TextEntry(`id ("share"), _("&Share"))),
+    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
+     // text entry
+    `Left(`TextEntry(`id ("username"), _("&User Name"))),
+    // password entry
+    `Left(`Password(`id ("password"), _("&Password")))
+  )))
+
+);
+
+//term empty = `VBox();
+
+symbol HandleTargetKdump (string key, map event) {
+  any radiobutton = UI::QueryWidget(`id("DumpTarget"), `CurrentButton);
+  any net = UI::QueryWidget(`id("NetworkRB"), `CurrentButton);
+  if (radiobutton == "local_filesystem") {
+     UI::ReplaceWidget (`id ("Network"), `Empty());
+     UI::ReplaceWidget (`id ("Targets"), local_filesystem);
+     set_network = false; 
+  } else if (radiobutton == "raw_disk") {
+     UI::ReplaceWidget (`id ("Network"), `Empty());
+     UI::ReplaceWidget (`id ("Targets"), raw_disk);
+     set_network = false;
+  } else if (radiobutton == "network") {
+     UI::ReplaceWidget (`id ("Targets"), `Empty());
+     if (!set_network)
+        UI::ReplaceWidget (`id ("Network"), network);
+     set_network = true;
+     if (net == "ftp") {
+        UI::ReplaceWidget (`id ("Targets"), ftp);
+     } else if (net == "ssh") {
+        UI::ReplaceWidget (`id ("Targets"), ssh);
+     } else if (net == "nfs") {
+        UI::ReplaceWidget (`id ("Targets"), nfs);
+     } else if (net == "smb") {
+        UI::ReplaceWidget (`id ("Targets"), smb);
+     }
+  }
+  return nil;
+
+}
+
+
+
+}
