@@ -50,6 +50,8 @@ list raw_partitions_list = [
 
 boolean set_network = false;
 
+boolean set_kdump_append = false;
+
 term local_filesystem = `VBox(
   `Frame(_("Local Filesystem"),`HBox(`HSpacing(1),`VBox(
     `Left(`ComboBox(`id("local_partitions"), "&Select Partition", local_partitions_list))
@@ -163,17 +165,49 @@ symbol HandleTargetKdump (string key, map event) {
 
 }
 
+/**
+  * Function initializes option "Kdump Command Line"
+  * or "Kdump Command Line Append"
+  */
 
-symbol HandleSwitchKdumpComLine (string key, map event) {
-  boolean checkbox = (boolean) UI::QueryWidget(`id("enable_append"), `Value);
+void InitSwitchKdumpComLine (string key) {
   string value = "";
-  if (checkbox) {
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line Append");
+  Popup::Message("InitSwitchKdumpComLine");
+  if (!set_kdump_append) {
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line");
+     UI::ChangeWidget(`id("enable_append"), `Value, false);
      value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"]:nil;
      UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
   } else {
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line");
+     UI::ChangeWidget(`id("enable_append"), `Value, true);
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line Append");
      value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"]:nil;
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
+  }  
+}
+
+
+
+/**
+  * Function handles switching between "Kdump Command Line"
+  * and "Kdump Command Line Append"
+  * also saves values for both options from config file
+  */
+symbol HandleSwitchKdumpComLine (string key, map event) {
+  boolean checkbox = (boolean) UI::QueryWidget(`id("enable_append"), `Value);
+  string value = "";
+  Popup::Message("HandleSwitchKdumpComLine");
+  if ((checkbox) && (!set_kdump_append)) {
+     set_kdump_append = true;
+     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line Append");
+     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"]:nil;
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
+  } else if ((!checkbox)&&(set_kdump_append)){
+     set_kdump_append = false;
+     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
+     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line");
+     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"]:nil;
      UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
   }
 
@@ -181,23 +215,53 @@ symbol HandleSwitchKdumpComLine (string key, map event) {
 }
 
 
+/**
+  * Function stores option "Kdump Command Line"
+  * or "Kdump Command Line Append"
+  */
+void StoreSwitchKdumpComLine (string key, map event) {
+  Popup::Message("StoreSwitchKdumpComLine");
+  if (!set_kdump_append) {    
+     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
+  } else {
+     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
+  }
+}
+
+
+/**
+  * Function initializes option "Number of Old Dumps"
+  */
 void InitNumberDumps (string key) {
-
-  UI::ChangeWidget(`id("NumberDumps"), `Value, tointeger(Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"]:nil));
-
-
-   //y2milestone("Example Init");
+  UI::ChangeWidget(`id("NumberDumps"), `Value, tointeger(Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"]:nil));  
 }
 
-
+/**
+  * Function stores option "Number of Old Dumps"
+  */
 void StoreNumberDumps(string key, map event) {
-
   Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"] = tostring(UI::QueryWidget(`id("NumberDumps"), `Value));
-
 }
 
+/**
+  * Function initializes option 
+  * "Enable Immediate Reboot After Saving the Core"
+  */
 
+void InitEnableReboot (string key) {
+  UI::ChangeWidget(`id("EnableReboot"), `Value, ((Kdump::KDUMP_SETTINGS["KDUMP_IMMEDIATE_REBOOT"]:nil == "yes") ? true:false));  
+}
 
+/**
+  * Function stores option 
+  * "Enable Immediate Reboot After Saving the Core"
+  */
+
+void StoreEnableReboot(string key, map event) {
+
+  Kdump::KDUMP_SETTINGS["KDUMP_IMMEDIATE_REBOOT"] = (((boolean) UI::QueryWidget(`id("EnableReboot"), `Value)) ? "yes":"no");
+
+}
 
 
 

@@ -202,7 +202,6 @@ global boolean Write() {
     // TODO FIXME And set the right number of stages
     integer steps = 2;
 
-    integer sl = 500;
     sleep(sl);
 
     // TODO FIXME Names of real stages

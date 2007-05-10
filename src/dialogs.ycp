@@ -94,9 +94,9 @@ map<string,map<string,any> > wid_handling = $[
      //TRANSLATORS: CheckBox Label
      "label" 		: _("&Enable Immediate Reboot After Saving the Core"),
      "widget" 		: `checkbox,
-     //"init"		: 
+     "init"		: InitEnableReboot,
      //"handle"		: 
-     //"store"		: 
+     "store"		: StoreEnableReboot,
      "help"		: HelpKdump("EnableReboot"),
   ],
 
@@ -183,9 +183,9 @@ map<string,map<string,any> > wid_handling = $[
      //TRANSLATORS: TextEntry Label
      "label" 		: _("Kdump Co&mmand Line"),
      "widget" 		: `textentry,
-     //"init"		: 
+     //"init"		: init is hadled by "SwitchKdumpComLine"
      //"handle"		: 
-     //"store"		: 
+     //"store"		: store is hadled by "SwitchKdumpComLine"
      "help"		: HelpKdump("KdumpCommandLine"),
   ],
 
@@ -200,9 +200,9 @@ map<string,map<string,any> > wid_handling = $[
              ))
            )
      ),
-     //"init"		: 
+     "init"		: InitSwitchKdumpComLine,
      "handle"		: HandleSwitchKdumpComLine,
-     //"store"		: 
+     "store"		: StoreSwitchKdumpComLine,
      "help"		: HelpKdump("SwitchKdumpComLine"),
 
   ],
