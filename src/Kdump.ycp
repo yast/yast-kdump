@@ -39,6 +39,7 @@ import "Progress";
 import "Report";
 import "Summary";
 import "Message";
+import "BootCommon";
 
 /**
  * Prototypes
@@ -85,6 +86,8 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KDUMP_FREE_DISK_SIZE"    	    : "64",
      "KDUMP_DUMPDEV"           	    : "",
      "KDUMP_VERBOSE"      	    : "3",
+     "KDUMP_DUMPLEVEL"		    : "24",
+     "KDUMP_DUMPFORMAT"		    : "elf", //or "compressed"
 ];
 
 /**
@@ -135,8 +138,13 @@ boolean ReadKdumpSettings () {
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
     y2milestone("kdump configuration has been read: %1", KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
-
-
+    /*
+    boolean ret = BootCommon::Read(false);
+    map boot = BootCommon::Export();
+    y2milestone("-------------BootCommon::Read-------------------");  
+    y2milestone("BootCommon::bootloader_attribs : %1", boot);
+    y2milestone("---------------------------------------------");
+    */
     return true;
 }
 
