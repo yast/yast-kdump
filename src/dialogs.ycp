@@ -234,16 +234,16 @@ map<string,map<string,any> > wid_handling = $[
      "custom_widget"	: `VBox(
            `Frame ( _("Dump Level"), `VBox(
            `Left(`HBox(`HSpacing(1),`HBox(
-	      `Left(`CheckBox(`id("zero_page"), `opt(`notify), "&Zero Page")),
-	      `Left(`CheckBox(`id("cache_page"), `opt(`notify),"Cach&e Page")),
+	      `Left(`CheckBox(`id("zero_page"),  "&Zero Page")),
+	      `Left(`CheckBox(`id("cache_page"), `opt(`notify), "Cach&e Page")),
 	      `Left(`CheckBox(`id("cache_private"), `opt(`notify), "Cache Priva&te")),
-	      `Left(`CheckBox(`id("user_data"), `opt(`notify), "&User Data")),
-	      `Left(`CheckBox(`id("free_page"), `opt(`notify), "&Free Page")),
+	      `Left(`CheckBox(`id("user_data"), "&User Data")),
+	      `Left(`CheckBox(`id("free_page"), "&Free Page")),
 	      `HStretch ()
            )))
      ))),
      "init"		: InitDumpLevel,
-     //"handle"		: 
+     "handle"		: HandleDumpLevel,
      "store"		: StoreDumpLevel,
      "help"		: HelpKdump("DumpLevel"),
   ],

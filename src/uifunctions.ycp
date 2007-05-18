@@ -365,21 +365,35 @@ void InitDumpLevel (string key) {
     }
   });
   
-  Popup::Message(ret);
+  //Popup::Message(ret);
   SetDumpLevel(ret);
 }
 
+/**
+  * Function store option 
+  * "Dump Level" - info from UI checkboxes
+  * @result string binary code e.g. 11000 
+  */
 
-
+string GetDumpLevel () {
+  string ret = "";
+  foreach(string key, ["free_page", "user_data", "cache_private", "cache_page", "zero_page"],{
+     if ( (boolean) UI::QueryWidget(`id(key), `Value))
+        ret = ret + "0";
+     else
+        ret = ret + "1";
+  });
+  //Popup::Message(ret);
+  return ret;
+}
 
 /**
   * Function stores option 
   * "Dump Level"
   */
-
 void StoreDumpLevel(string key, map event) {
   
-  string value = "11000";
+  string value = GetDumpLevel();
   integer counter = -1;
   integer int_value = 0;
   while (counter < 5) {
@@ -391,16 +405,36 @@ void StoreDumpLevel(string key, map event) {
   };
 
   string ret =  tostring(int_value);
-  Popup::Message(ret);
+  Kdump::KDUMP_SETTINGS["KDUMP_DUMPLEVEL"] = ret;
+  //Popup::Message(ret);
  
 
 }
 
 
+/**
+  *  Hadle function for option 
+  * "Dump Level"
+  */
 
+symbol HandleDumpLevel(string key, map event) {
+  any ret = event["ID"]:nil;
+  if (ret == "cache_private") {
+     boolean value_cache_private = (boolean) UI::QueryWidget(`id("cache_private"), `Value);
+     boolean value_cache_page = (boolean) UI::QueryWidget(`id("cache_page"), `Value);
+     if ((value_cache_private) && (!value_cache_page))
+        UI::ChangeWidget(`id("cache_page"), `Value, true);
+  }
 
+  if (ret == "cache_page") {
+     boolean value_cache_private = (boolean) UI::QueryWidget(`id("cache_private"), `Value);
+     boolean value_cache_page = (boolean) UI::QueryWidget(`id("cache_page"), `Value);
+     if ((value_cache_private) && (!value_cache_page))
+        UI::ChangeWidget(`id("cache_private"), `Value, false);
 
-
+  }
+  return nil;
+}
 
 
 
