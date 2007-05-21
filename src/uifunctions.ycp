@@ -107,13 +107,12 @@ term ftp = `VBox(
 
 term ssh = `VBox(
   `Frame(_("SSH (scp)"),`HBox(`HSpacing(1),`VBox(
-    `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
     `Left(`HBox(
-      `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
-       // text entry
+      `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
       `Left(`TextEntry(`id ("port"), _("P&ort"))),
       `HStretch ()
     )),
+    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
     // text entry
     `Left(`TextEntry(`id ("username"), _("&User Name"))),
     // password entry
