@@ -66,9 +66,9 @@ map<string,map<string,any> > wid_handling = $[
         ["disable_kdump", _("&Disable kdump") ],
      ],
      "orientation" 	: `horizontal,
-     //"init"		: 
-     //"handle"		: 
-     //"store"		: 
+     "init"		: InitEnableDisalbeKdump,
+     //"handle"		: HandleEnableDisalbeKdump,
+     "store"		: StoreEnableDisalbeKdump,
      "help"		: HelpKdump("StartRadioBut"),
 
   ],

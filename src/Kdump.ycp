@@ -42,6 +42,7 @@ import "Message";
 import "BootCommon";
 import "Storage";
 import "Map";
+import "Bootloader";
 
 /**
  * Prototypes
@@ -59,6 +60,7 @@ global boolean proposal_valid = false;
 
 /**
  * List of available partiotions
+ * with known partition
  *
  * list <string>
  */
@@ -72,6 +74,14 @@ global list <string> available_partitions =[];
  * list <string>
  */
 global list <string> uknown_fs_partitions =[];
+
+/**
+ * Boolean option indicates kernel parameter
+ * "crashkernel"
+ *
+ * boolean true if kernel parameter is set
+ */
+global boolean crashkernel_param = false;
 
 
 /**
@@ -207,6 +217,25 @@ boolean ReadDiskPartitions () {
 /**
  * Read current kdump configuration
  *
+ * read kernel parameter "crashkernel"
+ *  @return boolean successfull
+ */
+
+boolean ReadKdumpKernelParam () {
+
+  string result = Bootloader::getKernelParam (Bootloader::getDefaultSection (), "crashkernel");
+  if (result == "true") {
+     crashkernel_param = true;
+  } else { 
+     crashkernel_param = false;
+  }
+  return true;
+}
+
+
+/**
+ * Read current kdump configuration
+ *
  *  @return boolean successfull
  */
 boolean ReadKdumpSettings () {
@@ -219,7 +248,7 @@ boolean ReadKdumpSettings () {
     y2milestone("kdump configuration has been read: %1", KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
 
- 
+    
 
     return true;
 }
@@ -233,36 +262,49 @@ global boolean Read() {
 
     /* Kdump read dialog caption */
     string caption = _("Initializing kdump Configuration");
-    integer steps = 2;
+    integer steps = 3;
     sleep(sl);
 
     Progress::New( caption, " ", steps, [
-	    /* Progress stage 1/2 */
+	    /* Progress stage 1/3 */
 	    _("Read the config file"),
-	    /* Progress stage 2/2 */
+	    /* Progress stage 2/3 */
 	    _("Read disk partitions"),
+            /* Progress stage 3/3 */
+            _("Read kernel boot options"),
 	], [
-	    /* Progress step 1/2 */
+	    /* Progress step 1/3 */
 	    _("Reading the config file..."),
-	    /* Progress finished 2/2*/
-	    _("Finished")
+            /* Progress step 2/3*/
+            _("Reading partitions of disks..."),
+	    /* Progress finished 3/3*/
+	    Message::Finished()
 	],
 	""
     );
 
+    sleep(sl);
     // read database
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
     if(!ReadKdumpSettings ()) Report::Error(_("Cannot read config file /etc/sysconfig/kdump"));
-    sleep(sl);
+    //sleep(sl);
 
     // read another database
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
     if(!ReadDiskPartitions ()) Report::Error(_("Cannot read disk partitions."));
-    sleep(sl);
+    //sleep(sl);
+
+   // read another database
+    if(Abort()) return false;
+    Progress::NextStep();
+    /* Error message */
+    if(!ReadKdumpKernelParam ()) Report::Error(_("Cannot read kernel boot options"));
+    //sleep(sl);
+
 
     if(Abort()) return false;
     /* Progress finished */

@@ -35,19 +35,6 @@ import "Kdump";
  */
 
 
-list local_partitions_list = [
-  "/dev/sda2",
-  "/dev/sda5",
-  "/dev/sda7",
-];
-
-
-list raw_partitions_list = [
-  "/dev/sda2",
-  "/dev/sda5",
-  "/dev/sda7",
-];
-
 boolean set_network = false;
 
 boolean set_kdump_append = false;
@@ -133,8 +120,31 @@ term smb = `VBox(
 
 );
 
+/**
+  * Function initializes option "Enable/Disable kdump"
+  */
+void InitEnableDisalbeKdump (string key) {
+  if (Kdump::crashkernel_param) {
+     UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"enable_kdump");
 
+  } else {
+     UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"disable_kdump");
+  }  
+}
 
+/**
+  * Function stores option "Enable/Disable kdump"
+  * 
+  */
+void StoreEnableDisalbeKdump (string key, map event) {
+  string radiobut = (string) UI::QueryWidget(`id("EnableDisalbeKdump"), `Value);
+  if (radiobut == "enable_kdump") {
+     Kdump::crashkernel_param = true;
+  } else {
+     Kdump::crashkernel_param = false; 
+  }
+
+}
 
 
 /**
