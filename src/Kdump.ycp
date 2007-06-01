@@ -40,6 +40,8 @@ import "Report";
 import "Summary";
 import "Message";
 import "BootCommon";
+import "Storage";
+import "Map";
 
 /**
  * Prototypes
@@ -54,6 +56,23 @@ global boolean modified = false;
 /**
  */
 global boolean proposal_valid = false;
+
+/**
+ * List of available partiotions
+ *
+ * list <string>
+ */
+global list <string> available_partitions =[];
+
+
+/**
+ * List of available partiotions
+ * without filesystem or with uknown
+ *
+ * list <string>
+ */
+global list <string> uknown_fs_partitions =[];
+
 
 /**
  * Write only, used during autoinstallation.
@@ -125,6 +144,67 @@ global boolean Modified() {
 
 
 /**
+ * Read disk partitions
+ *
+ *  @return boolean successfull
+ */
+
+boolean ReadDiskPartitions () {
+  // get complete map from Storage module
+  map<string,map> tg = Storage::GetTargetMap();
+  // extract only real disks from target map.
+  map<string,map> disks = filter( string k, map disk, tg, ``(disk["type"]:`CT_UNKNOWN==`CT_DISK));    
+  // extract only disks
+  list <string> list_of_disks = (list<string>) Map::Keys(disks);
+  //get a list of all partitions usable for data storage
+  list <string> list_disks = (list<string>) Map::Keys(disks);
+
+  y2milestone("[kdump] (ReadDiskPartitions)  ----------------Begin of ReadDiskPartitions ()--------------");
+  y2milestone("[kdump] (ReadDiskPartitions) list of disks: %1", list_disks);
+
+  list<map> data_parts = [];
+  foreach (string key, list_disks, {
+    data_parts = data_parts + filter( map p, disks[key,"partitions"]:[], ``(p["type"]:`primary!=`extended));
+  });    
+  //list<map> data_parts = filter( map p, disks["/dev/sda","partitions"]:[], ``(p["type"]:`primary!=`extended));
+
+  //parse partiotions with uknown file system
+  list<map> unknown = [];
+  unknown = filter( map p, data_parts, ``(p["detected_fs"]:nil==`unknown));
+ 
+
+  list<string> uknown_partitions = [];
+  if (size(unknown)>0)
+     uknown_partitions = maplist( map p, unknown, ``(p["device"]:""));
+  y2milestone("[kdump] (ReadDiskPartitions) list of device names of partitions without filesystem: %1", uknown_partitions);
+  uknown_fs_partitions = uknown_partitions;
+  // get list of device names of partitions
+  list<string> parts = maplist( map p, data_parts, ``(p["device"]:""));
+ 
+  y2milestone("[kdump] (ReadDiskPartitions) list of device names of partitions: %1", parts);
+
+  // get list of udev ids of partitions, need to prepend "/dev/disk/by-id/"
+  list<string> udevids = maplist( map p, data_parts, ``(p["udev_id",0]:""));
+ 
+  y2milestone("[kdump] (ReadDiskPartitions) list of udev ids of partitions: %1", udevids);
+
+  
+  //combination name + uids to one list
+  integer i = 0;
+  //available_partitions = parts;
+  foreach (string key, udevids, {
+    string value = parts[i]:"" +" - " + udevids[i]:"";
+    available_partitions = available_partitions + value;
+    i= i+1; 
+  });
+ 
+  y2milestone("[kdump] (ReadDiskPartitions) list of available partitions (name + uid): %1", available_partitions);
+  y2milestone("[kdump] (ReadDiskPartitions)  ------------End of ReadDiskPartitions ()--------------------------");
+  return true;
+} 
+
+
+/**
  * Read current kdump configuration
  *
  *  @return boolean successfull
@@ -138,13 +218,9 @@ boolean ReadKdumpSettings () {
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
     y2milestone("kdump configuration has been read: %1", KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
-    /*
-    boolean ret = BootCommon::Read(false);
-    map boot = BootCommon::Export();
-    y2milestone("-------------BootCommon::Read-------------------");  
-    y2milestone("BootCommon::bootloader_attribs : %1", boot);
-    y2milestone("---------------------------------------------");
-    */
+
+ 
+
     return true;
 }
 
@@ -164,7 +240,7 @@ global boolean Read() {
 	    /* Progress stage 1/2 */
 	    _("Read the config file"),
 	    /* Progress stage 2/2 */
-	    _("Read another settings"),
+	    _("Read disk partitions"),
 	], [
 	    /* Progress step 1/2 */
 	    _("Reading the config file..."),
@@ -185,7 +261,7 @@ global boolean Read() {
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
-    if(false) Report::Error(_("Cannot read another settings."));
+    if(!ReadDiskPartitions ()) Report::Error(_("Cannot read disk partitions."));
     sleep(sl);
 
     if(Abort()) return false;

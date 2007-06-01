@@ -90,7 +90,19 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("RunLevel"),
   ],
 
-  "EnableReboot" 	: $[
+ "RawDisk" 		: $[
+     //TRANSLATORS: ComboBox Label
+     "label" 		: _("&The list of available paritions without any filesystem"),
+     "widget" 		: `combobox,
+     "items" 		: [
+     ],
+     "init"		: InitRawDisk,
+     //"handle"		: 
+     //"store"		: StoreRunLevel,
+     "help"		: HelpKdump("RawDisk"),
+  ],
+
+ "EnableReboot" 	: $[
      //TRANSLATORS: CheckBox Label
      "label" 		: _("&Enable Immediate Reboot After Saving the Core"),
      "widget" 		: `checkbox,
@@ -146,8 +158,8 @@ map<string,map<string,any> > wid_handling = $[
      "custom_widget"	: `VBox(
            `Frame(_("Saving Target for kdump Image"),`HBox(`HSpacing(1),`VBox(
              `RadioButtonGroup(`id("DumpTarget"), `VBox(
-	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem", true)),
-	        `Left(`RadioButton(`id("raw_disk"), `opt(`notify), "Raw Dis&k")),
+	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem")),
+	        //`Left(`RadioButton(`id("raw_disk"), `opt(`notify), "Raw Dis&k")),
                 `Left(`RadioButton(`id("network"), `opt(`notify), "Net&work"))
              ))
              
@@ -158,7 +170,7 @@ map<string,map<string,any> > wid_handling = $[
            `ReplacePoint(`id("Targets"), ftp),
            `VStretch()								    
      ),
-     //"init"		: 
+     "init"		: InitTargetKdump,
      "handle"		: HandleTargetKdump,
      //"store"		: 
      "help"		: HelpKdump("TargetKdump"),
@@ -332,13 +344,19 @@ map<string, map<string,any> > tabs = $[
           `Left("RunLevel"),          
 	  `HStretch ()
         ))),
+
+        `VSpacing(1),
+        `Frame ( _("Saving temporary to raw partition"),`HBox(`HSpacing(1),`VBox(
+          `Left("RawDisk"),          
+	  `HStretch ()
+        ))),
   	`VStretch ()
      ),
      "caption"		: _("Kdump Expert Settings"),
      "tree_item_label"	: _("Expert Settings"),
      "widget_names"	: [
         "DisBackButton","KdumpCommandLine",
-        "SwitchKdumpComLine", "RunLevel",
+        "SwitchKdumpComLine", "RunLevel", "RawDisk",
      ]    
   ],
 

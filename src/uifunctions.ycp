@@ -54,7 +54,7 @@ boolean set_kdump_append = false;
 
 term local_filesystem = `VBox(
   `Frame(_("Local Filesystem"),`HBox(`HSpacing(1),`VBox(
-    `Left(`ComboBox(`id("local_partitions"), "&Select Partition", local_partitions_list)),
+    `Left(`ComboBox(`id("local_partitions"), "&The list of available paritions of all disks with filesystem")),
     `Left(`HBox(
       `TextEntry(`id("dir_save_image"), _("&Directory for Saving Dumps")),
       `VBox ( `Label(""),
@@ -62,19 +62,6 @@ term local_filesystem = `VBox(
     )))
     
   )))
-);
-
-
-term raw_disk = `VBox(
-  `Frame(_("Raw Disk"),`HBox(`HSpacing(1),`VBox(
-    `Left(`ComboBox(`id("raw_partitions"), "&Select Partition", raw_partitions_list)),
-    `Left(`HBox(
-      `TextEntry(`id("dir_save_image"), _("&Directory for Saving Dumps")),
-      `VBox ( `Label(""),
-      `PushButton ( `id ("select_dir_image"), `opt ( `hstretch ),  _("B&rowse"))
-    )))
-  )))
-
 );
 
 
@@ -148,17 +135,33 @@ term smb = `VBox(
 
 
 
+
+
+/**
+  * Function initializes option "Kdump Command Line"
+  * or "Kdump Command Line Append"
+  */
+
+void InitTargetKdump (string key) {
+  UI::ReplaceWidget (`id ("Network"), `Empty());
+  UI::ReplaceWidget (`id ("Targets"), local_filesystem);
+  UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
+  y2milestone("[kdump] (InitTargetKdump)  Kdump::available_partitions %1", Kdump::available_partitions);
+}
+
+/**
+  * Function handles "Saving Target for kdump Image"
+  *
+  */
+
 symbol HandleTargetKdump (string key, map event) {
   any radiobutton = UI::QueryWidget(`id("DumpTarget"), `CurrentButton);
   
   if (radiobutton == "local_filesystem") {
      UI::ReplaceWidget (`id ("Network"), `Empty());
      UI::ReplaceWidget (`id ("Targets"), local_filesystem);
+     UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
      set_network = false; 
-  } else if (radiobutton == "raw_disk") {
-     UI::ReplaceWidget (`id ("Network"), `Empty());
-     UI::ReplaceWidget (`id ("Targets"), raw_disk);
-     set_network = false;
   } else if (radiobutton == "network") {    
      UI::ReplaceWidget (`id ("Targets"), `Empty());
      if (!set_network)
@@ -438,7 +441,21 @@ symbol HandleDumpLevel(string key, map event) {
 
 
 
+/**
+  * Function initializes option 
+  * "RawDisk"
+  */
 
+
+void InitRawDisk (string key) {
+  if (size(Kdump::uknown_fs_partitions)>0) {
+     UI::ChangeWidget(`id("RawDisk"), `Items, Kdump::uknown_fs_partitions);
+  } else {
+     UI::ChangeWidget(`id("RawDisk"), `Enabled, false);
+  } 
+
+
+}
 
 
 
