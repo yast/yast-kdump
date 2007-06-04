@@ -225,18 +225,18 @@ map<string,map<string,any> > wid_handling = $[
      "custom_widget"	: `HSquash(`VBox(
            `Left(`HBox(
 	      `Left(`Label("Total System Memory [MB]:")),
-	      `Left(`Label(`id("total_memory"),"4096")),
+	      `Left(`Label(`id("total_memory"),"0123456789")),
 	      `HStretch ()
            )),
            `Left(`HBox(
 	      `Left(`Label("Usable Memory [MB]:")),
-	      `Left(`Label(`id("usable_memory"),"3968")),
+	      `Left(`Label(`id("usable_memory"),"0123456789")),
 	      `HStretch ()
            )),
-	   `Left(`IntField(`id("memory_buffer"), _("Kdump Memor&y [MB]"),128,4096,128))
+	   `Left(`IntField(`id("memory_buffer"), `opt(`notify), _("Kdump Memor&y [MB]"),128,4096,128))
      )),
-     //"init"		: 
-     //"handle"		: 
+     "init"		: InitKdumpMemory,
+     "handle"		: HandleKdumpMemory,
      //"store"		: 
      "help"		: HelpKdump("KdumpMemory"),
   ],

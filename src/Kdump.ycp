@@ -76,6 +76,14 @@ global list <string> available_partitions =[];
 global list <string> uknown_fs_partitions =[];
 
 /**
+ * Total available memory
+ * 
+ *
+ * integer
+ */
+global integer total_memory =0;
+
+/**
  * Boolean option indicates kernel parameter
  * "crashkernel"
  *
@@ -232,7 +240,36 @@ boolean ReadKdumpKernelParam () {
   return true;
 }
 
+/**
+ * Read available memory
+ *
+ * read kernel parameter "crashkernel"
+ *  @return boolean successfull
+ */
 
+boolean ReadAvailableMemory () {
+  list <map> output =  (list<map>)SCR::Read(.probe.memory);
+  y2milestone("[kdump] (ReadAvailableMemory) SCR::Read(.probe.memory): %1", output);
+
+  map <any,any> resor = $[];
+  list <any> temp = maplist(map mem, output,{    
+    return mem["resource"]:nil;
+  });
+  //y2milestone("[kdump] (ReadAvailableMemory) temp: %1", temp);
+  resor = tomap(temp[0]:nil);
+  
+  output = (list<map>)resor["phys_mem"]:nil;
+  temp = maplist(map mem, output,{    
+    return mem["range"]:nil;
+  });
+  //list <any> range = maplist(map resor["phys_mem"]:nil);
+ 
+  //resor = (map)range;
+  total_memory = tointeger(temp[0]:nil)/1048576;
+  y2milestone("[kdump] (ReadAvailableMemory) total phys. memory [MB]: %1", tostring(total_memory));
+  
+  return true;
+}
 /**
  * Read current kdump configuration
  *
@@ -262,22 +299,27 @@ global boolean Read() {
 
     /* Kdump read dialog caption */
     string caption = _("Initializing kdump Configuration");
-    integer steps = 3;
+    integer steps = 4;
     sleep(sl);
 
     Progress::New( caption, " ", steps, [
-	    /* Progress stage 1/3 */
+	    /* Progress stage 1/4 */
 	    _("Read the config file"),
-	    /* Progress stage 2/3 */
+	    /* Progress stage 2/4 */
 	    _("Read disk partitions"),
-            /* Progress stage 3/3 */
+            /* Progress stage 3/4 */
             _("Read kernel boot options"),
+            /* Progress stage 4/4 */
+            _("Read available memory"),
+ 
 	], [
-	    /* Progress step 1/3 */
+	    /* Progress step 1/4 */
 	    _("Reading the config file..."),
-            /* Progress step 2/3*/
+            /* Progress step 2/4*/
             _("Reading partitions of disks..."),
-	    /* Progress finished 3/3*/
+            /* Progress finished 3/4*/ 
+            _("Reading available memory..."),
+	    /* Progress finished 4/4*/
 	    Message::Finished()
 	],
 	""
@@ -305,6 +347,12 @@ global boolean Read() {
     if(!ReadKdumpKernelParam ()) Report::Error(_("Cannot read kernel boot options"));
     //sleep(sl);
 
+    // read another database
+    if(Abort()) return false;
+    Progress::NextStep();
+    /* Error message */
+    if(!ReadAvailableMemory ()) Report::Error(_("Cannot read available memory"));
+    //sleep(sl);
 
     if(Abort()) return false;
     /* Progress finished */

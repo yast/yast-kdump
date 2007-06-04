@@ -165,7 +165,8 @@ void InitTargetKdump (string key) {
   */
 
 symbol HandleTargetKdump (string key, map event) {
-  any radiobutton = UI::QueryWidget(`id("DumpTarget"), `CurrentButton);
+  
+  any radiobutton = event["ID"]:nil;
   
   if (radiobutton == "local_filesystem") {
      UI::ReplaceWidget (`id ("Network"), `Empty());
@@ -177,17 +178,17 @@ symbol HandleTargetKdump (string key, map event) {
      if (!set_network)
         UI::ReplaceWidget (`id ("Network"), network);
      set_network = true;
-      any net = UI::QueryWidget(`id("NetworkRB"), `CurrentButton);
-     if (net == "ftp") {
-        UI::ReplaceWidget (`id ("Targets"), ftp);
-     } else if (net == "ssh") {
-        UI::ReplaceWidget (`id ("Targets"), ssh);
-     } else if (net == "nfs") {
-        UI::ReplaceWidget (`id ("Targets"), nfs);
-     } else if (net == "smb") {
-        UI::ReplaceWidget (`id ("Targets"), smb);
-     }
+      //any net = UI::QueryWidget(`id("NetworkRB"), `CurrentButton);
+  } else if (radiobutton == "ftp") {
+     UI::ReplaceWidget (`id ("Targets"), ftp);
+  } else if (radiobutton == "ssh") {
+     UI::ReplaceWidget (`id ("Targets"), ssh);
+  } else if (radiobutton == "nfs") {
+     UI::ReplaceWidget (`id ("Targets"), nfs);
+  } else if (radiobutton == "smb") {
+     UI::ReplaceWidget (`id ("Targets"), smb);
   }
+ 
   return nil;
 
 }
@@ -468,17 +469,44 @@ void InitRawDisk (string key) {
 }
 
 
+/**
+  * Function initializes option 
+  * "KdumpMemory"
+  */
 
 
+void InitKdumpMemory (string key) {
+  if (Kdump::total_memory > 0) {
+    UI::ChangeWidget(`id("total_memory"), `Value, tostring(Kdump::total_memory));
+    UI::ChangeWidget(`id("memory_buffer"), `Value, 128);
+    UI::ChangeWidget(`id("usable_memory"), `Value, 
+      tostring((Kdump::total_memory - (integer) UI::QueryWidget(`id("memory_buffer"), `Value))));
+  } else {
+    UI::ChangeWidget(`id("total_memory"), `Value, "0");
+    UI::ChangeWidget(`id("usable_memory"), `Value, "0");
+    UI::ChangeWidget(`id("memory_buffer"), `Enabled, false);
+  }
 
+}
 
+/**
+  *  Hadle function for option 
+  * "Dump Level"
+  */
 
+symbol HandleKdumpMemory (string key, map event) {
+  any ret = event["ID"]:nil;
+  if (ret == "memory_buffer") {
+     integer value = (integer) UI::QueryWidget(`id("memory_buffer"), `Value);
+     if (value > Kdump::total_memory) {
+        UI::ChangeWidget(`id("memory_buffer"), `Value, Kdump::total_memory);
+        UI::ChangeWidget(`id("usable_memory"), `Value, "0");
+     } else {
+        UI::ChangeWidget(`id("usable_memory"), `Value, 
+         tostring((Kdump::total_memory - (integer) UI::QueryWidget(`id("memory_buffer"), `Value))));
+     }
+  }
 
-
-
-
-
-
-
+}
 
 }
