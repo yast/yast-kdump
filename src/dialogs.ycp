@@ -233,7 +233,7 @@ map<string,map<string,any> > wid_handling = $[
 	      `Left(`Label(`id("usable_memory"),"0123456789")),
 	      `HStretch ()
            )),
-	   `Left(`IntField(`id("memory_buffer"), `opt(`notify), _("Kdump Memor&y [MB]"),128,4096,128))
+	   `Left(`IntField(`id("memory_buffer"), `opt(`notify), _("Kdump Memor&y [MB]"),128,1048576,128))
      )),
      "init"		: InitKdumpMemory,
      "handle"		: HandleKdumpMemory,

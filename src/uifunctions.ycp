@@ -39,6 +39,22 @@ boolean set_network = false;
 
 boolean set_kdump_append = false;
 
+/**
+ * map of values for "KDUMP_SAVEDIR"
+ *  
+ * local map <string, string >
+ */
+map <string, string > KDUMP_SAVE_TARGET = $[
+   "target"		: "file", // ftp, ssh, nfs, cifs
+   "server"		: "",
+   "dir"		: "",
+   "user_name"		: "", // anonymous
+   "port"		: "", // deafults ftp: 21 ssh:22
+   "share"		: "",
+   "password"		: "", 
+];
+
+
 term local_filesystem = `VBox(
   `Frame(_("Local Filesystem"),`HBox(`HSpacing(1),`VBox(
     `Left(`ComboBox(`id("local_partitions"), "&The list of available paritions of all disks with filesystem")),
@@ -68,11 +84,15 @@ term network = `VBox(
 
 term ftp = `VBox(
   `Frame(_("FTP"),`HBox(`HSpacing(1),`VBox(
-    `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
+    `Left(`HBox(
+      `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
+      `Left(`TextEntry(`id ("port"), _("P&ort"))),
+      `HStretch ()
+    )),
     `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
     `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("&Anonymous"))),
     // text entry
-    `Left(`TextEntry(`id ("username"), _("&User Name"))),
+    `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
     // password entry
     `Left(`Password(`id ("password"), _("&Password")))    
   )))
@@ -88,9 +108,7 @@ term ssh = `VBox(
     )),
     `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
     // text entry
-    `Left(`TextEntry(`id ("username"), _("&User Name"))),
-    // password entry
-    `Left(`Password(`id ("password"), _("&Password")))    
+    `Left(`TextEntry(`id ("user_name"), _("&User Name")))   
   )))
 
 );
@@ -113,7 +131,7 @@ term smb = `VBox(
     `Left(`TextEntry(`id ("share"), _("Sha&re"))),
     `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
      // text entry
-    `Left(`TextEntry(`id ("username"), _("&User Name"))),
+    `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
     // password entry
     `Left(`Password(`id ("password"), _("&Password")))
   )))
@@ -146,6 +164,88 @@ void StoreEnableDisalbeKdump (string key, map event) {
 
 }
 
+/**
+  * Function for handling map values
+  * 
+  * local map <string, string > KDUMP_SAVE_TARGET
+  */
+
+boolean SetUpKDUMP_SAVE_TARGET(string target) {
+ 
+ string parse_target = target;
+ if (target != "") {
+   integer pos = find(parse_target, "/");
+   integer pos1 = -1;
+   KDUMP_SAVE_TARGET["target"]=substring(parse_target,0,pos-1);
+   parse_target = substring(parse_target,pos+2);
+   if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
+      KDUMP_SAVE_TARGET["dir"]=parse_target;
+   } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
+      pos = find(parse_target, ":");
+      pos1 = pos; 
+      KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
+      pos = find(parse_target, "/");
+      KDUMP_SAVE_TARGET["share"]=substring(parse_target,pos1+1,pos-(pos1+1));
+      KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);
+   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
+      pos = find(parse_target, "@");
+      if (pos != -1) {
+         KDUMP_SAVE_TARGET["user_name"]=substring(parse_target,0,pos);
+         parse_target = substring(parse_target,pos+1);
+      }
+      pos1 = find(parse_target, ":");
+      pos = find(parse_target, "/");
+      if (pos1 !=-1) {
+         KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos1);
+         KDUMP_SAVE_TARGET["port"]=substring(parse_target,pos1+1,pos-(pos1+1));
+      } else {
+         KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
+      }
+      KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);
+   } else if ((KDUMP_SAVE_TARGET["target"]:nil == "ftp") 
+             || (KDUMP_SAVE_TARGET["target"]:nil == "cifs")) {
+
+      pos = find(parse_target, "@");      
+      if (pos != -1) {
+         string user_pas = substring(parse_target,0,pos);
+         pos1 = find(user_pas, ":");
+         if (pos1 != -1) {
+            KDUMP_SAVE_TARGET["user_name"]=substring(parse_target,0,pos1);
+            KDUMP_SAVE_TARGET["password"]=substring(parse_target,pos1+1,pos);
+         } else {
+            KDUMP_SAVE_TARGET["user_name"]=substring(parse_target,0,pos);
+         }
+         parse_target = substring(parse_target,pos+1);
+      }
+      if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
+         pos1 = find(parse_target, ":");
+         pos = find(parse_target, "/");
+         if (pos1 !=-1) {
+            KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos1);
+            KDUMP_SAVE_TARGET["port"]=substring(parse_target,pos1+1,pos-(pos1+1));
+         } else {
+            KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
+         }
+         KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);         
+      } else {
+         pos = find(parse_target, "/"); 
+         KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
+         parse_target = substring(parse_target,pos+1);
+         pos = find(parse_target, "/");
+         KDUMP_SAVE_TARGET["share"]=substring(parse_target,0,pos);
+         KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);
+      }
+
+   }
+
+
+   return true;
+ } else {
+   return false;
+ }
+
+}
+
 
 /**
   * Function initializes option "Kdump Command Line"
@@ -153,10 +253,68 @@ void StoreEnableDisalbeKdump (string key, map event) {
   */
 
 void InitTargetKdump (string key) {
-  UI::ReplaceWidget (`id ("Network"), `Empty());
-  UI::ReplaceWidget (`id ("Targets"), local_filesystem);
-  UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
-  y2milestone("[kdump] (InitTargetKdump)  Kdump::available_partitions %1", Kdump::available_partitions);
+  
+  SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil);
+  //Popup::Message(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil);
+  //Popup::Message(KDUMP_SAVE_TARGET["target"]:nil);
+  if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
+     UI::ChangeWidget(`id ("local_filesystem"), `Value, true);
+     UI::ReplaceWidget (`id ("Network"), `Empty());
+     UI::ReplaceWidget (`id ("Targets"), local_filesystem);     
+     UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
+     y2milestone("[kdump] (InitTargetKdump)  Kdump::available_partitions %1", Kdump::available_partitions);
+     UI::ChangeWidget(`id ("dir_save_image"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
+  } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
+     UI::ChangeWidget(`id ("network"), `Value, true);
+     UI::ReplaceWidget (`id ("Targets"), `Empty());
+     UI::ReplaceWidget (`id ("Network"), network);
+     UI::ReplaceWidget (`id ("Targets"), nfs);
+     UI::ChangeWidget(`id ("nfs"), `Value, true);
+     UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
+     UI::ChangeWidget(`id ("share"), `Value, KDUMP_SAVE_TARGET["share"]:nil);
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
+  } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
+     UI::ChangeWidget(`id ("network"), `Value, true);
+     UI::ReplaceWidget (`id ("Targets"), `Empty());
+     UI::ReplaceWidget (`id ("Network"), network);
+     UI::ReplaceWidget (`id ("Targets"), ssh);
+     UI::ChangeWidget(`id ("ssh"), `Value, true);
+     UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
+     UI::ChangeWidget(`id ("port"), `Value, KDUMP_SAVE_TARGET["port"]:nil);
+     UI::ChangeWidget(`id ("user_name"), `Value, KDUMP_SAVE_TARGET["user_name"]:nil);
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
+  } else if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
+     UI::ChangeWidget(`id ("network"), `Value, true);
+     UI::ReplaceWidget (`id ("Targets"), `Empty());
+     UI::ReplaceWidget (`id ("Network"), network);
+     UI::ReplaceWidget (`id ("Targets"), ftp);
+     UI::ChangeWidget(`id ("ftp"), `Value, true);
+     UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
+     UI::ChangeWidget(`id ("port"), `Value, KDUMP_SAVE_TARGET["port"]:nil);
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
+     if (KDUMP_SAVE_TARGET["user_name"]:nil == "") {
+        UI::ChangeWidget(`id ("user_name"), `Enabled, false);     
+        UI::ChangeWidget(`id ("password"), `Enabled, false);
+        UI::ChangeWidget(`id ("anonymous"), `Value, true);
+     } else {
+       UI::ChangeWidget(`id ("user_name"), `Value, KDUMP_SAVE_TARGET["user_name"]:nil);     
+       UI::ChangeWidget(`id ("password"), `Value, KDUMP_SAVE_TARGET["password"]:nil);
+     }
+  } else if (KDUMP_SAVE_TARGET["target"]:nil == "cifs") {
+     UI::ChangeWidget(`id ("network"), `Value, true);
+     UI::ReplaceWidget (`id ("Targets"), `Empty());
+     UI::ReplaceWidget (`id ("Network"), network);
+     UI::ReplaceWidget (`id ("Targets"), smb);
+     UI::ChangeWidget(`id ("smb"), `Value, true);
+     UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
+     UI::ChangeWidget(`id ("share"), `Value, KDUMP_SAVE_TARGET["share"]:nil);
+     UI::ChangeWidget(`id ("user_name"), `Value, KDUMP_SAVE_TARGET["user_name"]:nil);
+     UI::ChangeWidget(`id ("password"), `Value, KDUMP_SAVE_TARGET["password"]:nil);
+     
+  }
+
+
 }
 
 /**
