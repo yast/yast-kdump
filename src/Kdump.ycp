@@ -211,7 +211,7 @@ boolean ReadDiskPartitions () {
   integer i = 0;
   //available_partitions = parts;
   foreach (string key, udevids, {
-    string value = parts[i]:"" +" - " + udevids[i]:"";
+    string value = parts[i]:"" +"/by-id/" + udevids[i]:"";
     available_partitions = available_partitions + value;
     i= i+1; 
   });
@@ -249,10 +249,10 @@ boolean ReadKdumpKernelParam () {
 
 boolean ReadAvailableMemory () {
 
-  //list <any> fero = ["stano" , 45];
-  //y2milestone("[kdump] (ReadAvailableMemory) before fero: %1", fero);
-  //add(fero, nil);
-  //y2milestone("[kdump] (ReadAvailableMemory) after fero: %1", fero);
+  list <any> fero = ["stano" , 45];
+  y2milestone("[kdump] (ReadAvailableMemory) before fero: %1", fero);
+  add(fero, nil);
+  y2milestone("[kdump] (ReadAvailableMemory) after fero: %1", fero);
   list <map> output =  (list<map>)SCR::Read(.probe.memory);
   y2milestone("[kdump] (ReadAvailableMemory) SCR::Read(.probe.memory): %1", output);
 
