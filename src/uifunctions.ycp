@@ -57,9 +57,9 @@ map <string, string > KDUMP_SAVE_TARGET = $[
 
 term local_filesystem = `VBox(
   `Frame(_("Local Filesystem"),`HBox(`HSpacing(1),`VBox(
-    `Left(`ComboBox(`id("local_partitions"), "&The List of Available Paritions of All Disks with Filesystem")),
-    `Left(`CheckBox(`id("enable_raw_partit"),"&Enable Save Image to Raw Partition")),
-    `Left(`ComboBox(`id("raw_partitions"), "&The List of Raw Paritions of All isks Without Filesystem")),
+    //`Left(`ComboBox(`id("local_partitions"), "&The List of Available Paritions of All Disks with Filesystem")),
+    //`Left(`CheckBox(`id("enable_raw_partit"),"&Enable Save Image to Raw Partition")),
+    //`Left(`ComboBox(`id("raw_partitions"), "&The List of Raw Paritions of All isks Without Filesystem")),
     `Left(`HBox(
       `TextEntry(`id("dir_save_image"), _("&Directory for Saving Dumps")),      
       `VBox ( `Label(""),
@@ -69,7 +69,7 @@ term local_filesystem = `VBox(
   )))
 );
 
-
+/*
 term network = `VBox(
   `VSpacing(1),
   `Frame(_("Network"),`HBox(`HSpacing(1),
@@ -82,21 +82,25 @@ term network = `VBox(
   ))
 
 );
-
+*/
 
 term ftp = `VBox(
   `Frame(_("FTP"),`HBox(`HSpacing(1),`VBox(
     `Left(`HBox(
       `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
-      `Left(`TextEntry(`id ("port"), _("P&ort"))),
+      `Left(`IntField(`id ("port"), _("P&ort"), 0,65536,21)),
       `HStretch ()
     )),
-    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
-    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("&Anonymous"))),
     // text entry
-    `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
-    // password entry
-    `Left(`Password(`id ("password"), _("&Password")))    
+    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
+    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("Enable Anonymous &FTP"))),
+    
+    `Left(`HBox(
+       // text entry
+      `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
+      // password entry
+      `Left(`Password(`id ("password"), _("&Password")))
+     ))    
   )))
 
 );
@@ -105,9 +109,9 @@ term ssh = `VBox(
   `Frame(_("SSH (scp)"),`HBox(`HSpacing(1),`VBox(
     `Left(`HBox(
       `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
-      `Left(`TextEntry(`id ("port"), _("P&ort"))),
+      `Left(`IntField(`id ("port"), _("P&ort"), 0,65536,22)),
       `HStretch ()
-    )),
+    )),    
     `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
     // text entry
     `Left(`TextEntry(`id ("user_name"), _("&User Name")))   
@@ -128,13 +132,18 @@ term nfs = `VBox(
 term smb = `VBox(
   `Frame(_("CIFS (SMB)"),`HBox(`HSpacing(1),`VBox(
     `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
-     // text entry
-    `Left(`TextEntry(`id ("share"), _("Sha&re"))),
-    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
-     // text entry
-    `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
-    // password entry
-    `Left(`Password(`id ("password"), _("&Password")))
+    `Left(`HBox(
+      // text entries
+      `Left(`TextEntry(`id ("share"), _("Exported Sha&re"))),
+      `Left(`TextEntry( `id("dir"), _("&Directory on Server")))
+     )),
+    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("&Use Authentication"), true)),
+    `Left(`HBox(
+       // text entry
+      `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
+      // password entry
+      `Left(`Password(`id ("password"), _("&Password")))
+    ))
   )))
 
 );
@@ -254,44 +263,45 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
   */
 
 void InitTargetKdump (string key) {
-  
+
   SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil);
   //Popup::Message(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil);
   //Popup::Message(KDUMP_SAVE_TARGET["target"]:nil);
   if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
      UI::ChangeWidget(`id ("local_filesystem"), `Value, true);
-     UI::ReplaceWidget (`id ("Network"), `Empty());
+     //UI::ReplaceWidget (`id ("Network"), `Empty());
      UI::ReplaceWidget (`id ("Targets"), local_filesystem);     
-     UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
+     //UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
      y2milestone("[kdump] (InitTargetKdump)  Kdump::available_partitions %1", Kdump::available_partitions);
+     /*
      if (size(Kdump::uknown_fs_partitions)>0) {        
         UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions);
      } else {
         UI::ChangeWidget(`id("raw_partitions"), `Enabled, false);
         UI::ChangeWidget(`id("enable_raw_partit"), `Enabled, false);
-     }
+     }*/
      UI::ChangeWidget(`id ("dir_save_image"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
-     UI::ChangeWidget(`id ("network"), `Value, true);
-     UI::ReplaceWidget (`id ("Targets"), `Empty());
-     UI::ReplaceWidget (`id ("Network"), network);
+     //UI::ChangeWidget(`id ("network"), `Value, true);
+     //UI::ReplaceWidget (`id ("Targets"), `Empty());
+     //UI::ReplaceWidget (`id ("Network"), network);
      UI::ReplaceWidget (`id ("Targets"), nfs);
      UI::ChangeWidget(`id ("nfs"), `Value, true);
      UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
      UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
-     UI::ChangeWidget(`id ("network"), `Value, true);
-     UI::ReplaceWidget (`id ("Targets"), `Empty());
-     UI::ReplaceWidget (`id ("Network"), network);
+     //UI::ChangeWidget(`id ("network"), `Value, true);
+     //UI::ReplaceWidget (`id ("Targets"), `Empty());
+     //UI::ReplaceWidget (`id ("Network"), network);
      UI::ReplaceWidget (`id ("Targets"), ssh);
      UI::ChangeWidget(`id ("ssh"), `Value, true);
      foreach (string key, ["server", "port", "user_name", "dir" ], {
        UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
      });
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
-     UI::ChangeWidget(`id ("network"), `Value, true);
-     UI::ReplaceWidget (`id ("Targets"), `Empty());
-     UI::ReplaceWidget (`id ("Network"), network);
+     //UI::ChangeWidget(`id ("network"), `Value, true);
+     //UI::ReplaceWidget (`id ("Targets"), `Empty());
+     //UI::ReplaceWidget (`id ("Network"), network);
      UI::ReplaceWidget (`id ("Targets"), ftp);
      UI::ChangeWidget(`id ("ftp"), `Value, true);
      foreach (string key, ["server", "port", "dir" ], {
@@ -306,9 +316,9 @@ void InitTargetKdump (string key) {
        UI::ChangeWidget(`id ("password"), `Value, KDUMP_SAVE_TARGET["password"]:nil);
      }
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "cifs") {
-     UI::ChangeWidget(`id ("network"), `Value, true);
-     UI::ReplaceWidget (`id ("Targets"), `Empty());
-     UI::ReplaceWidget (`id ("Network"), network);
+     //UI::ChangeWidget(`id ("network"), `Value, true);
+     //UI::ReplaceWidget (`id ("Targets"), `Empty());
+     //UI::ReplaceWidget (`id ("Network"), network);
      UI::ReplaceWidget (`id ("Targets"), smb);
      UI::ChangeWidget(`id ("smb"), `Value, true);
      foreach (string key, ["server", "dir", "share", "user_name", "password"], {
@@ -319,7 +329,15 @@ void InitTargetKdump (string key) {
 
 
 }
+/**
+  * Function initializes option "Kdump Command Line"
+  * or "Kdump Command Line Append"
+  */
 
+void InitRawPartitions (string key) {
+  UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::available_partitions);
+
+}
 /**
   * Function handles "Saving Target for kdump Image"
   *
@@ -330,7 +348,7 @@ symbol HandleTargetKdump (string key, map event) {
   any radiobutton = event["ID"]:nil;
   
   if (radiobutton == "local_filesystem") {
-     UI::ReplaceWidget (`id ("Network"), `Empty());
+     //UI::ReplaceWidget (`id ("Network"), `Empty());
      UI::ReplaceWidget (`id ("Targets"), local_filesystem);
      UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
      if (size(Kdump::uknown_fs_partitions)>0) {        
@@ -340,12 +358,6 @@ symbol HandleTargetKdump (string key, map event) {
         UI::ChangeWidget(`id("enable_raw_partit"), `Enabled, false);
      }
      set_network = false; 
-  } else if (radiobutton == "network") {    
-     UI::ReplaceWidget (`id ("Targets"), `Empty());
-     if (!set_network)
-        UI::ReplaceWidget (`id ("Network"), network);
-     set_network = true;
-      //any net = UI::QueryWidget(`id("NetworkRB"), `CurrentButton);
   } else if (radiobutton == "ftp") {
      UI::ReplaceWidget (`id ("Targets"), ftp);
   } else if (radiobutton == "ssh") {

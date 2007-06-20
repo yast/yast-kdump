@@ -124,7 +124,7 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KDUMP_DUMPDEV"           	    : "",
      "KDUMP_VERBOSE"      	    : "3",
      "KDUMP_DUMPLEVEL"		    : "24",
-     "KDUMP_DUMPFORMAT"		    : "elf", //or "compressed"
+     "KDUMP_DUMPFORMAT"		    : "ELF", //or "compressed"
 ];
 
 /**
@@ -211,7 +211,8 @@ boolean ReadDiskPartitions () {
   integer i = 0;
   //available_partitions = parts;
   foreach (string key, udevids, {
-    string value = parts[i]:"" +"/by-id/" + udevids[i]:"";
+    string disk_from_partition = filterchars(parts[i]:"", "abcdefghijklmnopqrstuvwxyz/");
+    string value = disk_from_partition  +"/by-id/" + udevids[i]:"" +" ( " + parts[i]:"" +" )";
     available_partitions = available_partitions + value;
     i= i+1; 
   });
