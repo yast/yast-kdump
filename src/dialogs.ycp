@@ -117,9 +117,9 @@ map<string,map<string,any> > wid_handling = $[
      //TRANSLATORS: CheckBox Label
      "label" 		: _("Enable &Delete Old Dump Images"),
      "widget" 		: `checkbox,
-     //"init"		: 
-     //"handle"		: 
-     //"store"		: 
+     "init"		: InitEnableDeleteImages,
+     "handle"		: HandleEnableDeleteImages,
+     "store"		: StoreEnableDeleteImages,
      "help"		: HelpKdump("EnableDeleteImages"),
   ],
 
@@ -146,9 +146,9 @@ map<string,map<string,any> > wid_handling = $[
         ["compressed_format", _("C&ompressed Format") ],
      ],
      "orientation" 	: `horizontal,
-     //"init"		: 
+     "init"		: InitDumpFormat,
      //"handle"		: 
-     //"store"		: 
+     "store"		: StoreDumpFormat,
      "help"		: HelpKdump("DumpFormat"),
   ],
 
@@ -316,11 +316,11 @@ map<string,map<string,any> > wid_handling = $[
 
   "InitrdKernel" 	: $[
      //TRANSLATORS: TextEntry Label
-     "label" 		: _("Custom kdump &Kernel Initrd"),
+     "label" 		: _("Custom kdump &Kernel"),
      "widget" 		: `textentry,
-     //"init"		: init is hadled by "SwitchKdumpComLine"
+     "init"		: InitInitrdKernel,
      //"handle"		: 
-     //"store"		: store is hadled by "SwitchKdumpComLine"
+     "store"		: StoreInitrdKernel,
      "help"		: HelpKdump("InitrdKernel"),
   ],
 

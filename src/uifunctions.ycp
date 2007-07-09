@@ -688,4 +688,135 @@ symbol HandleKdumpMemory (string key, map event) {
 
 }
 
+
+/**
+  * Function initializes option 
+  * "Custom kdump Kernel"
+  */
+
+
+void InitInitrdKernel (string key) {
+  UI::ChangeWidget(`id("InitrdKernel"), `Value, Kdump::KDUMP_SETTINGS["KDUMP_KERNELVER"]:nil);
+}
+
+
+
+/**
+  * Function stores option 
+  * "Custom kdump Kernel"
+  */
+void StoreInitrdKernel (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_KERNELVER"] = tostring(UI::QueryWidget(`id("InitrdKernel"), `Value));
+}
+
+
+/**
+  * Function initializes option 
+  * "Dump Format"
+  */
+
+void InitDumpFormat (string key) {
+  if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"]:nil == "ELF")
+     UI::ChangeWidget(`id("DumpFormat"), `Value, "elf_format");
+  else
+     UI::ChangeWidget(`id("DumpFormat"), `Value, "compressed_format");
+}
+
+/**
+  * Function stores option 
+  * "Dump Format"
+  */
+
+void StoreDumpFormat (string key, map event) {
+  string value = tostring(UI::QueryWidget(`id("DumpFormat"), `Value));
+  if (value == "elf_format")
+     Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"] = "ELF";
+  else
+     Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"] = "compressed";
+}
+
+/**
+  * Function initializes option 
+  * "Enable Delete Old Dump Images"
+  */
+
+void InitEnableDeleteImages (string key) {
+  UI::ChangeWidget(`id("EnableDeleteImages"), `Notify, true);
+  if (Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"]:nil != "0") {
+     UI::ChangeWidget(`id("NumberDumps"), `Enabled, true);
+     UI::ChangeWidget(`id("EnableDeleteImages"), `Value, true);
+  } else {
+     UI::ChangeWidget(`id("EnableDeleteImages"), `Value, false);
+     UI::ChangeWidget(`id("NumberDumps"), `Enabled, false); 
+  }
+}
+
+/**
+  *  Hadle function for option 
+  * "Enable Delete Old Dump Images"
+  */
+
+symbol HandleEnableDeleteImages (string key, map event) {
+
+  any ret = event["ID"]:nil;
+  if (ret == "EnableDeleteImages") {
+     boolean value = (boolean) UI::QueryWidget(`id("EnableDeleteImages"), `Value);
+     if (!value) {
+        UI::ChangeWidget(`id("NumberDumps"), `Value, tointeger("0"));
+        UI::ChangeWidget(`id("NumberDumps"), `Enabled, false);	
+     } else {
+        UI::ChangeWidget(`id("NumberDumps"), `Value, 
+            tointeger(Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"]:nil));
+        UI::ChangeWidget(`id("NumberDumps"), `Enabled, true);	
+
+     }
+  }
+
+
+}
+
+
+/**
+  * Function stores option 
+  * "Enable Delete Old Dump Images"
+  */
+
+void StoreEnableDeleteImages (string key, map event) {
+  boolean value = (boolean) UI::QueryWidget(`id("EnableDeleteImages"), `Value);
+  if (!value) {
+     Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"] = "0";
+  } 
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

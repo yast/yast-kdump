@@ -123,7 +123,7 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KDUMP_FREE_DISK_SIZE"    	    : "64",
      "KDUMP_DUMPDEV"           	    : "",
      "KDUMP_VERBOSE"      	    : "3",
-     "KDUMP_DUMPLEVEL"		    : "24",
+     "KDUMP_DUMPLEVEL"		    : "0",
      "KDUMP_DUMPFORMAT"		    : "ELF", //or "compressed"
 ];
 
@@ -211,8 +211,8 @@ boolean ReadDiskPartitions () {
   integer i = 0;
   //available_partitions = parts;
   foreach (string key, udevids, {
-    string disk_from_partition = filterchars(parts[i]:"", "abcdefghijklmnopqrstuvwxyz/");
-    string value = disk_from_partition  +"/by-id/" + udevids[i]:"" +" ( " + parts[i]:"" +" )";
+    //string disk_from_partition = filterchars(parts[i]:"", "abcdefghijklmnopqrstuvwxyz/");
+    string value = "/dev/disk/by-id/" + udevids[i]:"" +" ( " + parts[i]:"" +" )";
     available_partitions = available_partitions + value;
     i= i+1; 
   });
@@ -250,10 +250,6 @@ boolean ReadKdumpKernelParam () {
 
 boolean ReadAvailableMemory () {
 
-  list <any> fero = ["stano" , 45];
-  y2milestone("[kdump] (ReadAvailableMemory) before fero: %1", fero);
-  add(fero, nil);
-  y2milestone("[kdump] (ReadAvailableMemory) after fero: %1", fero);
   list <map> output =  (list<map>)SCR::Read(.probe.memory);
   y2milestone("[kdump] (ReadAvailableMemory) SCR::Read(.probe.memory): %1", output);
 
@@ -293,6 +289,28 @@ boolean ReadKdumpSettings () {
 
     
 
+    return true;
+}
+
+
+
+/**
+ * Write current kdump configuration
+ *
+ *  @return boolean successfull
+ */
+boolean WriteKdumpSettings () {
+
+    y2milestone("-------------KDUMP_SETTINGS-------------------");  
+    y2milestone("Writing kdump configuration: %1", KDUMP_SETTINGS);
+    y2milestone("---------------------------------------------");
+
+
+    foreach (string option_key, string option_val, KDUMP_SETTINGS, {
+	SCR::Write(add(.sysconfig.kdump, option_key), option_val);
+    });
+    SCR::Write(.sysconfig.kdump, nil);
+        
     return true;
 }
 
@@ -406,7 +424,7 @@ global boolean Write() {
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
-    if(false) Report::Error (_("Cannot write settings."));
+    if(!WriteKdumpSettings ()) Report::Error (_("Cannot write settings."));
     sleep(sl);
 
     // run SuSEconfig
