@@ -90,6 +90,7 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("RunLevel"),
   ],
 
+/*
  "RawDisk" 		: $[
      //TRANSLATORS: ComboBox Label
      "label" 		: _("&The list of available paritions without any filesystem"),
@@ -98,10 +99,10 @@ map<string,map<string,any> > wid_handling = $[
      ],
      "init"		: InitRawDisk,
      //"handle"		: 
-     //"store"		: StoreRunLevel,
+     "store"		: StoreRawDisk,
      "help"		: HelpKdump("RawDisk"),
   ],
-
+*/
  "EnableReboot" 	: $[
      //TRANSLATORS: CheckBox Label
      "label" 		: _("&Enable Immediate Reboot After Saving the Core"),
@@ -153,29 +154,7 @@ map<string,map<string,any> > wid_handling = $[
   ],
 
 
-  /*"TargetKdump"		: $[
-     "widget"		: `custom,
-     "custom_widget"	: `VBox(
-           `Frame(_("Saving Target for kdump Image"),`HBox(`HSpacing(1),`VBox(
-             `RadioButtonGroup(`id("DumpTarget"), `VBox(
-	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem")),
-	        //`Left(`RadioButton(`id("raw_disk"), `opt(`notify), "Raw Dis&k")),
-                `Left(`RadioButton(`id("network"), `opt(`notify), "Net&work"))
-             ))
-             
-           ))),
 
-           `ReplacePoint(`id("Network"), network),
-           `VSpacing(1),
-           `ReplacePoint(`id("Targets"), ftp),
-           `VStretch()								    
-     ),
-     "init"		: InitTargetKdump,
-     "handle"		: HandleTargetKdump,
-     //"store"		: 
-     "help"		: HelpKdump("TargetKdump"),
-
-  ],*/
 
  "TargetKdump"		: $[
      "widget"		: `custom,
@@ -197,20 +176,10 @@ map<string,map<string,any> > wid_handling = $[
      ),
      "init"		: InitTargetKdump,
      "handle"		: HandleTargetKdump,
-     //"store"		: 
+     "store"		: StoreTargetKdump,
      "help"		: HelpKdump("TargetKdump"),
 
   ], 
-
-  "EnableRawPartitions" : $[
-     //TRANSLATORS: CheckBox Label
-     "label" 		: _("&Enable Save Image to Raw Partition"),
-     "widget" 		: `checkbox,
-     //"init"		: 
-     //"handle"		: 
-     //"store"		: 
-     "help"		: HelpKdump("EnableRawPartitions"),
-  ],
 
   "RawPartitions" 		: $[
      //TRANSLATORS: ComboBox Label
@@ -225,7 +194,7 @@ map<string,map<string,any> > wid_handling = $[
      ),
      "init"		: InitRawPartitions,
      //"handle"		: 
-     //"store"		: StoreRawPartitions,
+     "store"		: StoreRawPartitions,
      "help"		: HelpKdump("RawPartitions"),
   ],
 

@@ -61,28 +61,14 @@ term local_filesystem = `VBox(
     //`Left(`CheckBox(`id("enable_raw_partit"),"&Enable Save Image to Raw Partition")),
     //`Left(`ComboBox(`id("raw_partitions"), "&The List of Raw Paritions of All isks Without Filesystem")),
     `Left(`HBox(
-      `TextEntry(`id("dir_save_image"), _("&Directory for Saving Dumps")),      
+      `TextEntry(`id("dir"), _("&Directory for Saving Dumps")),      
       `VBox ( `Label(""),
-      `PushButton ( `id ("select_dir_image"), `opt ( `hstretch ),  _("B&rowse"))
+      `PushButton ( `id ("select_dir"), `opt ( `hstretch ),  _("B&rowse"))
     )))
     
   )))
 );
 
-/*
-term network = `VBox(
-  `VSpacing(1),
-  `Frame(_("Network"),`HBox(`HSpacing(1),
-    `RadioButtonGroup(`id("NetworkRB"), `HBox(
-       `Left(`RadioButton(`id("ftp"), `opt(`notify), "F&TP")),
-       `Left(`RadioButton(`id("ssh"), `opt(`notify), "&SSH (scp)")),
-       `Left(`RadioButton(`id("nfs"), `opt(`notify), "N&FS")),
-       `Left(`RadioButton(`id("smb"), `opt(`notify), "C&IFS (SMB)"))
-    ))
-  ))
-
-);
-*/
 
 term ftp = `VBox(
   `Frame(_("FTP"),`HBox(`HSpacing(1),`VBox(
@@ -265,46 +251,31 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
 void InitTargetKdump (string key) {
 
   SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil);
-  //Popup::Message(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil);
-  //Popup::Message(KDUMP_SAVE_TARGET["target"]:nil);
   if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
      UI::ChangeWidget(`id ("local_filesystem"), `Value, true);
-     //UI::ReplaceWidget (`id ("Network"), `Empty());
      UI::ReplaceWidget (`id ("Targets"), local_filesystem);     
-     //UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
      y2milestone("[kdump] (InitTargetKdump)  Kdump::available_partitions %1", Kdump::available_partitions);
-     /*
-     if (size(Kdump::uknown_fs_partitions)>0) {        
-        UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions);
-     } else {
-        UI::ChangeWidget(`id("raw_partitions"), `Enabled, false);
-        UI::ChangeWidget(`id("enable_raw_partit"), `Enabled, false);
-     }*/
-     UI::ChangeWidget(`id ("dir_save_image"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
-     //UI::ChangeWidget(`id ("network"), `Value, true);
-     //UI::ReplaceWidget (`id ("Targets"), `Empty());
-     //UI::ReplaceWidget (`id ("Network"), network);
      UI::ReplaceWidget (`id ("Targets"), nfs);
      UI::ChangeWidget(`id ("nfs"), `Value, true);
      UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
      UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
-     //UI::ChangeWidget(`id ("network"), `Value, true);
-     //UI::ReplaceWidget (`id ("Targets"), `Empty());
-     //UI::ReplaceWidget (`id ("Network"), network);
+
      UI::ReplaceWidget (`id ("Targets"), ssh);
      UI::ChangeWidget(`id ("ssh"), `Value, true);
-     foreach (string key, ["server", "port", "user_name", "dir" ], {
+     if (KDUMP_SAVE_TARGET["port"]:nil != "")
+        UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
+     foreach (string key, ["server",  "user_name", "dir" ], {
        UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
      });
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
-     //UI::ChangeWidget(`id ("network"), `Value, true);
-     //UI::ReplaceWidget (`id ("Targets"), `Empty());
-     //UI::ReplaceWidget (`id ("Network"), network);
      UI::ReplaceWidget (`id ("Targets"), ftp);
      UI::ChangeWidget(`id ("ftp"), `Value, true);
-     foreach (string key, ["server", "port", "dir" ], {
+     if (KDUMP_SAVE_TARGET["port"]:nil != "")
+        UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
+     foreach (string key, ["server", "dir" ], {
        UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
      });
       if (KDUMP_SAVE_TARGET["user_name"]:nil == "") {
@@ -316,9 +287,6 @@ void InitTargetKdump (string key) {
        UI::ChangeWidget(`id ("password"), `Value, KDUMP_SAVE_TARGET["password"]:nil);
      }
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "cifs") {
-     //UI::ChangeWidget(`id ("network"), `Value, true);
-     //UI::ReplaceWidget (`id ("Targets"), `Empty());
-     //UI::ReplaceWidget (`id ("Network"), network);
      UI::ReplaceWidget (`id ("Targets"), smb);
      UI::ChangeWidget(`id ("smb"), `Value, true);
      foreach (string key, ["server", "dir", "share", "user_name", "password"], {
@@ -326,18 +294,8 @@ void InitTargetKdump (string key) {
      });
      
   }
-
-
 }
-/**
-  * Function initializes option "Kdump Command Line"
-  * or "Kdump Command Line Append"
-  */
 
-void InitRawPartitions (string key) {
-  UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::available_partitions);
-
-}
 /**
   * Function handles "Saving Target for kdump Image"
   *
@@ -348,29 +306,121 @@ symbol HandleTargetKdump (string key, map event) {
   any radiobutton = event["ID"]:nil;
   
   if (radiobutton == "local_filesystem") {
-     //UI::ReplaceWidget (`id ("Network"), `Empty());
-     UI::ReplaceWidget (`id ("Targets"), local_filesystem);
-     UI::ChangeWidget(`id("local_partitions"), `Items, Kdump::available_partitions);
-     if (size(Kdump::uknown_fs_partitions)>0) {        
-        UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions);
-     } else {
-        UI::ChangeWidget(`id("raw_partitions"), `Enabled, false);
-        UI::ChangeWidget(`id("enable_raw_partit"), `Enabled, false);
-     }
-     set_network = false; 
+     UI::ReplaceWidget (`id ("Targets"), local_filesystem);     
+     set_network = false;     
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil); 
   } else if (radiobutton == "ftp") {
      UI::ReplaceWidget (`id ("Targets"), ftp);
+     if (KDUMP_SAVE_TARGET["port"]:nil != "")
+        UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
+     foreach (string key, ["server", "dir" ], {
+       UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
+     });
+     if (KDUMP_SAVE_TARGET["user_name"]:nil == "") {
+        UI::ChangeWidget(`id ("user_name"), `Enabled, false);     
+        UI::ChangeWidget(`id ("password"), `Enabled, false);
+        UI::ChangeWidget(`id ("anonymous"), `Value, true);
+     } else {
+       UI::ChangeWidget(`id ("user_name"), `Value, KDUMP_SAVE_TARGET["user_name"]:nil);     
+       UI::ChangeWidget(`id ("password"), `Value, KDUMP_SAVE_TARGET["password"]:nil);
+     }
   } else if (radiobutton == "ssh") {
      UI::ReplaceWidget (`id ("Targets"), ssh);
+     if (KDUMP_SAVE_TARGET["port"]:nil != "")
+        UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
+     foreach (string key, ["server",  "user_name", "dir" ], {
+       UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
+     });
   } else if (radiobutton == "nfs") {
      UI::ReplaceWidget (`id ("Targets"), nfs);
+     UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
   } else if (radiobutton == "smb") {
      UI::ReplaceWidget (`id ("Targets"), smb);
+     foreach (string key, ["server", "dir", "share", "user_name", "password"], {
+       UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
+     });
+
+  } else if (radiobutton == "select_dir") {
+     string dir = UI::AskForExistingDirectory("/", "Select directory for saving dump images");
+     UI::ChangeWidget(`id ("dir"), `Value, dir);
+     //KDUMP_SAVE_TARGET["dir"] = dir;
+
   }
  
   return nil;
 
 }
+
+
+/**
+  * Function stores option 
+  * "Saving Target for kdump Image"
+  */
+
+void StoreTargetKdump (string key, map event) {
+  string radiobut = tostring(UI::QueryWidget(`id ("DumpTarget"), `Value));
+  if (radiobut == "local_filesystem") {
+     KDUMP_SAVE_TARGET["target"] = "file";
+     if (UI::QueryWidget(`id ("dir"), `Value) != nil)
+        KDUMP_SAVE_TARGET["dir"] = tostring(UI::QueryWidget(`id ("dir"), `Value));
+     else
+        KDUMP_SAVE_TARGET["dir"] = "";
+    Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"] =  KDUMP_SAVE_TARGET["target"]:nil + "://" + KDUMP_SAVE_TARGET["dir"]:nil;
+  }
+  
+}
+
+
+/**
+  * Function initializes option "Enable Raw Saving in Initrd"
+  * 
+  */
+
+void InitRawPartitions (string key) {
+  if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil != "") {
+     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::available_partitions);
+     string value = tostring(find(string key, Kdump::available_partitions, 
+       ``(find(key, Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil) != -1)));
+     //Popup::Message(value);
+     if ((value != nil) && (value != ""))
+        UI::ChangeWidget(`id("raw_partitions"), `Value, value);
+     else
+        Popup::Error("Partition doesn't exist on your disks!");
+  } else if (size(Kdump::available_partitions)>0) {
+     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::available_partitions); //uknown_fs_partitions);
+     //UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);
+  } else {
+     UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);
+  }
+}
+
+
+
+
+/**
+  * Function stores option 
+  * "Enable Raw Saving in Initrd"
+  */
+
+void StoreRawPartitions (string key, map event) {
+  boolean enabled = (boolean) UI::QueryWidget(`id("enable_raw_partitions"), `Value);
+  if (enabled) {
+     string value = tostring(UI::QueryWidget(`id("raw_partitions"), `Value));
+     integer position = find(value," ");
+     Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = substring(value, 0, position);
+     //Popup::Message(Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil);
+  } else {
+     Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = "";
+  }
+}
+
+
+
+
+
+
+
 
 /**
   * Function initializes option "Kdump Command Line"
@@ -631,21 +681,6 @@ symbol HandleDumpLevel(string key, map event) {
 
 
 
-/**
-  * Function initializes option 
-  * "RawDisk"
-  */
-
-
-void InitRawDisk (string key) {
-  if (size(Kdump::uknown_fs_partitions)>0) {
-     UI::ChangeWidget(`id("RawDisk"), `Items, Kdump::uknown_fs_partitions);
-  } else {
-     UI::ChangeWidget(`id("RawDisk"), `Enabled, false);
-  } 
-
-
-}
 
 
 /**
