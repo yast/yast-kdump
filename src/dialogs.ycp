@@ -165,7 +165,7 @@ map<string,map<string,any> > wid_handling = $[
                 `Left(`RadioButton(`id("ftp"), `opt(`notify), "F&TP")),
        		`Left(`RadioButton(`id("ssh"), `opt(`notify), "&SSH (scp)")),
        		`Left(`RadioButton(`id("nfs"), `opt(`notify), "N&FS")),
-       		`Left(`RadioButton(`id("smb"), `opt(`notify), "C&IFS (SMB)"))
+       		`Left(`RadioButton(`id("cifs"), `opt(`notify), "C&IFS (SMB)"))
              ))
              
            ))),
