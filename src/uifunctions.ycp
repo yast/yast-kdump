@@ -414,7 +414,84 @@ symbol HandleTargetKdump (string key, map event) {
 
 }
 
+/**
+  * Function validates options in 
+  * "Saving Target for kdump Image"
+  */
 
+boolean ValidTargetKdump (string key, map event) {
+  string radiobut = tostring(UI::QueryWidget(`id ("DumpTarget"), `Value));
+  string value = nil;
+  boolean anon = true;
+  if (radiobut == "local_filesystem") {
+     value = tostring(UI::QueryWidget(`id ("dir"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Directory for Saving Dumps\"");
+        UI::SetFocus(`id("dir"));
+        return false;
+     }
+
+  } else if (radiobut == "ftp") {
+     value = tostring(UI::QueryWidget(`id ("server"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Server Name\"");
+        UI::SetFocus(`id("server"));
+        return false;
+     }
+     value = tostring(UI::QueryWidget(`id ("dir"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Directory on Server\"");
+        UI::SetFocus(`id("dir"));
+        return false;
+     }
+     anon = (boolean) UI::QueryWidget(`id ("anonymous"), `Value);
+     if (!anon) {
+        value = tostring(UI::QueryWidget(`id ("user_name"), `Value));
+        if ((value == nil) || (value == "")) {
+	   Popup::Error("You need specify \"User Name\"");
+           UI::SetFocus(`id("user_name"));
+           return false;
+        }
+        
+     }
+  } else if ((radiobut == "ssh") || (radiobut == "nfs")) {
+     value = tostring(UI::QueryWidget(`id ("server"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Server Name\"");
+        UI::SetFocus(`id("server"));
+        return false;
+     }
+     value = tostring(UI::QueryWidget(`id ("dir"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Directory on Server\"");
+        UI::SetFocus(`id("dir"));
+        return false;
+     }
+
+  } else if (radiobut == "cifs") {
+     value = tostring(UI::QueryWidget(`id ("server"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Server Name\"");
+        UI::SetFocus(`id("server"));
+        return false;
+     }
+     value = tostring(UI::QueryWidget(`id ("dir"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Directory on Server\"");
+        UI::SetFocus(`id("dir"));
+        return false;
+     }
+     value = tostring(UI::QueryWidget(`id ("share"), `Value));
+     if ((value == nil) || (value == "")) {
+	Popup::Error("You need specify \"Exported Share\"");
+        UI::SetFocus(`id("share"));
+        return false;
+     }
+
+  }
+
+  return true;
+}
 /**
   * Function stores option 
   * "Saving Target for kdump Image"

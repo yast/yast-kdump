@@ -176,6 +176,8 @@ map<string,map<string,any> > wid_handling = $[
      ),
      "init"		: InitTargetKdump,
      "handle"		: HandleTargetKdump,
+     "validate_type"    : `function,
+     "validate_function": ValidTargetKdump,
      "store"		: StoreTargetKdump,
      "help"		: HelpKdump("TargetKdump"),
 
