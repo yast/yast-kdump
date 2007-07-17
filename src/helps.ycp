@@ -36,8 +36,71 @@ textdomain "kdump";
  */
 map HELPS = $[
 
+  /*Enable/Disable Kdump - RadioButtons 1/1*/
+  "StartRadioBut" :  _("<p><b>Enable/Disable Kdump</b><br>
+    Enable or disable kdump. The boot option crashkernel parameter is added/removed. 
+    For applying changes is necessary reboot.<br></p>"),
+   
+
+  /* Kdump Memor&y [MB] - IntField 1/1*/
+  "KdumpMemory" : _("<p><b>Kdump Memory</b><br>
+    Alocating of memory for kdump kernel. <br></p>"),
+
+  /* Kdump Memor&y [MB] - IntField 1/1*/
+  "DumpLevel" : _("<p><b>Dump Level</b><br>
+    Specify the type of necessary page for analysis.
+    Pages of the specified type are copied to dumpfile. 
+    The page type marked in the following table is included. <br></p>"),
+
+  /* Dump Format - RadioButtons  1/1*/
+  "DumpFormat" : _("<p><b>Dump Format</b><br>
+    <i>Compressed Format</i> - Compress dump data by each page.
+    <i>ELF Format</i> - Create dumpfile in the ELF format<br></p>"),
+
+  /* Dump Format - RadioButtons  1/6*/
+  "TargetKdump" : _("<p><b>Saving Target for Kdump Image</b><br>
+    The target for saving kdump images.<br></p>")+
+  /* Dump Format - RadioButtons  2/6*/
+  _("<p><b>Local Filestem</b> - Save kdump image in the local filesystem.
+    <i>Directory for Saving Dumps</i> - The path for saving kdump images.
+    If user push <i>Browse</i> he can select directory for saving kdump images 
+    via dialog.<br></p>")+
+  /* Dump Format - RadioButtons  3/6*/
+  _("<p><b>FTP</b> - Save kdump image via FTP.
+    <i>Server Name</i> - The name of ftp server.
+    <i>Port</i> - The port number for connection.
+    <i>Directory on Server</i> - The path for saving kdump images.
+    <i>Enable Anonymous FTP</i> enables anonymous connection to server.
+    <i>User Name</i> for ftp connection. <i>Password</i> for ftp connection.<br></p>")+
+ /* Dump Format - RadioButtons  4/6*/
+  _("<p><b>SSH</b> - Save kdump image via SSH.
+    <i>Server Name</i> - The name of server.
+    <i>Port</i> - The port number for connection.
+    <i>Directory on Server</i> - The path for saving kdump images.
+    <i>User Name</i> for ssh connection.<br></p>")+
+ /* Dump Format - RadioButtons  5/6*/
+  _("<p><b>NFS</b> - Save kdump image on NFS.
+    <i>Server Name</i> - The name of nfs server.
+    <i>Directory on Server</i> - The path for saving kdump images.<br></p>")+
+  /* Dump Format - RadioButtons  6/6*/
+  _("<p><b>CIFS</b> - Save kdump image via CIFS.
+    <i>Server Name</i> - The name of server.
+    <i>Exported Share</i> - The windows share name.
+    <i>Directory on Server</i> - The path for saving kdump images.
+    <i>Use Authentication</i> enables authenticated connection to server.
+    <i>User Name</i> for connection. <i>Password</i> for connection.<br></p>"),
+
+
+  /* Enable Raw Saving in Initrd - ComboBox 1/1*/  
+  "RawPartitions": _("<p><b>Enable Raw Saving in Initrd</b> - allows to save 
+    the dump in initrd before mounting any filesystem. Then the system is rebooted, and 
+    if filesystem doesn't mount user can repair it with a rescue system. On first normal 
+    boot, the dump is saved to the final dump destination.<br></p>""), 
+
+
+
     /* Read dialog help 1/2 */
-    "read" : _("<p><b><big>Initializing kdump Configuration</big></b><br>
+    "read" : _("<p><b><big>Initializing Kdump Configuration</big></b><br>
 Please wait...<br></p>
 ") +
 
@@ -47,7 +110,7 @@ Safely abort the configuration utility by pressing <b>Abort</b> now.</p>
 "),
 
     /* Write dialog help 1/2 */
-    "write" : _("<p><b><big>Saving kdump Configuration</big></b><br>
+    "write" : _("<p><b><big>Saving Kdump Configuration</big></b><br>
 Please wait...<br></p>
 ") +
 
@@ -64,7 +127,7 @@ Configure kdump here.<br></p>
 ") +
 
     /* Summary dialog help 2/3 */
-    _("<p><b><big>Adding a kdump:</big></b><br>
+    _("<p><b><big>Adding a Kdump:</big></b><br>
 Choose an kdump from the list of detected kdumps.
 If your kdump was not detected, use <b>Other (not detected)</b>.
 Then press <b>Configure</b>.</p>
@@ -83,7 +146,7 @@ edit their configurations.<br></p>
 ") +
 
     /* Ovreview dialog help 2/3 */
-_("<p><b><big>Adding a kdump:</big></b><br>
+_("<p><b><big>Adding a Kdump:</big></b><br>
 Press <b>Add</b> to configure a kdump.</p>") +
 
     /* Ovreview dialog help 3/3 */
@@ -92,26 +155,6 @@ Choose a kdump to change or remove.
 Then press <b>Edit</b> or <b>Delete</b> as desired.</p>
 "),
 
-    /* Configure1 dialog help 1/2 */
-    "c1" : _("<p><b><big>Configuration Part One</big></b><br>
-Press <b>Next</b> to continue.
-<br></p>") +
-
-    /* Configure1 dialog help 2/2 */
-_("<p><b><big>Selecting Something</big></b><br>
-It is not possible. You must code it first. :-)
-</p>"),
-
-    /* Configure2 dialog help 1/2 */
-    "c2" : _("<p><b><big>Configuration Part Two</big></b><br>
-Press <b>Next</b> to continue.
-<br></p>
-") +
-
-    /* Configure2 dialog help 2/2 */
-_("<p><b><big>Selecting Something</big></b><br>
-It is not possible. You must code it first. :-)
-</p>"),
 
 ];
  string HelpKdump (string identification) {

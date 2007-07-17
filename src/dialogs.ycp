@@ -59,7 +59,7 @@ map<string,map<string,any> > wid_handling = $[
 
   "EnableDisalbeKdump"	: $[
      //TRANSLATORS: RadioButtonGroup Label
-     "label" 		: _("Enable/Disable kdump"),
+     "label" 		: _("Enable/Disable Kdump"),
      "widget" 		: `radio_buttons,
      "items" 		: [
         ["enable_kdump",  _("Enable kd&ump")  ],
@@ -71,6 +71,109 @@ map<string,map<string,any> > wid_handling = $[
      "store"		: StoreEnableDisalbeKdump,
      "help"		: HelpKdump("StartRadioBut"),
 
+  ],
+
+
+ "KdumpMemory" 		: $[
+     "widget" 		: `custom,
+     "custom_widget"	: `HSquash(`VBox(
+           `Left(`HBox(
+	      `Left(`Label("Total System Memory [MB]:")),
+	      `Left(`Label(`id("total_memory"),"0123456789")),
+	      `HStretch ()
+           )),
+           `Left(`HBox(
+	      `Left(`Label("Usable Memory [MB]:")),
+	      `Left(`Label(`id("usable_memory"),"0123456789")),
+	      `HStretch ()
+           )),
+	   `Left(`IntField(`id("memory_buffer"), `opt(`notify), _("Kdump Memor&y [MB]"),128,1048576,128))
+     )),
+     "init"		: InitKdumpMemory,
+     "handle"		: HandleKdumpMemory,
+     //"store"		: 
+     "help"		: HelpKdump("KdumpMemory"),
+  ],
+
+
+ "DumpLevel" 		: $[
+     "widget" 		: `custom,
+     "custom_widget"	: `VBox(
+           `Frame ( _("Include in Dumping"), `VBox(
+           `Left(`HBox(`HSpacing(1),`VBox(
+	      `Left(`CheckBox(`id("zero_page"),  "&Pages Filled with Zero")),
+	      `Left(`CheckBox(`id("cache_page"), `opt(`notify), "Cach&e Pages")),
+              `HBox(`HSpacing(2),`VBox(
+	        `Left(`CheckBox(`id("cache_private"), `opt(`notify), "Cache Priva&te Pages"))
+               )),
+	      `Left(`CheckBox(`id("user_data"), "&User Data Pages")),
+	      `Left(`CheckBox(`id("free_page"), "&Free Pages"))
+	      //`VStretch ()
+           )))
+     ))),
+     "init"		: InitDumpLevel,
+     "handle"		: HandleDumpLevel,
+     "store"		: StoreDumpLevel,
+     "help"		: HelpKdump("DumpLevel"),
+  ],
+
+  "DumpFormat" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("&Dump Format"),
+     "widget" 		: `radio_buttons,
+     "items" 		: [
+        ["elf_format",  _("E&LF Format")  ],
+        ["compressed_format", _("C&ompressed Format") ],
+     ],
+     "orientation" 	: `horizontal,
+     "init"		: InitDumpFormat,
+     //"handle"		: 
+     "store"		: StoreDumpFormat,
+     "help"		: HelpKdump("DumpFormat"),
+  ],
+
+  "TargetKdump"		: $[
+     "widget"		: `custom,
+     "custom_widget"	: `VBox(
+           `Frame(_("Saving Target for Kdump Image"),`HBox(`HSpacing(1),`VBox(
+             `RadioButtonGroup(`id("DumpTarget"), `HBox(
+	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem")),
+                `Left(`RadioButton(`id("ftp"), `opt(`notify), "F&TP")),
+       		`Left(`RadioButton(`id("ssh"), `opt(`notify), "&SSH (scp)")),
+       		`Left(`RadioButton(`id("nfs"), `opt(`notify), "N&FS")),
+       		`Left(`RadioButton(`id("cifs"), `opt(`notify), "C&IFS (SMB)"))
+             ))
+             
+           ))),
+
+           `VSpacing(1),
+           `ReplacePoint(`id("Targets"), ftp)
+           //`VStretch()								    
+     ),
+     "init"		: InitTargetKdump,
+     "handle"		: HandleTargetKdump,
+     "validate_type"    : `function,
+     "validate_function": ValidTargetKdump,
+     "store"		: StoreTargetKdump,
+     "help"		: HelpKdump("TargetKdump"),
+
+  ], 
+
+ "RawPartitions" 		: $[
+     //TRANSLATORS: ComboBox Label
+     "widget" 		: `custom,
+     "custom_widget"	: `VBox(
+	`CheckBoxFrame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"), true, 
+          `HBox(`HSpacing(1),`VBox(
+            `Left(`ComboBox(`id("raw_partitions"), 
+                    "&The List of Available Raw Paritions of All Disks Without Known Filesystem"))
+	  ))
+        )
+     ),
+     "init"		: InitRawPartitions,
+     //"handle"		: 
+     "store"		: StoreRawPartitions,
+     "help"		: HelpKdump("RawPartitions"),
   ],
 
   "RunLevel" 		: $[
@@ -90,19 +193,6 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("RunLevel"),
   ],
 
-/*
- "RawDisk" 		: $[
-     //TRANSLATORS: ComboBox Label
-     "label" 		: _("&The list of available paritions without any filesystem"),
-     "widget" 		: `combobox,
-     "items" 		: [
-     ],
-     "init"		: InitRawDisk,
-     //"handle"		: 
-     "store"		: StoreRawDisk,
-     "help"		: HelpKdump("RawDisk"),
-  ],
-*/
  "EnableReboot" 	: $[
      //TRANSLATORS: CheckBox Label
      "label" 		: _("&Enable Immediate Reboot After Saving the Core"),
@@ -135,69 +225,6 @@ map<string,map<string,any> > wid_handling = $[
      //"handle"		: 
      //"store"		: 
      "help"		: HelpKdump("FreeDiskSize"),
-  ],
-
-
-  "DumpFormat" 	: $[
-     //TRANSLATORS: TextEntry Label
-     "label" 		: _("&Dump Format"),
-     "widget" 		: `radio_buttons,
-     "items" 		: [
-        ["elf_format",  _("E&LF Format")  ],
-        ["compressed_format", _("C&ompressed Format") ],
-     ],
-     "orientation" 	: `horizontal,
-     "init"		: InitDumpFormat,
-     //"handle"		: 
-     "store"		: StoreDumpFormat,
-     "help"		: HelpKdump("DumpFormat"),
-  ],
-
-
-
-
- "TargetKdump"		: $[
-     "widget"		: `custom,
-     "custom_widget"	: `VBox(
-           `Frame(_("Saving Target for kdump Image"),`HBox(`HSpacing(1),`VBox(
-             `RadioButtonGroup(`id("DumpTarget"), `HBox(
-	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem")),
-                `Left(`RadioButton(`id("ftp"), `opt(`notify), "F&TP")),
-       		`Left(`RadioButton(`id("ssh"), `opt(`notify), "&SSH (scp)")),
-       		`Left(`RadioButton(`id("nfs"), `opt(`notify), "N&FS")),
-       		`Left(`RadioButton(`id("cifs"), `opt(`notify), "C&IFS (SMB)"))
-             ))
-             
-           ))),
-
-           `VSpacing(1),
-           `ReplacePoint(`id("Targets"), ftp)
-           //`VStretch()								    
-     ),
-     "init"		: InitTargetKdump,
-     "handle"		: HandleTargetKdump,
-     "validate_type"    : `function,
-     "validate_function": ValidTargetKdump,
-     "store"		: StoreTargetKdump,
-     "help"		: HelpKdump("TargetKdump"),
-
-  ], 
-
-  "RawPartitions" 		: $[
-     //TRANSLATORS: ComboBox Label
-     "widget" 		: `custom,
-     "custom_widget"	: `VBox(
-	`CheckBoxFrame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"), true, 
-          `HBox(`HSpacing(1),`VBox(
-            `Left(`ComboBox(`id("raw_partitions"), 
-                    "&The List of Available Raw Paritions of All Disks Without Known Filesystem"))
-	  ))
-        )
-     ),
-     "init"		: InitRawPartitions,
-     //"handle"		: 
-     "store"		: StoreRawPartitions,
-     "help"		: HelpKdump("RawPartitions"),
   ],
 
   "NumberDumps"		: $[
@@ -243,47 +270,9 @@ map<string,map<string,any> > wid_handling = $[
 
 
 
-  "KdumpMemory" 		: $[
-     "widget" 		: `custom,
-     "custom_widget"	: `HSquash(`VBox(
-           `Left(`HBox(
-	      `Left(`Label("Total System Memory [MB]:")),
-	      `Left(`Label(`id("total_memory"),"0123456789")),
-	      `HStretch ()
-           )),
-           `Left(`HBox(
-	      `Left(`Label("Usable Memory [MB]:")),
-	      `Left(`Label(`id("usable_memory"),"0123456789")),
-	      `HStretch ()
-           )),
-	   `Left(`IntField(`id("memory_buffer"), `opt(`notify), _("Kdump Memor&y [MB]"),128,1048576,128))
-     )),
-     "init"		: InitKdumpMemory,
-     "handle"		: HandleKdumpMemory,
-     //"store"		: 
-     "help"		: HelpKdump("KdumpMemory"),
-  ],
+ 
 
-  "DumpLevel" 		: $[
-     "widget" 		: `custom,
-     "custom_widget"	: `VBox(
-           `Frame ( _("Include in Dumping"), `VBox(
-           `Left(`HBox(`HSpacing(1),`VBox(
-	      `Left(`CheckBox(`id("zero_page"),  "&Pages Filled with Zero")),
-	      `Left(`CheckBox(`id("cache_page"), `opt(`notify), "Cach&e Pages")),
-              `HBox(`HSpacing(2),`VBox(
-	        `Left(`CheckBox(`id("cache_private"), `opt(`notify), "Cache Priva&te Pages"))
-               )),
-	      `Left(`CheckBox(`id("user_data"), "&User Data Pages")),
-	      `Left(`CheckBox(`id("free_page"), "&Free Pages"))
-	      //`VStretch ()
-           )))
-     ))),
-     "init"		: InitDumpLevel,
-     "handle"		: HandleDumpLevel,
-     "store"		: StoreDumpLevel,
-     "help"		: HelpKdump("DumpLevel"),
-  ],
+ 
 
   "InitrdKernel" 	: $[
      //TRANSLATORS: TextEntry Label
