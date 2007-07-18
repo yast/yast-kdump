@@ -79,7 +79,7 @@ term ftp = `VBox(
     )),
     // text entry
     `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
-    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("Enable Anonymous &FTP"))),
+    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("Enable Anon&ymous FTP"))),
     
     `Left(`HBox(
        // text entry
@@ -123,7 +123,7 @@ term cifs = `VBox(
       `Left(`TextEntry(`id ("share"), _("Exported Sha&re"))),
       `Left(`TextEntry( `id("dir"), _("&Directory on Server")))
      )),
-    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("&Use Authentication"), true)),
+    `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("Use Aut&hentication"), true)),
     `Left(`HBox(
        // text entry
       `Left(`TextEntry(`id ("user_name"), _("&User Name"))),

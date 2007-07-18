@@ -57,13 +57,15 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: " ",
   ],
 
+/*---------============ Start-up screen=============------------*/
+
   "EnableDisalbeKdump"	: $[
      //TRANSLATORS: RadioButtonGroup Label
      "label" 		: _("Enable/Disable Kdump"),
      "widget" 		: `radio_buttons,
      "items" 		: [
-        ["enable_kdump",  _("Enable kd&ump")  ],
-        ["disable_kdump", _("&Disable kdump") ],
+        ["enable_kdump",  _("Enable Kd&ump")  ],
+        ["disable_kdump", _("&Disable Kdump") ],
      ],
      "orientation" 	: `horizontal,
      "init"		: InitEnableDisalbeKdump,
@@ -95,7 +97,7 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("KdumpMemory"),
   ],
 
-
+/*---------============ Dump Filtering screen=============------------*/
  "DumpLevel" 		: $[
      "widget" 		: `custom,
      "custom_widget"	: `VBox(
@@ -132,6 +134,8 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("DumpFormat"),
   ],
 
+/*---------============ Dump Target screen=============------------*/
+
   "TargetKdump"		: $[
      "widget"		: `custom,
      "custom_widget"	: `VBox(
@@ -166,7 +170,7 @@ map<string,map<string,any> > wid_handling = $[
 	`CheckBoxFrame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"), true, 
           `HBox(`HSpacing(1),`VBox(
             `Left(`ComboBox(`id("raw_partitions"), 
-                    "&The List of Available Raw Paritions of All Disks Without Known Filesystem"))
+                    "The List of A&vailable Raw Paritions of All Disks Without Known Filesystem"))
 	  ))
         )
      ),
@@ -174,6 +178,48 @@ map<string,map<string,any> > wid_handling = $[
      //"handle"		: 
      "store"		: StoreRawPartitions,
      "help"		: HelpKdump("RawPartitions"),
+  ],
+
+/*---------============ Expert Settings screen=============------------*/
+
+  "InitrdKernel" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Custom Kdump &Kernel"),
+     "widget" 		: `textentry,
+     "init"		: InitInitrdKernel,
+     //"handle"		: 
+     "store"		: StoreInitrdKernel,
+     "help"		: HelpKdump("InitrdKernel"),
+  ],
+
+
+  "KdumpCommandLine" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Kdump Co&mmand Line"),
+     "widget" 		: `textentry,
+     //"init"		: init is hadled by "SwitchKdumpComLine"
+     //"handle"		: 
+     //"store"		: store is hadled by "SwitchKdumpComLine"
+     "help"		: HelpKdump("KdumpCommandLine"),
+  ],
+
+
+  "SwitchKdumpComLine"	: $[
+
+     "widget"		: `custom,
+     "custom_widget"	: `VBox(
+           `RadioButtonGroup(`id("switch_kdum_comm_line"),
+             `HBox(`HSpacing(1),`VBox(
+	      `Left(`Label("")),
+	      `Left(`CheckBox(`id("enable_append"), `opt(`notify), "A&ppend Kdump Commandline"))
+             ))
+           )
+     ),
+     "init"		: InitSwitchKdumpComLine,
+     "handle"		: HandleSwitchKdumpComLine,
+     "store"		: StoreSwitchKdumpComLine,
+     "help"		: HelpKdump("SwitchKdumpComLine"),
+
   ],
 
   "RunLevel" 		: $[
@@ -185,7 +231,7 @@ map<string,map<string,any> > wid_handling = $[
         [ "run_level2", _("2 - Local Multiuser Without Remote Network") ],
         [ "run_level3", _("3 - Full Multiuser With Network") ],
         [ "run_level5", _("5 - Full Multiuser With Network and xdm") ],
-        [ "run_levelS", _("s - ") ],
+        [ "run_levelS", _("s - Single User Mode (only one console)") ],
      ],
      "init"		: InitRunLevel,
      //"handle"		: 
@@ -214,19 +260,6 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("EnableDeleteImages"),
   ],
 
-
-  "FreeDiskSize"	: $[
-     //TRANSLATORS: IntField Label
-     "label" 		: _("Fr&ee Disk Size [MB]"),
-     "widget" 		: `intfield,
-     "minimum" 		: 0,
-     "maximum" 		: 10,
-     //"init"		: 
-     //"handle"		: 
-     //"store"		: 
-     "help"		: HelpKdump("FreeDiskSize"),
-  ],
-
   "NumberDumps"		: $[
      //TRANSLATORS: IntField Label
      "label" 		: _("N&umber of Old Dumps"),
@@ -238,62 +271,6 @@ map<string,map<string,any> > wid_handling = $[
      "store"		: StoreNumberDumps,
      "help"		: HelpKdump("NumberDumps"),
   ],
-
-  
-  "KdumpCommandLine" 	: $[
-     //TRANSLATORS: TextEntry Label
-     "label" 		: _("Kdump Co&mmand Line"),
-     "widget" 		: `textentry,
-     //"init"		: init is hadled by "SwitchKdumpComLine"
-     //"handle"		: 
-     //"store"		: store is hadled by "SwitchKdumpComLine"
-     "help"		: HelpKdump("KdumpCommandLine"),
-  ],
-
-  "SwitchKdumpComLine"	: $[
-
-     "widget"		: `custom,
-     "custom_widget"	: `VBox(
-           `RadioButtonGroup(`id("switch_kdum_comm_line"),
-             `HBox(`HSpacing(1),`VBox(
-	      `Left(`Label("")),
-	      `Left(`CheckBox(`id("enable_append"), `opt(`notify), "A&ppend kdump Commandline"))
-             ))
-           )
-     ),
-     "init"		: InitSwitchKdumpComLine,
-     "handle"		: HandleSwitchKdumpComLine,
-     "store"		: StoreSwitchKdumpComLine,
-     "help"		: HelpKdump("SwitchKdumpComLine"),
-
-  ],
-
-
-
- 
-
- 
-
-  "InitrdKernel" 	: $[
-     //TRANSLATORS: TextEntry Label
-     "label" 		: _("Custom kdump &Kernel"),
-     "widget" 		: `textentry,
-     "init"		: InitInitrdKernel,
-     //"handle"		: 
-     "store"		: StoreInitrdKernel,
-     "help"		: HelpKdump("InitrdKernel"),
-  ],
-
-  "SelectKernel" 	: $[
-     //TRANSLATORS: TextEntry Label
-     "label" 		: _("Bro&wse"),
-     "widget" 		: `push_button,
-     //"init"		: init is hadled by "SwitchKdumpComLine"
-     //"handle"		: 
-     //"store"		: store is hadled by "SwitchKdumpComLine"
-     "help"		: HelpKdump("Browse"),
-  ],
-
 
 ];
 
@@ -317,26 +294,6 @@ map<string, map<string,any> > tabs = $[
         "DisBackButton", "EnableDisalbeKdump", "KdumpMemory",
      ],    
   ],
-  /*
-  "general"	: $[
-     "contents"		: `VBox(
-
-        "DumpFormat",
-        `VSpacing(1),
-	`Frame ( _("Dump Settings"),`HBox(`HSpacing(1),`VBox(
-	   `Left("EnableReboot")
-        ))),
-        
-	`VStretch ()
-     		
-     ),
-     "caption"		: _("Kdump Genral Settings"),
-     "tree_item_label"	: _("General"),
-     "widget_names"	: [
-	"DisBackButton",  "DumpFormat",
-	"EnableReboot", 
-     ]    
-  ],*/
 
   "dump_filtering"	: $[
      "contents"		: `VBox(     	
@@ -345,7 +302,7 @@ map<string, map<string,any> > tabs = $[
         "DumpFormat",
 	`VStretch ()
      ),
-     "caption"		: _("kdump - Dump Filtering"),
+     "caption"		: _("Kdump - Dump Filtering"),
      "tree_item_label"	: _("Dump Filtering"),
      "widget_names"	: [ 
         "DisBackButton", "DumpLevel", "DumpFormat",
@@ -370,7 +327,7 @@ map<string, map<string,any> > tabs = $[
   
   "exp_settings" 	: $[
      "contents"		: `VBox(
-        `Frame ( _("Custom Kernel for kdump"),`HBox(`HSpacing(1),`VBox(          
+        `Frame ( _("Custom Kernel for Kdump"),`HBox(`HSpacing(1),`VBox(          
           `Left("InitrdKernel")            
         ))),
 	`VSpacing(1),
