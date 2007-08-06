@@ -26,6 +26,5 @@ Summary:	Configuration of kdump
 @clientdir@/kdump.ycp
 @clientdir@/kdump_*.ycp
 @moduledir@/Kdump.*
-@moduledir@/Kdump2.*
 @desktopdir@/kdump.desktop
 %doc @docdir@
