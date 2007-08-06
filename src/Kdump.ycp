@@ -55,7 +55,7 @@ global boolean Modified();
 /**
  * Data was modified?
  */
-global boolean modified = true;
+global boolean modified = false;
 
 /**
  */
