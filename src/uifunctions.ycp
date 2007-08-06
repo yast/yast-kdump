@@ -54,12 +54,14 @@ map <string, string > KDUMP_SAVE_TARGET = $[
    "password"		: "", 
 ];
 
+/**
+ * definition UI terms for saveing dump target
+ *  
+ * terms
+ */
 
 term local_filesystem = `VBox(
   `Frame(_("Local Filesystem"),`HBox(`HSpacing(1),`VBox(
-    //`Left(`ComboBox(`id("local_partitions"), "&The List of Available Paritions of All Disks with Filesystem")),
-    //`Left(`CheckBox(`id("enable_raw_partit"),"&Enable Save Image to Raw Partition")),
-    //`Left(`ComboBox(`id("raw_partitions"), "&The List of Raw Paritions of All isks Without Filesystem")),
     `Left(`HBox(
       `TextEntry(`id("dir"), _("&Directory for Saving Dumps")),      
       `VBox ( `Label(""),
@@ -153,9 +155,9 @@ void InitEnableDisalbeKdump (string key) {
 void StoreEnableDisalbeKdump (string key, map event) {
   string radiobut = (string) UI::QueryWidget(`id("EnableDisalbeKdump"), `Value);
   if (radiobut == "enable_kdump") {
-     Kdump::crashkernel_param = true;
+     Kdump::add_crashkernel_param = true;
   } else {
-     Kdump::crashkernel_param = false; 
+     Kdump::add_crashkernel_param = false; 
   }
 
 }
@@ -296,8 +298,8 @@ string tostringKDUMP_SAVE_TARGET() {
 
 
 /**
-  * Function initializes option "Kdump Command Line"
-  * or "Kdump Command Line Append"
+  * Function initializes option "Save Traget for Kdump Images"
+  * 
   */
 
 void InitTargetKdump (string key) {
@@ -349,7 +351,7 @@ void InitTargetKdump (string key) {
 }
 
 /**
-  * Function handles "Saving Target for kdump Image"
+  * Function handles "Saving Target for Kdump Image"
   *
   */
 
@@ -416,7 +418,7 @@ symbol HandleTargetKdump (string key, map event) {
 
 /**
   * Function validates options in 
-  * "Saving Target for kdump Image"
+  * "Saving Target for Kdump Image"
   */
 
 boolean ValidTargetKdump (string key, map event) {
@@ -636,6 +638,13 @@ void StoreTargetKdump (string key, map event) {
         KDUMP_SAVE_TARGET["password"] = "";
   }
   Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"] = tostringKDUMP_SAVE_TARGET();
+
+  if (radiobut != "local_filesystem") {
+     if ((Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil != "3") || 
+         (Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil != "5"))
+         Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"] = "3";
+  }
+
 }
 
 
@@ -646,16 +655,16 @@ void StoreTargetKdump (string key, map event) {
 
 void InitRawPartitions (string key) {
   if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil != "") {
-     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::available_partitions);
-     string value = tostring(find(string key, Kdump::available_partitions, 
+     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions);
+     string value = tostring(find(string key, Kdump::uknown_fs_partitions, 
        ``(find(key, Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil) != -1)));
      //Popup::Message(value);
      if ((value != nil) && (value != ""))
         UI::ChangeWidget(`id("raw_partitions"), `Value, value);
      else
         Popup::Error("Partition doesn't exist on your disks!");
-  } else if (size(Kdump::available_partitions)>0) {
-     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::available_partitions); //uknown_fs_partitions);
+  } else if (size(Kdump::uknown_fs_partitions)>0) {
+     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions); //uknown_fs_partitions);
      //UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);
   } else {
      UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);
@@ -959,7 +968,7 @@ symbol HandleDumpLevel(string key, map event) {
 void InitKdumpMemory (string key) {
   if (Kdump::total_memory > 0) {
     UI::ChangeWidget(`id("total_memory"), `Value, tostring(Kdump::total_memory));
-    UI::ChangeWidget(`id("memory_buffer"), `Value, 128);
+    UI::ChangeWidget(`id("memory_buffer"), `Value, tointeger(Kdump::alocated_memory));
     UI::ChangeWidget(`id("usable_memory"), `Value, 
       tostring((Kdump::total_memory - (integer) UI::QueryWidget(`id("memory_buffer"), `Value))));
   } else {
@@ -987,6 +996,17 @@ symbol HandleKdumpMemory (string key, map event) {
          tostring((Kdump::total_memory - (integer) UI::QueryWidget(`id("memory_buffer"), `Value))));
      }
   }
+
+}
+
+
+/**
+  *  Store function for option 
+  * "Dump Level"
+  */
+
+void StoreKdumpMemory (string key, map event) {
+  Kdump::alocated_memory = tostring(UI::QueryWidget(`id("memory_buffer"), `Value));
 
 }
 

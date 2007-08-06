@@ -43,6 +43,9 @@ import "BootCommon";
 import "Storage";
 import "Map";
 import "Bootloader";
+import "Service";
+import "Popup";
+import "Arch";
 
 /**
  * Prototypes
@@ -91,6 +94,30 @@ global integer total_memory =0;
  */
 global boolean crashkernel_param = false;
 
+/**
+ * String option indicates value of kernel parameter
+ * "crashkernel"
+ *
+ * string value of kernel parameter
+ */
+global string crashkernel_param_value = "";
+
+/**
+ * Boolean option indicates add kernel param
+ * "crashkernel"
+ *
+ * boolean true if kernel parameter will be add
+ */
+global boolean add_crashkernel_param = false;
+
+
+/**
+ * String option for alocate of memory for boot param
+ * "crashkernel"
+ *
+ * string value number of alocate memory
+ */
+global string alocated_memory = "128";
 
 /**
  * Write only, used during autoinstallation.
@@ -233,11 +260,14 @@ boolean ReadDiskPartitions () {
 boolean ReadKdumpKernelParam () {
 
   string result = Bootloader::getKernelParam (Bootloader::getDefaultSection (), "crashkernel");
-  if (result == "true") {
-     crashkernel_param = true;
-  } else { 
+  if (result == "false") {
      crashkernel_param = false;
+  } else { 
+     crashkernel_param = true;
   }
+
+  crashkernel_param_value = result;
+
   return true;
 }
 
@@ -313,6 +343,44 @@ boolean WriteKdumpSettings () {
         
     return true;
 }
+
+
+/**
+ * Write kdump boot argument crashkernel
+ * set kernel-kdump start at boot
+ *
+ *  @return boolean successfull
+ */
+boolean WriteKdumpBootParameter () {
+  
+  boolean result = true;
+  if (add_crashkernel_param) {
+     string crash_value = "";
+     crash_value = alocated_memory+"@";
+     if ((Arch::i386()) ||(Arch::x86_64())) {
+        crash_value = crash_value + "16M";
+     } else if (Arch::ia64()) {
+        crash_value = crash_value + "0";
+     } else if (Arch::ppc64()) {
+        crash_value = crash_value + "32M";
+     } else {
+        Popup::Error("Unsupported architecture, \"crashkernel\" was not added");
+        return false;
+     }
+           
+     if ((!crashkernel_param) || (crash_value != crashkernel_param_value)) {
+        result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", crash_value);
+        Popup::Message("For applying changes is necessary reboot.");
+     }
+     //start kernel-kdump at boot
+     Service::Enable("kernel-kdump");
+  } else {
+
+    Service::Disable("kernel-kdump");
+  }    
+  return true;
+}
+
 
 
 /**
@@ -431,7 +499,7 @@ global boolean Write() {
     if(Abort()) return false;
     Progress::NextStage ();
     /* Error message */
-    if(false) Report::Error (Message::SuSEConfigFailed());
+    if(!WriteKdumpBootParameter ()) Report::Error (_("Adding crashkernel parameter to bootloader fault."));
     sleep(sl);
 
     if(Abort()) return false;

@@ -37,7 +37,7 @@ import "Wizard";
 import "Wizard_hw";
 import "Confirm";
 import "Kdump";
-
+import "Package";
 
 include "kdump/helps.ycp";
 
@@ -62,9 +62,61 @@ boolean PollAbort() {
  * @return `abort if aborted and `next otherwise
  */
 symbol ReadDialog() {
-    Wizard::RestoreHelp(HELPS["read"]:"");
-    // Kdump::AbortFunction = PollAbort;
-    if (!Confirm::MustBeRoot()) return `abort;
+  boolean kexec_installed = false;
+  boolean kdump_installed = false;
+  boolean kexec_available = false;
+  boolean kdump_available = false;
+  list <string> package_list = [];
+
+  Wizard::RestoreHelp(HELPS["read"]:"");
+  // Kdump::AbortFunction = PollAbort;
+  if (!Confirm::MustBeRoot()) return `abort;
+     
+  //checking of installation packages
+  if (Package::Installed("kexec-tools")) {
+     kexec_installed = true;
+  }
+
+  if (Package::Installed("kernel-kdump")) {
+      kdump_installed =true;
+  }
+  //checking if packages are available
+  if ((!kexec_installed) || (!kdump_installed)) {
+     if (!kexec_installed)
+        kexec_available = Package::Available("kexec-tools");
+     if (!kdump_installed)
+        kdump_available = Package::Available("kernel-kdump");
+
+     if ((!kexec_installed) &&(!kexec_available)) {
+        Popup::Error("Package for kexec-tools is not available.");
+        y2error("[kdump] (ReadDialog ()) Packages for kexec-tools is not available.");
+        return `abort;
+     }
+     
+     if ((!kdump_installed) &&(!kdump_available)) {
+        Popup::Error("Package for kernel-kdump is not available.");
+        y2error("[kdump] (ReadDialog ()) Packages for kernel-kdump is not available.");
+        return `abort;
+     }
+     
+     //add packages for installation
+     if (!kexec_installed) 
+        package_list = add(package_list, "kexec-tools");
+   
+     if (!kdump_installed) 
+        package_list = add(package_list, "kernel-kdump");
+     
+     //install packages
+     if (!Package::DoInstall(package_list)) {
+        Popup::Error("Installation failed!");
+        y2error("[kdump] Installation of package list %1 failed", package_list);
+	return `abort;
+     }
+
+  }
+
+
+
     boolean ret = Kdump::Read();
     return ret ? `next : `abort;
 }

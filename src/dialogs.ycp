@@ -93,7 +93,7 @@ map<string,map<string,any> > wid_handling = $[
      )),
      "init"		: InitKdumpMemory,
      "handle"		: HandleKdumpMemory,
-     //"store"		: 
+     "store"		: StoreKdumpMemory,
      "help"		: HelpKdump("KdumpMemory"),
   ],
 
