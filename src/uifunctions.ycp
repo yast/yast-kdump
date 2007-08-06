@@ -140,7 +140,7 @@ term cifs = `VBox(
   * Function initializes option "Enable/Disable kdump"
   */
 void InitEnableDisalbeKdump (string key) {
-  if (Kdump::crashkernel_param) {
+  if (Kdump::add_crashkernel_param) {
      UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"enable_kdump");
 
   } else {

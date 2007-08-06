@@ -90,7 +90,7 @@ any KdumpSequence() {
   ];
 
   Wizard::CreateDialog();
-  Wizard::SetTitleIcon("yast-sysconfig");
+  Wizard::SetTitleIcon("yast-kdump");
   any ret = Sequencer::Run(aliases, sequence);
   UI::CloseDialog();
   return ret;

@@ -260,13 +260,20 @@ boolean ReadDiskPartitions () {
 boolean ReadKdumpKernelParam () {
 
   string result = Bootloader::getKernelParam (Bootloader::getDefaultSection (), "crashkernel");
+  //Popup::Message(result);
   if (result == "false") {
      crashkernel_param = false;
+     add_crashkernel_param = false;
   } else { 
      crashkernel_param = true;
+     add_crashkernel_param = true;
   }
 
   crashkernel_param_value = result;
+  if (result != "false")
+     alocated_memory = substring(result,0,find(result,"@"));
+
+  //Popup::Message(alocated_memory);
 
   return true;
 }
@@ -368,15 +375,27 @@ boolean WriteKdumpBootParameter () {
         return false;
      }
            
-     if ((!crashkernel_param) || (crash_value != crashkernel_param_value)) {
-        result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", crash_value);
+     if ((!crashkernel_param) || ((crash_value != crashkernel_param_value) && (add_crashkernel_param))) {
+
+        //Popup::Message(Bootloader::getDefaultSection ());
+        result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", crash_value); //        
+        //Popup::Message(crash_value);
         Popup::Message("For applying changes is necessary reboot.");
+
+        return result;
      }
+
+     
      //start kernel-kdump at boot
      Service::Enable("kernel-kdump");
   } else {
-
+    if (crashkernel_param) {
+       //delete crashkernel paramter from bootloader
+       result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", "false");
+       Popup::Message("For applying changes is necessary reboot.");
+    }
     Service::Disable("kernel-kdump");
+    return result;
   }    
   return true;
 }

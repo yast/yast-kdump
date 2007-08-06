@@ -42,7 +42,7 @@ include "kdump/helps.ycp";
 include "kdump/uifunctions.ycp";
 
 void DisBackButton (string key) {
-  Wizard::SetTitleIcon("yast-sysconfig");
+  Wizard::SetTitleIcon("yast-kdump");
   UI::ChangeWidget(`id(`back), `Enabled, false);
 }
 
