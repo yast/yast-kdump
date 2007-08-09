@@ -3,9 +3,7 @@
 yncludedir = @yncludedir@/kdump
 
 client_DATA =			\
-	kdump.ycp		\
-	kdump_auto.ycp	\
-	kdump_proposal.ycp
+	kdump.ycp
 
 ynclude_DATA =			\
 	helps.ycp		\

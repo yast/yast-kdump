@@ -172,28 +172,28 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
  
  string parse_target = target;
  if (target != "") {
-   integer pos = find(parse_target, "/");
+   integer pos = search(parse_target, "/");
    integer pos1 = -1;
    KDUMP_SAVE_TARGET["target"]=substring(parse_target,0,pos-1);
    parse_target = substring(parse_target,pos+2);
    if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
       KDUMP_SAVE_TARGET["dir"]=parse_target;
    } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
-      pos = find(parse_target, "/");
+      pos = search(parse_target, "/");
       //pos1 = pos; 
       KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
       //pos = find(parse_target, "/");
       //KDUMP_SAVE_TARGET["share"]=substring(parse_target,pos1+1,pos-(pos1+1));
       KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);
    } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
-      pos = find(parse_target, "@");
-      if (pos != -1) {
+      pos = search(parse_target, "@");
+      if (pos != nil) {
          KDUMP_SAVE_TARGET["user_name"]=substring(parse_target,0,pos);
          parse_target = substring(parse_target,pos+1);
       }
-      pos1 = find(parse_target, ":");
-      pos = find(parse_target, "/");
-      if (pos1 !=-1) {
+      pos1 = search(parse_target, ":");
+      pos = search(parse_target, "/");
+      if (pos1 != nil) {
          KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos1);
          KDUMP_SAVE_TARGET["port"]=substring(parse_target,pos1+1,pos-(pos1+1));
       } else {
@@ -203,22 +203,22 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
    } else if ((KDUMP_SAVE_TARGET["target"]:nil == "ftp") 
              || (KDUMP_SAVE_TARGET["target"]:nil == "cifs")) {
 
-      pos = find(parse_target, "@");      
-      if (pos != -1) {
+      pos = search(parse_target, "@");      
+      if (pos != nil) {
          string user_pas = substring(parse_target,0,pos);
-         pos1 = find(user_pas, ":");
-         if (pos1 != -1) {
-            KDUMP_SAVE_TARGET["user_name"]=substring(parse_target,0,pos1);
-            KDUMP_SAVE_TARGET["password"]=substring(parse_target,pos1+1,pos);
+         pos1 = search(user_pas, ":");
+         if (pos1 != nil) {
+            KDUMP_SAVE_TARGET["user_name"]=substring(user_pas,0,pos1);
+            KDUMP_SAVE_TARGET["password"]=substring(user_pas,pos1+1,pos);
          } else {
-            KDUMP_SAVE_TARGET["user_name"]=substring(parse_target,0,pos);
+            KDUMP_SAVE_TARGET["user_name"]=substring(user_pas,0,pos);
          }
          parse_target = substring(parse_target,pos+1);
       }
       if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
-         pos1 = find(parse_target, ":");
-         pos = find(parse_target, "/");
-         if (pos1 !=-1) {
+         pos1 = search(parse_target, ":");
+         pos = search(parse_target, "/");
+         if (pos1 != nil) {
             KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos1);
             KDUMP_SAVE_TARGET["port"]=substring(parse_target,pos1+1,pos-(pos1+1));
          } else {
@@ -226,16 +226,19 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
          }
          KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);         
       } else {
-         pos = find(parse_target, "/"); 
+         pos = search(parse_target, "/"); 
          KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
          parse_target = substring(parse_target,pos+1);
-         pos = find(parse_target, "/");
+         pos = search(parse_target, "/");
          KDUMP_SAVE_TARGET["share"]=substring(parse_target,0,pos);
          KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);
       }
 
    }
 
+ y2milestone("--------------KDUMP_SAVE_TARGET---------------");
+ y2milestone("%1",KDUMP_SAVE_TARGET);
+ y2milestone("--------------KDUMP_SAVE_TARGET---------------");
 
    return true;
  } else {
@@ -291,6 +294,11 @@ string tostringKDUMP_SAVE_TARGET() {
  }
  
  //Popup::Message(result);
+
+ y2milestone("-----------------KDUMP_SAVEDIR--------------------");
+ y2milestone("%1",result);
+ y2milestone("-----------------KDUMP_SAVEDIR--------------------");
+
  return result;
 }
 
@@ -412,7 +420,7 @@ symbol HandleTargetKdump (string key, map event) {
      }
 
   } else if (radiobutton == "select_dir") {
-     string dir = UI::AskForExistingDirectory("/", "Select directory for saving dump images");
+     string dir = UI::AskForExistingDirectory("/", _("Select directory for saving dump images"));
      UI::ChangeWidget(`id ("dir"), `Value, dir);
      //KDUMP_SAVE_TARGET["dir"] = dir;
 
@@ -444,7 +452,7 @@ boolean ValidTargetKdump (string key, map event) {
   if (radiobut == "local_filesystem") {
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Directory for Saving Dumps\"");
+	Popup::Error(_("You need specify \"Directory for Saving Dumps\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
@@ -452,13 +460,13 @@ boolean ValidTargetKdump (string key, map event) {
   } else if (radiobut == "ftp") {
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Server Name\"");
+	Popup::Error(_("You need specify \"Server Name\""));
         UI::SetFocus(`id("server"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Directory on Server\"");
+	Popup::Error(_("You need specify \"Directory on Server\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
@@ -466,7 +474,7 @@ boolean ValidTargetKdump (string key, map event) {
      if (!anon) {
         value = tostring(UI::QueryWidget(`id ("user_name"), `Value));
         if ((value == nil) || (value == "")) {
-	   Popup::Error("You need specify \"User Name\"");
+	   Popup::Error(_("You need specify \"User Name\""));
            UI::SetFocus(`id("user_name"));
            return false;
         }
@@ -475,13 +483,13 @@ boolean ValidTargetKdump (string key, map event) {
   } else if ((radiobut == "ssh") || (radiobut == "nfs")) {
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Server Name\"");
+	Popup::Error(_("You need specify \"Server Name\""));
         UI::SetFocus(`id("server"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Directory on Server\"");
+	Popup::Error(_("You need specify \"Directory on Server\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
@@ -489,19 +497,19 @@ boolean ValidTargetKdump (string key, map event) {
   } else if (radiobut == "cifs") {
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Server Name\"");
+	Popup::Error(_("You need specify \"Server Name\""));
         UI::SetFocus(`id("server"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Directory on Server\"");
+	Popup::Error(_("You need specify \"Directory on Server\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("share"), `Value));
      if ((value == nil) || (value == "")) {
-	Popup::Error("You need specify \"Exported Share\"");
+	Popup::Error(_("You need specify \"Exported Share\""));
         UI::SetFocus(`id("share"));
         return false;
      }
@@ -509,7 +517,7 @@ boolean ValidTargetKdump (string key, map event) {
      if (anon) {
         value = tostring(UI::QueryWidget(`id ("user_name"), `Value));
         if ((value == nil) || (value == "")) {
-	   Popup::Error("You need specify \"User Name\"");
+	   Popup::Error(_("You need specify \"User Name\""));
            UI::SetFocus(`id("user_name"));
            return false;
         }
@@ -693,12 +701,12 @@ void InitRawPartitions (string key) {
   if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil != "") {
      UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions);
      string value = tostring(find(string key, Kdump::uknown_fs_partitions, 
-       ``(find(key, Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil) != -1)));
+       ``(search(key, tostring(Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil)) != -1)));
      //Popup::Message(value);
      if ((value != nil) && (value != ""))
         UI::ChangeWidget(`id("raw_partitions"), `Value, value);
      else
-        Popup::Error("Partition doesn't exist on your disks!");
+        Popup::Error(_("Partition doesn't exist on your disks"));
   } else if (size(Kdump::uknown_fs_partitions)>0) {
      UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions); //uknown_fs_partitions);
      //UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);
@@ -719,8 +727,9 @@ void StoreRawPartitions (string key, map event) {
   boolean enabled = (boolean) UI::QueryWidget(`id("enable_raw_partitions"), `Value);
   if (enabled) {
      string value = tostring(UI::QueryWidget(`id("raw_partitions"), `Value));
-     integer position = find(value," ");
-     Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = substring(value, 0, position);
+     integer position = search(value," ");
+     if (position != nil)
+        Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = substring(value, 0, position);
      //Popup::Message(Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil);
   } else {
      Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = "";
@@ -1149,32 +1158,5 @@ void StoreEnableDeleteImages (string key, map event) {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* EOF */
 }
