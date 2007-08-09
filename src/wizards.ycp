@@ -96,27 +96,5 @@ any KdumpSequence() {
   return ret;
 }
 
-/**
- * Whole configuration of kdump but without reading and writing.
- * For use with autoinstallation.
- * @return sequence result
- */
-any KdumpAutoSequence() {
-
-    /* Initialization dialog caption */
-    string caption = _("Kdump Configuration");
-    /* Initialization dialog contents */
-    term contents = `Label(_("Initializing..."));
-
-    Wizard::CreateDialog();
-    Wizard::SetContentsButtons(caption, contents, "",
-	    Label::BackButton(), Label::NextButton());
-
-    any ret = MainSequence();
-
-    UI::CloseDialog();
-    return ret;
-}
-
 /* EOF */
 }

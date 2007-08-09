@@ -46,6 +46,7 @@ import "Bootloader";
 import "Service";
 import "Popup";
 import "Arch";
+import "Mode";
 
 /**
  * Prototypes
@@ -145,7 +146,7 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KDUMP_RUNLEVEL"               : "1",
      "KDUMP_IMMEDIATE_REBOOT"       : "yes",
      "KDUMP_TRANSFER"               : "",
-     "KDUMP_SAVEDIR"      	    : "/var/log/dump",
+     "KDUMP_SAVEDIR"      	    : "file:///var/log/dump",
      "KDUMP_KEEP_OLD_DUMPS"         : "5",
      "KDUMP_FREE_DISK_SIZE"    	    : "64",
      "KDUMP_DUMPDEV"           	    : "",
@@ -271,7 +272,7 @@ boolean ReadKdumpKernelParam () {
 
   crashkernel_param_value = result;
   if (result != "false")
-     alocated_memory = substring(result,0,find(result,"@"));
+     alocated_memory = substring(result,0,search(result,"@"));
 
   //Popup::Message(alocated_memory);
 
@@ -371,7 +372,8 @@ boolean WriteKdumpBootParameter () {
      } else if (Arch::ppc64()) {
         crash_value = crash_value + "32M";
      } else {
-        Popup::Error("Unsupported architecture, \"crashkernel\" was not added");
+        if (!Mode::commandline())
+           Popup::Error(_("Unsupported architecture, \"crashkernel\" was not added"));
         return false;
      }
            
@@ -380,7 +382,8 @@ boolean WriteKdumpBootParameter () {
         //Popup::Message(Bootloader::getDefaultSection ());
         result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", crash_value); //        
         //Popup::Message(crash_value);
-        Popup::Message("For applying changes is necessary reboot.");
+        if (!Mode::commandline())
+           Popup::Message(_("For applying changes is necessary reboot."));
 
         return result;
      }
@@ -392,7 +395,8 @@ boolean WriteKdumpBootParameter () {
     if (crashkernel_param) {
        //delete crashkernel paramter from bootloader
        result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", "false");
-       Popup::Message("For applying changes is necessary reboot.");
+       if (!Mode::commandline())
+          Popup::Message(_("For applying changes is necessary reboot."));
     }
     Service::Disable("kernel-kdump");
     return result;
@@ -484,23 +488,22 @@ global boolean Write() {
     /* Kdump read dialog caption */
     string caption = _("Saving kdump Configuration");
 
-    // TODO FIXME And set the right number of stages
+    //number of stages
     integer steps = 2;
 
     sleep(sl);
 
-    // TODO FIXME Names of real stages
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
 	    /* Progress stage 1/2 */
 	    _("Write the settings"),
 	    /* Progress stage 2/2 */
-	    _("Run SuSEconfig")
+	    _("Update boot options")
 	], [
 	    /* Progress step 1/2 */
 	    _("Writing the settings..."),
 	    /* Progress step 2/2 */
-	    _("Running SuSEconfig..."),
+	    _("Updating boot options..."),
 	    /* Progress finished */
 	    _("Finished")
 	],
@@ -514,7 +517,7 @@ global boolean Write() {
     if(!WriteKdumpSettings ()) Report::Error (_("Cannot write settings."));
     sleep(sl);
 
-    // run SuSEconfig
+    // write/delete bootloader option for kernel "crashkernel"
     if(Abort()) return false;
     Progress::NextStage ();
     /* Error message */
@@ -528,57 +531,6 @@ global boolean Write() {
 
     if(Abort()) return false;
     return true;
-}
-
-/**
- * Get all kdump settings from the first parameter
- * (For use by autoinstallation.)
- * @param settings The YCP structure to be imported.
- * @return boolean True on success
- */
-global boolean Import (map settings) {
-    // TODO FIXME: your code here (fill the above mentioned variables)...
-    return true;
-}
-
-/**
- * Dump the kdump settings to a single map
- * (For use by autoinstallation.)
- * @return map Dumped settings (later acceptable by Import ())
- */
-global map Export () {
-    // TODO FIXME: your code here (return the above mentioned variables)...
-    return $[];
-}
-
-/**
- * Create a textual summary and a list of unconfigured cards
- * @return summary of the current configuration
- */
-global list Summary() {
-    // TODO FIXME: your code here...
-    /* Configuration summary text for autoyast */
-    return [ _("Configuration summary..."), [] ];
-}
-
-/**
- * Create an overview table with all configured cards
- * @return table items
- */
-global list Overview() {
-    // TODO FIXME: your code here...
-    return [];
-}
-
-/**
- * Return packages needed to be installed and removed during
- * Autoinstallation to insure module has all needed software
- * installed.
- * @return map with 2 lists.
- */
-global map AutoPackages() {
-    // TODO FIXME: your code here...
-    return $[ "install":[], "remove":[] ];
 }
 
 /* EOF */
