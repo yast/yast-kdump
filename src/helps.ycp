@@ -95,18 +95,18 @@ map HELPS = $[
   "RawPartitions": _("<p><b>Enable Raw Saving in Initrd</b> - allows to save 
     the dump in initrd before mounting any filesystem. Then the system is rebooted, and 
     if filesystem doesn't mount user can repair it with a rescue system. On first normal 
-    boot, the dump is saved to the final dump destination. User can select raw partition 
+    boot, the dump is saved to the final dump destination. It is possible select raw partition 
     from <i>The List of Available Raw Paritions of All Disks Without Known Filesystem</i><br></p>"), 
 
   /* Custom Kdump Kernel - TextEntry 1/1*/
   "InitrdKernel":_("<p><b>Custom Kdump Kernel</b> The user can enter the custom kernel.
     The naming scheme is:<i>/boot/vmlinu[zx]-<kernel_string>[.gz]</i>
-    The user only enter <i>kernel_string</i>.<br></p>"),
+    Please enter only <i>kernel_string</i>.<br></p>"),
 
   /* Custom Kdump Kernel - TextEntry 1/1*/
   "KdumpCommandLine" : _("<p><b>Kdump Command Line</b>
     Additional arguments passed to kexec.
-    <b>Kdump Command Line Append</b> - Set this variable if user only want to _append_ 
+    <b>Kdump Command Line Append</b> - Set this variable means _append_ 
     values to the default command line string. The string gets also appended if <i>Kdump Command Line</i>
     is set. <br></p>"),
 
