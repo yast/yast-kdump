@@ -390,7 +390,7 @@ boolean WriteKdumpBootParameter () {
 
      
      //start kernel-kdump at boot
-     Service::Enable("kernel-kdump");
+     Service::Enable("kdump");
   } else {
     if (crashkernel_param) {
        //delete crashkernel paramter from bootloader
@@ -398,7 +398,7 @@ boolean WriteKdumpBootParameter () {
        if (!Mode::commandline())
           Popup::Message(_("For applying changes is necessary reboot."));
     }
-    Service::Disable("kernel-kdump");
+    Service::Disable("kdump");
     return result;
   }    
   return true;
