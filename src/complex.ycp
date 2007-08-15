@@ -38,6 +38,9 @@ import "Wizard_hw";
 import "Confirm";
 import "Kdump";
 import "Package";
+import "Arch";
+import "CommandLine";
+import "Mode";
 
 include "kdump/helps.ycp";
 
@@ -77,26 +80,49 @@ symbol ReadDialog() {
      kexec_installed = true;
   }
 
-  if (Package::Installed("kernel-kdump")) {
+  string kdump ="";
+  
+  //only ppc64 includes package kernel-kdump
+  //others include kdump-helper and kexec-tools depend on it
+  //it mean that it is not important check for available kdump-helper
+  if (Arch::ppc64()) {
+     kdump = "kernel-kdump";
+  } else {
+     kdump = "kdump-helpers";
+  }
+
+  if (Package::Installed(kdump)) {
       kdump_installed =true;
   }
   //checking if packages are available
   if ((!kexec_installed) || (!kdump_installed)) {
      if (!kexec_installed)
         kexec_available = Package::Available("kexec-tools");
-     if (!kdump_installed)
-        kdump_available = Package::Available("kernel-kdump");
+
+     if (!kdump_installed) {
+        if (Arch::ppc64())
+           kdump_available = Package::Available(kdump);
+        else
+           kdump_available = true;
+     }
 
      if ((!kexec_installed) &&(!kexec_available)) {
-       
-        Popup::Error(_("Package for kexec-tools is not available."));
+        if (!Mode::commandline()) {
+           Popup::Error(_("Package for kexec-tools is not available."));
+        } else {
+           CommandLine::Error(_("Package for kexec-tools is not available."));
+        }
         y2error("[kdump] (ReadDialog ()) Packages for kexec-tools is not available.");
         return `abort;
      }
      
-     if ((!kdump_installed) &&(!kdump_available)) {
-        Popup::Error(_("Package for kernel-kdump is not available."));
-        y2error("[kdump] (ReadDialog ()) Packages for kernel-kdump is not available.");
+     if ((!kdump_installed) && (!kdump_available)) {
+        if (!Mode::commandline()) {
+           Popup::Error(_("Package for kernel-kdump is not available."));
+        } else {
+           CommandLine::Error(_("Package for kernel-kdump is not available."));
+        }
+        y2error("[kdump] (ReadDialog ()) Packages for %1 is not available.",kdump);
         return `abort;
      }
      
@@ -104,12 +130,16 @@ symbol ReadDialog() {
      if (!kexec_installed) 
         package_list = add(package_list, "kexec-tools");
    
-     if (!kdump_installed) 
-        package_list = add(package_list, "kernel-kdump");
+     if ((!kdump_installed) && (Arch::ppc64()))
+        package_list = add(package_list, kdump);
      
      //install packages
      if (!Package::DoInstall(package_list)) {
-        Popup::Error(_("Installation failed!"));
+        if (!Mode::commandline()) {
+           Popup::Error(_("Installation failed!"));
+        } else {
+           CommandLine::Error(_("Installation failed!"));
+        }
         y2error("[kdump] Installation of package list %1 failed", package_list);
 	return `abort;
      }
