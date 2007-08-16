@@ -13,6 +13,7 @@ textdomain "kdump";
 
 import "Popup";
 import "Kdump";
+import "Service";
 
 
     // EXAMPLE FUNCTIONS
@@ -140,7 +141,7 @@ term cifs = `VBox(
   * Function initializes option "Enable/Disable kdump"
   */
 void InitEnableDisalbeKdump (string key) {
-  if (Kdump::add_crashkernel_param) {
+  if ((Kdump::add_crashkernel_param) && (Service::Enabled("kdump"))) {
      UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"enable_kdump");
 
   } else {
@@ -235,9 +236,11 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
       }
 
    }
-
+ map <string, string > debug_KDUMP_SAVE_TARGET = KDUMP_SAVE_TARGET;
+ if (debug_KDUMP_SAVE_TARGET["password"]:nil != "")
+    debug_KDUMP_SAVE_TARGET["password"] = "**********";
  y2milestone("--------------KDUMP_SAVE_TARGET---------------");
- y2milestone("%1",KDUMP_SAVE_TARGET);
+ y2milestone("%1",debug_KDUMP_SAVE_TARGET);
  y2milestone("--------------KDUMP_SAVE_TARGET---------------");
 
    return true;
@@ -295,9 +298,9 @@ string tostringKDUMP_SAVE_TARGET() {
  
  //Popup::Message(result);
 
- y2milestone("-----------------KDUMP_SAVEDIR--------------------");
- y2milestone("%1",result);
- y2milestone("-----------------KDUMP_SAVEDIR--------------------");
+ //y2milestone("-----------------KDUMP_SAVEDIR--------------------");
+ //y2milestone("%1",result);
+ //y2milestone("-----------------KDUMP_SAVEDIR--------------------");
 
  return result;
 }
@@ -745,65 +748,43 @@ void StoreRawPartitions (string key, map event) {
 
 /**
   * Function initializes option "Kdump Command Line"
-  * or "Kdump Command Line Append"
+  * 
   */
 
-void InitSwitchKdumpComLine (string key) {
+void InitKdumpCommandLine(string key) {  
   string value = "";
-  //Popup::Message("InitSwitchKdumpComLine");
-  if (!set_kdump_append) {
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line");
-     UI::ChangeWidget(`id("enable_append"), `Value, false);
-     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"]:nil;
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
-  } else {
-     UI::ChangeWidget(`id("enable_append"), `Value, true);
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line Append");
-     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"]:nil;
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
-  }  
+  value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"]:nil;
+  UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
+
 }
-
-
-
-/**
-  * Function handles switching between "Kdump Command Line"
-  * and "Kdump Command Line Append"
-  * also saves values for both options from config file
-  */
-symbol HandleSwitchKdumpComLine (string key, map event) {
-  boolean checkbox = (boolean) UI::QueryWidget(`id("enable_append"), `Value);
-  string value = "";
-  //Popup::Message("HandleSwitchKdumpComLine");
-  if ((checkbox) && (!set_kdump_append)) {
-     set_kdump_append = true;
-     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line Append");
-     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"]:nil;
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
-  } else if ((!checkbox)&&(set_kdump_append)){
-     set_kdump_append = false;
-     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Label, "Kdump Co&mmand Line");
-     value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"]:nil;
-     UI::ChangeWidget(`id("KdumpCommandLine"), `Value, ((value == nil) ? "":value));
-  }
-
-  return nil;
-}
-
 
 /**
   * Function stores option "Kdump Command Line"
-  * or "Kdump Command Line Append"
+  * 
   */
-void StoreSwitchKdumpComLine (string key, map event) {
-  //Popup::Message("StoreSwitchKdumpComLine");
-  if (!set_kdump_append) {    
-     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
-  } else {
-     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
-  }
+void StoreKdumpCommandLine (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE"] = tostring(UI::QueryWidget(`id("KdumpCommandLine"), `Value));
+}
+
+
+/**
+  * Function initializes option "Kdump Command Line Append"
+  * 
+  */
+
+void InitKdumpCommandLineAppend(string key) {  
+  string value = "";
+  value = Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"]:nil;
+  UI::ChangeWidget(`id("KdumpCommandLineAppend"), `Value, ((value == nil) ? "":value));
+
+}
+
+/**
+  * Function stores option "Kdump Command Line Append"
+  * 
+  */
+void StoreKdumpCommandLineAppend (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = tostring(UI::QueryWidget(`id("KdumpCommandLineAppend"), `Value));
 }
 
 
@@ -1013,7 +994,7 @@ symbol HandleDumpLevel(string key, map event) {
 void InitKdumpMemory (string key) {
   if (Kdump::total_memory > 0) {
     UI::ChangeWidget(`id("total_memory"), `Value, tostring(Kdump::total_memory));
-    UI::ChangeWidget(`id("memory_buffer"), `Value, tointeger(Kdump::alocated_memory));
+    UI::ChangeWidget(`id("memory_buffer"), `Value, tointeger(Kdump::alocated_memory));    
     UI::ChangeWidget(`id("usable_memory"), `Value, 
       tostring((Kdump::total_memory - (integer) UI::QueryWidget(`id("memory_buffer"), `Value))));
   } else {
