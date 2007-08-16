@@ -210,7 +210,7 @@ map<string,map<string,any> > wid_handling = $[
      "init"		: InitKdumpCommandLineAppend,
      //"handle"		: 
      "store"		: StoreKdumpCommandLineAppend,
-     "help"		: HelpKdump("KdumpCommandLine"),
+     "help"		: HelpKdump("KdumpCommandLineAppend"),
   ],
 
 
