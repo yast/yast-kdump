@@ -88,7 +88,13 @@ global list <string> uknown_fs_partitions =[];
 global integer total_memory =0;
 
 /**
- * Boolean option indicates kernel parameter
+ * Number of cpus
+ * 
+ * integer
+ */
+integer number_of_cpus = 1;
+
+/** Boolean option indicates kernel parameter
  * "crashkernel"
  *
  * boolean true if kernel parameter is set
@@ -118,7 +124,7 @@ global boolean add_crashkernel_param = false;
  *
  * string value number of alocate memory
  */
-global string alocated_memory = "128";
+global string alocated_memory = "0";
 
 /**
  * Write only, used during autoinstallation.
@@ -280,9 +286,38 @@ boolean ReadKdumpKernelParam () {
 }
 
 /**
+ * Read available cpu
+ *
+ * 
+ *  @return boolean successfull
+ */
+
+boolean ReadAvailableCPU () {
+
+  list <map> output =  (list<map>)SCR::Read(.probe.cpu);
+
+  number_of_cpus = size(output);
+  y2milestone("[kdump] (ReadAvailableCPU) SCR::Read(.probe.cpu): %1", output);
+  y2milestone("[kdump] number of CPUs: %1", number_of_cpus);
+  //alocated_memory = "0";
+  if (alocated_memory == "0") {     
+     if ((number_of_cpus > 16) || ((total_memory/1024) > 16))
+        alocated_memory = "256";
+     else if ((number_of_cpus > 4) || ((total_memory/1024) > 4))
+        alocated_memory = "128";
+     else
+        alocated_memory = "64";
+     y2milestone("[kdump] allocated memory if not set in \"crashkernel\" param: %1", alocated_memory);
+  }
+
+  
+  return true;
+}
+
+/**
  * Read available memory
  *
- * read kernel parameter "crashkernel"
+ * 
  *  @return boolean successfull
  */
 
@@ -307,9 +342,14 @@ boolean ReadAvailableMemory () {
   //resor = (map)range;
   total_memory = tointeger(temp[0]:nil)/1048576;
   y2milestone("[kdump] (ReadAvailableMemory) total phys. memory [MB]: %1", tostring(total_memory));
-  
+  ReadAvailableCPU ();
   return true;
 }
+
+
+
+
+
 /**
  * Read current kdump configuration
  *
@@ -321,8 +361,12 @@ boolean ReadKdumpSettings () {
 	string val = (string) SCR::Read(add(.sysconfig.kdump, key));
         if (val != nil) KDUMP_SETTINGS[key] = val;
     });
+
+    map <string, string > debug_KDUMP_SETTINGS = KDUMP_SETTINGS;
+
+    debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "";
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
-    y2milestone("kdump configuration has been read: %1", KDUMP_SETTINGS);
+    y2milestone("kdump configuration has been read without value \"KDUMP_SAVEDIR\": %1", debug_KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
 
     
@@ -338,9 +382,10 @@ boolean ReadKdumpSettings () {
  *  @return boolean successfull
  */
 boolean WriteKdumpSettings () {
-
+    map <string, string > debug_KDUMP_SETTINGS = KDUMP_SETTINGS;
+    debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "";
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
-    y2milestone("Writing kdump configuration: %1", KDUMP_SETTINGS);
+    y2milestone("Writing kdump configuration without value \"KDUMP_SAVEDIR\": %1", debug_KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
 
 
@@ -385,6 +430,7 @@ boolean WriteKdumpBootParameter () {
         if (!Mode::commandline())
            Popup::Message(_("For applying changes is necessary reboot."));
 
+        Service::Enable("kdump");
         return result;
      }
 

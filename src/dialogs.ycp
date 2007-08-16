@@ -89,7 +89,7 @@ map<string,map<string,any> > wid_handling = $[
 	      `Left(`Label(`id("usable_memory"),"0123456789")),
 	      `HStretch ()
            )),
-	   `Left(`IntField(`id("memory_buffer"), `opt(`notify), _("Kdump Memor&y [MB]"),128,1048576,128))
+	   `Left(`IntField(`id("memory_buffer"), `opt(`notify), _("Kdump Memor&y [MB]"),32,1048576,128))
      )),
      "init"		: InitKdumpMemory,
      "handle"		: HandleKdumpMemory,
@@ -197,30 +197,22 @@ map<string,map<string,any> > wid_handling = $[
      //TRANSLATORS: TextEntry Label
      "label" 		: _("Kdump Co&mmand Line"),
      "widget" 		: `textentry,
-     //"init"		: init is hadled by "SwitchKdumpComLine"
+     "init"		: InitKdumpCommandLine,
      //"handle"		: 
-     //"store"		: store is hadled by "SwitchKdumpComLine"
+     "store"		: StoreKdumpCommandLine,
      "help"		: HelpKdump("KdumpCommandLine"),
   ],
 
-
-  "SwitchKdumpComLine"	: $[
-
-     "widget"		: `custom,
-     "custom_widget"	: `VBox(
-           `RadioButtonGroup(`id("switch_kdum_comm_line"),
-             `HBox(`HSpacing(1),`VBox(
-	      `Left(`Label("")),
-	      `Left(`CheckBox(`id("enable_append"), `opt(`notify), "A&ppend Kdump Commandline"))
-             ))
-           )
-     ),
-     "init"		: InitSwitchKdumpComLine,
-     "handle"		: HandleSwitchKdumpComLine,
-     "store"		: StoreSwitchKdumpComLine,
-     "help"		: HelpKdump("SwitchKdumpComLine"),
-
+  "KdumpCommandLineAppend" 	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Kdump Command &Line Append"),
+     "widget" 		: `textentry,
+     "init"		: InitKdumpCommandLineAppend,
+     //"handle"		: 
+     "store"		: StoreKdumpCommandLineAppend,
+     "help"		: HelpKdump("KdumpCommandLine"),
   ],
+
 
   "RunLevel" 		: $[
      //TRANSLATORS: ComboBox Label
@@ -332,13 +324,8 @@ map<string, map<string,any> > tabs = $[
         ))),
 	`VSpacing(1),
 	`Frame ( _("Command Line"),`HBox(`HSpacing(1),`VBox(
-          //`Left("KernelCommandLine"),
-	  `Left(`HBox(
-            `Left("KdumpCommandLine"),
-	    `Left("SwitchKdumpComLine"),
-
-	    `HStretch ()
-	  ))         
+          `Left("KdumpCommandLine"),
+	  `Left("KdumpCommandLineAppend")      
         ))),
         `VSpacing(1),
         `Frame ( _("The Run-level to Boot"),`HBox(`HSpacing(1),`VBox(
@@ -366,8 +353,8 @@ map<string, map<string,any> > tabs = $[
      "caption"		: _("Kdump Expert Settings"),
      "tree_item_label"	: _("Expert Settings"),
      "widget_names"	: [
-        "DisBackButton","KdumpCommandLine",
-        "SwitchKdumpComLine", "RunLevel",
+        "DisBackButton", "KdumpCommandLine",
+        "KdumpCommandLineAppend", "RunLevel",
         "EnableDeleteImages", "NumberDumps", 
         "InitrdKernel", "SelectKernel", "EnableReboot"
      ]    
