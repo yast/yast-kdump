@@ -103,16 +103,15 @@ map HELPS = $[
     The naming scheme is:<i>/boot/vmlinu[zx]-<kernel_string>[.gz]</i>
     Please enter only <i>kernel_string</i>.<br></p>"),
 
-  /* Custom Kdump Kernel - TextEntry 1/1*/
+  /* Kdump Command Line - TextEntry 1/1*/
   "KdumpCommandLine" : _("<p><b>Kdump Command Line</b>
-    Additional arguments passed to kexec.
-    <b>Kdump Command Line Append</b> - Set this variable means _append_ 
-    values to the default command line string. The string gets also appended if <i>Kdump Command Line</i>
-    is set. <br></p>"),
+    Additional arguments passed to kexec. <br></p>"),
 
-  /* Append Kdump Commandline - CheckBox 1/1*/
-  "SwitchKdumpComLine" : _("<p><b>Append Kdump Commandline</b> - Switching between 
-    <i>Kdump Command Line</i> and <i>Kdump Command Line Append</i><br></p>"),
+ /* Kdump Command Line Append - TextEntry 1/1*/
+  "KdumpCommandLineAppend" : _("<p><b>Kdump Command Line Append</b>
+    Set this option means _append_  values to the default command line string. 
+    The string gets also appended if <i>Kdump Command Line</i>
+    is set. <br></p>"),
 
   /* The Run-level to Boot the Kdump Kernel - ComboBox 1/1*/
   "RunLevel" : _("<p><b>The Run-level to Boot the Kdump Kernel</b> - 
