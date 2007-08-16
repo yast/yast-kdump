@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Aug 16 16:58:01 CEST 2007 - juhliarik@suse.cz
+
+- added patch for enable kdump, delete "noarch" from spec file
+- deleted switching between Command Line and Command Line Append
+- added patch for default allocate memory
+- V 2.15.4
+
+-------------------------------------------------------------------
 Wed Aug 15 11:46:44 CEST 2007 - juhliarik@suse.cz
 
 - added patch for problem with installing package kernel-kdump
