@@ -41,7 +41,7 @@ import "Package";
 import "Arch";
 import "CommandLine";
 import "Mode";
-import "XMessages";
+import "Message";
 import "PackageSystem";
 
 include "kdump/helps.ycp";
@@ -137,20 +137,16 @@ symbol ReadDialog() {
         package_list = add(package_list, kdump);
      
      //install packages       
-     if (! PackageSystem::CheckAndInstallPackagesInteractive(package_list)) {
+     if (! PackageSystem::CheckAndInstallPackages(package_list)) {
 
        
         if (!Mode::commandline()) {
-           Popup::Error(_("Installation failed!"));
+           Popup::Error(Message::CannotContinueWithoutPackagesInstalled());
         } else {
-           CommandLine::Error(_("Installation failed!"));
+           CommandLine::Error(Message::CannotContinueWithoutPackagesInstalled());
         }
-        y2error("[kdump] Installation of package list %1 failed", package_list);
+        y2error("[kdump] Installation of package list %1 failed or aborted", package_list);
 	return `abort;
-     }
-     if (!Package::Installed("kexec-tools")) {
-        Popup::Error(_("Installation failed!"));
-        return `abort;
      }
 
   }
