@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 17 12:42:44 CEST 2007 - juhliarik@suse.cz
+
+- added new interactive installation packages
+- V 2.15.5
+
+-------------------------------------------------------------------
 Thu Aug 16 16:58:01 CEST 2007 - juhliarik@suse.cz
 
 - added patch for enable kdump, delete "noarch" from spec file
