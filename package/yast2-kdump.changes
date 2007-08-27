@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Aug 27 16:44:48 CEST 2007 - juhliarik@suse.cz
+
+- added correction for problems:
+  bug#301357 - yast2-kdump module always asks for reboot
+  bug#301359 - yast2-kdump: Ncurses UI contains no space between text fields 
+  bug#301361 - yast2-kdump: Username not saved for FTP
+  bug#301372 - yast2-kdump: Wrong default port for SSH
+  bug#301399 - yast2-kdump: Install makedumpfile if necessary
+- V 2.15.6
+
+-------------------------------------------------------------------
 Fri Aug 17 12:42:44 CEST 2007 - juhliarik@suse.cz
 
 - added new interactive installation packages
