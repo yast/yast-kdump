@@ -278,7 +278,7 @@ boolean ReadKdumpKernelParam () {
 
   crashkernel_param_value = result;
   if (result != "false")
-     alocated_memory = substring(result,0,search(result,"@"));
+     alocated_memory = substring(result,0,search(result,"M"));
 
   //Popup::Message(alocated_memory);
 
@@ -409,7 +409,7 @@ boolean WriteKdumpBootParameter () {
   boolean result = true;
   if (add_crashkernel_param) {
      string crash_value = "";
-     crash_value = alocated_memory+"@";
+     crash_value = alocated_memory+"M@";
      if ((Arch::i386()) ||(Arch::x86_64())) {
         crash_value = crash_value + "16M";
      } else if (Arch::ia64()) {
@@ -422,11 +422,12 @@ boolean WriteKdumpBootParameter () {
         return false;
      }
            
-     if ((!crashkernel_param) || ((crash_value != crashkernel_param_value) && (add_crashkernel_param))) {
+     if ((!crashkernel_param) || (crash_value != crashkernel_param_value)) {
 
         //Popup::Message(Bootloader::getDefaultSection ());
         result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", crash_value); //        
         //Popup::Message(crash_value);
+        y2milestone("[kdump] (WriteKdumpBootParameter) adding chrashkernel option with value : %1", crash_value);
         if (!Mode::commandline())
            Popup::Message(_("For applying changes is necessary reboot."));
 
@@ -437,6 +438,9 @@ boolean WriteKdumpBootParameter () {
      
      //start kernel-kdump at boot
      Service::Enable("kdump");
+
+     if (Service::Status("kdump") == 0)
+        Service::Restart("kdump");
   } else {
     if (crashkernel_param) {
        //delete crashkernel paramter from bootloader
@@ -445,6 +449,8 @@ boolean WriteKdumpBootParameter () {
           Popup::Message(_("For applying changes is necessary reboot."));
     }
     Service::Disable("kdump");
+    if (Service::Status("kdump") == 0)
+       Service::Stop("kdump");
     return result;
   }    
   return true;

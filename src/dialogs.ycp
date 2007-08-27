@@ -115,6 +115,8 @@ map<string,map<string,any> > wid_handling = $[
      ))),
      "init"		: InitDumpLevel,
      "handle"		: HandleDumpLevel,
+     "validate_type"    : `function,
+     "validate_function": ValidDumpLevel,    
      "store"		: StoreDumpLevel,
      "help"		: HelpKdump("DumpLevel"),
   ],
@@ -129,7 +131,8 @@ map<string,map<string,any> > wid_handling = $[
      ],
      "orientation" 	: `horizontal,
      "init"		: InitDumpFormat,
-     //"handle"		: 
+     "validate_type"    : `function,
+     "validate_function": ValidDumpFormat,    
      "store"		: StoreDumpFormat,
      "help"		: HelpKdump("DumpFormat"),
   ],
@@ -163,14 +166,15 @@ map<string,map<string,any> > wid_handling = $[
 
   ], 
 
- "RawPartitions" 		: $[
+ "RawPartitions" 	: $[
      //TRANSLATORS: ComboBox Label
      "widget" 		: `custom,
      "custom_widget"	: `VBox(
-	`CheckBoxFrame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"), true, 
+	`CheckBoxFrame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"), false, 
+        //`Frame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"),
           `HBox(`HSpacing(1),`VBox(
             `Left(`ComboBox(`id("raw_partitions"), 
-                    "The List of A&vailable Raw Paritions of All Disks Without Known Filesystem"))
+                    _("The List of A&vailable Raw Paritions of All Disks Without Known Filesystem")))
 	  ))
         )
      ),
