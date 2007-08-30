@@ -47,6 +47,7 @@ import "Service";
 import "Popup";
 import "Arch";
 import "Mode";
+import "BootCommon";
 
 /**
  * Prototypes
@@ -125,6 +126,18 @@ global boolean add_crashkernel_param = false;
  * string value number of alocate memory
  */
 global string alocated_memory = "0";
+
+
+
+/**
+ * String option identify which boot section was used
+ * during boot process
+ *
+ * string value actual boot section
+ */
+
+global string actual_boot_section = "";
+
 
 /**
  * Write only, used during autoinstallation.
@@ -258,6 +271,141 @@ boolean ReadDiskPartitions () {
 
 
 /**
+ * Compare boot section options with 
+ *
+ * options from running kernel
+ *  @return integer return number of differences
+ */
+
+integer CmpKernelAndBootOptions (list <string> kernel_option, list <string> boot_options) {
+  integer result = size(kernel_option);
+  integer dif_size = size(boot_options) - size(kernel_option);
+  if (dif_size < 0)
+     dif_size = dif_size*(-1);
+  foreach (string option, kernel_option, {
+    if (contains(boot_options, option))
+       result = result -1;
+  });
+
+  result = result + dif_size;
+  return result;
+}
+
+
+/**
+ * Function add into option from boot 
+ * section root device and vgamode
+ * 
+ *  @return list <string> boot section + root and vgamode
+ */
+
+
+list <string> AddDeviceVgamode (map section) {
+  string tmp_boot_section = tostring(section["append"]:nil);
+  //adding root device
+  tmp_boot_section = tmp_boot_section + " root=" + tostring(section["root"]:nil);
+  tmp_boot_section = tmp_boot_section + " vga=" + tostring(section["vgamode"]:nil);
+  
+  return splitstring(tmp_boot_section," ");
+
+}
+
+
+/**
+ * Read actual boot section
+ *
+ * read kernal version and boot options
+ *  @return string actual boot section
+ */
+
+
+string GetActualBootSection () {
+  //read option from bootlaoder
+
+  string result = "";
+  string kernel_boot_options = "";
+  string kernel_version = "";
+  integer min_dif_size = 1000;
+ 
+  //reading bootloader settings
+  boolean old_progress = Progress::set (false);
+  Bootloader::Read();
+  Progress::set (old_progress);
+
+  //reading kernel options
+  string command = "cat /proc/cmdline";
+  map options = (map)SCR::Execute (.target.bash_output, command);
+  y2milestone("[kdump] (GetActualBootSection) command read boot options from kernel:  %1  output: %2",command, options);  
+  
+  if (options["exit"]:nil !=  0)
+     return "";
+
+  kernel_boot_options = tostring(options["stdout"]:nil);
+  //Popup::Message(kernel_boot_options);
+
+  //reading version of kernel
+  command = "uname -r";
+  options = (map)SCR::Execute (.target.bash_output, command);
+  y2milestone("[kdump] (GetActualBootSection) command read kernel version:  %1  output: %2",command, options);  
+  
+  if (options["exit"]:nil !=  0)
+     return "";
+
+  kernel_version = tostring(options["stdout"]:nil);
+
+  //Popup::Message(kernel_version);
+  
+  y2milestone("[kdump] (GetActualBootSection) kerne version: %1",kernel_version);
+
+
+  //boot sections from bootloader
+  list<map<string,any> > sects = BootCommon::sections;
+
+  //deleting non linux sections
+  sects = filter (map<string,any> s, sects, ``(
+                ! haskey (s, "chainloader")));
+  
+  y2milestone("[kdump] (GetActualBootSection) BootCommon::sections only linux sections:  %1",sects);
+
+  //find probably boot section, what was used during start-up
+  foreach(map section, sects, {
+
+    string image = tostring(section["image"]:nil);
+
+    if (image != nil) {
+       //Popup::Message(image);
+       command = "/sbin/get_kernel_version "+image;
+       options = (map)SCR::Execute (.target.bash_output, command);
+
+       if (options["exit"]:nil ==  0) {
+          string ret = tostring(options["stdout"]:nil);
+
+          if (ret == kernel_version) {
+             //Popup::Message("hura!");
+             integer value = CmpKernelAndBootOptions(splitstring(kernel_boot_options," "),AddDeviceVgamode(section));
+             if (value < min_dif_size) {
+                min_dif_size = value;
+                result = tostring(section["name"]:nil);		
+             }
+             //Popup::Message(tostring(value));
+          } //end if (ret == kernel_version)
+       } // end if (options["exit"]:nil ==  0)     
+    } //end of if (image != nil)           
+  }); //end of foreach(map section, sects, {
+
+  
+  //Popup::Message(result);
+
+  y2milestone("[kdump] (GetActualBootSection) selected boot section :  %1",result);
+  return result;
+
+}
+
+
+
+
+
+/**
  * Read current kdump configuration
  *
  * read kernel parameter "crashkernel"
@@ -266,7 +414,16 @@ boolean ReadDiskPartitions () {
 
 boolean ReadKdumpKernelParam () {
 
-  string result = Bootloader::getKernelParam (Bootloader::getDefaultSection (), "crashkernel");
+  //boolean old_progress = Progress::set (false);
+  //Bootloader::Read();
+  //Progress::set (old_progress);
+  actual_boot_section =  GetActualBootSection ();
+
+  if (actual_boot_section == "")
+     actual_boot_section = Bootloader::getDefaultSection ();
+
+  string result = Bootloader::getKernelParam (actual_boot_section, "crashkernel");
+
   //Popup::Message(result);
   if (result == "false") {
      crashkernel_param = false;
@@ -407,6 +564,7 @@ boolean WriteKdumpSettings () {
 boolean WriteKdumpBootParameter () {
   
   boolean result = true;
+  boolean old_progress = false;
   if (add_crashkernel_param) {
      string crash_value = "";
      crash_value = alocated_memory+"M@";
@@ -425,7 +583,10 @@ boolean WriteKdumpBootParameter () {
      if ((!crashkernel_param) || (crash_value != crashkernel_param_value)) {
 
         //Popup::Message(Bootloader::getDefaultSection ());
-        result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", crash_value); //        
+        result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", crash_value);
+        old_progress = Progress::set (false);
+        Bootloader::Write();
+        Progress::set (old_progress);
         //Popup::Message(crash_value);
         y2milestone("[kdump] (WriteKdumpBootParameter) adding chrashkernel option with value : %1", crash_value);
         if (!Mode::commandline())
@@ -444,7 +605,10 @@ boolean WriteKdumpBootParameter () {
   } else {
     if (crashkernel_param) {
        //delete crashkernel paramter from bootloader
-       result = Bootloader::setKernelParam (Bootloader::getDefaultSection (), "crashkernel", "false");
+       result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", "false");
+       old_progress = Progress::set (false);
+       Bootloader::Write();
+       Progress::set (old_progress);
        if (!Mode::commandline())
           Popup::Message(_("For applying changes is necessary reboot."));
     }
@@ -467,7 +631,7 @@ global boolean Read() {
     /* Kdump read dialog caption */
     string caption = _("Initializing kdump Configuration");
     integer steps = 4;
-    sleep(sl);
+    //sleep(sl);
 
     Progress::New( caption, " ", steps, [
 	    /* Progress stage 1/4 */
@@ -492,7 +656,7 @@ global boolean Read() {
 	""
     );
 
-    sleep(sl);
+    //sleep(sl);
     // read database
     if(Abort()) return false;
     Progress::NextStage();
@@ -524,7 +688,7 @@ global boolean Read() {
     if(Abort()) return false;
     /* Progress finished */
     Progress::NextStage();
-    sleep(sl);
+    //sleep(sl);
 
     if(Abort()) return false;
     modified = false;
