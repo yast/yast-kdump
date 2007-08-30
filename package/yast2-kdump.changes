@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Aug 30 16:35:32 CEST 2007 - juhliarik@suse.cz
+
+- added correction for:
+  bug#300124 - Adding boot options via yast bootloader doesn't work
+  bug#305905 - Unneeded sleeps during KDump reading 
+- added recommends for makedumpfile
+- V 2.15.7
+
+-------------------------------------------------------------------
 Mon Aug 27 16:44:48 CEST 2007 - juhliarik@suse.cz
 
 - added correction for problems:
