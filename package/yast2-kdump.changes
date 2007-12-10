@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Dec 10 16:51:12 CET 2007 - juhliarik@suse.cz
+
+- backporting to sle10-sp2
+- added correction for bug# 347241 - kdump package needs to be installed in yast2-kdump module
+- V 2.13.8 
+
+-------------------------------------------------------------------
 Thu Aug 30 16:35:32 CEST 2007 - juhliarik@suse.cz
 
 - added correction for:
