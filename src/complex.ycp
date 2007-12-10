@@ -87,11 +87,16 @@ symbol ReadDialog() {
   //only ppc64 includes package kernel-kdump
   //others include kdump-helper and kexec-tools depend on it
   //it mean that it is not important check for available kdump-helper
-  if (Arch::ppc64()) {
-     kdump = "kernel-kdump";
-  } else {
-     kdump = "kdump-helpers";
-  }
+
+  //if (Arch::ppc64()) {
+  //   kdump = "kernel-kdump";
+  //} else {
+  //   kdump = "kdump-helpers";
+  //}
+
+  //the patch for openSUSE 11 and for SP2, kdump-helpers was rename to kdump package
+  //it valid for all architectures bug#347241
+  kdump = "kdump";
 
   if (Package::Installed(kdump)) {
       kdump_installed =true;
