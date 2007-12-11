@@ -1,8 +1,17 @@
 -------------------------------------------------------------------
+Tue Dec 11 10:39:07 CET 2007 - juhliarik@suse.cz
+
+- added new bugfix for bug# 347241 - kdump package needs to be 
+  installed in yast2-kdump module
+- corrections for problem with installing kdump package 
+- V 2.13.9
+
+-------------------------------------------------------------------
 Mon Dec 10 16:51:12 CET 2007 - juhliarik@suse.cz
 
 - backporting to sle10-sp2
-- added correction for bug# 347241 - kdump package needs to be installed in yast2-kdump module
+- added correction for bug# 347241 - kdump package needs to be 
+  installed in yast2-kdump module
 - V 2.13.8 
 
 -------------------------------------------------------------------
