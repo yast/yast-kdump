@@ -88,13 +88,14 @@ symbol ReadDialog() {
   //others include kdump-helper and kexec-tools depend on it
   //it mean that it is not important check for available kdump-helper
 
+  
   //if (Arch::ppc64()) {
   //   kdump = "kernel-kdump";
   //} else {
   //   kdump = "kdump-helpers";
   //}
 
-  //the patch for openSUSE 11 and for SP2, kdump-helpers was rename to kdump package
+  //the patch for openSUSE 11, kdump-helpers was rename to kdump package
   //it valid for all architectures bug#347241
   kdump = "kdump";
 
@@ -108,13 +109,14 @@ symbol ReadDialog() {
         kexec_available = Package::Available("kexec-tools");
 
      if (!kdump_installed) {
-        if (Arch::ppc64())
-           kdump_available = Package::Available(kdump);
-        else
-           kdump_available = true;
+        //if (Arch::ppc64())
+        //   kdump_available = Package::Available(kdump);
+        //else
+        //   kdump_available = true;
+        kdump_available = Package::Available(kdump);
      }
 
-     if ((!kexec_installed) &&(!kexec_available)) {
+     if ((!kexec_installed) && (!kexec_available)) {
         if (!Mode::commandline()) {
            Popup::Error(_("Package for kexec-tools is not available."));
         } else {
@@ -126,9 +128,9 @@ symbol ReadDialog() {
      
      if ((!kdump_installed) && (!kdump_available)) {
         if (!Mode::commandline()) {
-           Popup::Error(_("Package for kernel-kdump is not available."));
+           Popup::Error(_("Package for kdump is not available."));
         } else {
-           CommandLine::Error(_("Package for kernel-kdump is not available."));
+           CommandLine::Error(_("Package for kdump is not available."));
         }
         y2error("[kdump] (ReadDialog ()) Packages for %1 is not available.",kdump);
         return `abort;
@@ -138,7 +140,7 @@ symbol ReadDialog() {
      if (!kexec_installed) 
         package_list = add(package_list, "kexec-tools");
    
-     if ((!kdump_installed) && (Arch::ppc64()))
+     if (!kdump_installed)
         package_list = add(package_list, kdump);
      
      //install packages       
