@@ -80,12 +80,12 @@ map<string,map<string,any> > wid_handling = $[
      "widget" 		: `custom,
      "custom_widget"	: `HSquash(`VBox(
            `Left(`HBox(
-	      `Left(`Label("Total System Memory [MB]:")),
+	      `Left(`Label(_("Total System Memory [MB]:"))),
 	      `Left(`Label(`id("total_memory"),"0123456789")),
 	      `HStretch ()
            )),
            `Left(`HBox(
-	      `Left(`Label("Usable Memory [MB]:")),
+	      `Left(`Label(_("Usable Memory [MB]:"))),
 	      `Left(`Label(`id("usable_memory"),"0123456789")),
 	      `HStretch ()
            )),
@@ -103,13 +103,13 @@ map<string,map<string,any> > wid_handling = $[
      "custom_widget"	: `VBox(
            `Frame ( _("Include in Dumping"), `VBox(
            `Left(`HBox(`HSpacing(1),`VBox(
-	      `Left(`CheckBox(`id("zero_page"),  "&Pages Filled with Zero")),
-	      `Left(`CheckBox(`id("cache_page"), `opt(`notify), "Cach&e Pages")),
+	      `Left(`CheckBox(`id("zero_page"),  _("&Pages Filled with Zero"))),
+	      `Left(`CheckBox(`id("cache_page"), `opt(`notify), _("Cach&e Pages"))),
               `HBox(`HSpacing(2),`VBox(
-	        `Left(`CheckBox(`id("cache_private"), `opt(`notify), "Cache Priva&te Pages"))
+	        `Left(`CheckBox(`id("cache_private"), `opt(`notify), _("Cache Priva&te Pages")))
                )),
-	      `Left(`CheckBox(`id("user_data"), "&User Data Pages")),
-	      `Left(`CheckBox(`id("free_page"), "&Free Pages"))
+	      `Left(`CheckBox(`id("user_data"), _("&User Data Pages"))),
+	      `Left(`CheckBox(`id("free_page"), _("&Free Pages")))
 	      //`VStretch ()
            )))
      ))),
@@ -174,7 +174,7 @@ map<string,map<string,any> > wid_handling = $[
         //`Frame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"),
           `HBox(`HSpacing(1),`VBox(
             `Left(`ComboBox(`id("raw_partitions"), 
-                    _("The List of A&vailable Raw Paritions of All Disks Without Known Filesystem")))
+                    _("The List of A&vailable Raw Partitions of All Disks Without Known Filesystem")))
 	  ))
         )
      ),
