@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan  9 17:44:01 CET 2008 - juhliarik@suse.cz
+
+- added patch for text lines bug #352266 #350248
+- V 2.16.9 
+
+-------------------------------------------------------------------
 Tue Dec 11 10:17:01 CET 2007 - juhliarik@suse.cz
 
 - added patch for bug# 347241 - kdump package needs to be 
