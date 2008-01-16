@@ -220,7 +220,7 @@ map<string,map<string,any> > wid_handling = $[
 
   "RunLevel" 		: $[
      //TRANSLATORS: ComboBox Label
-     "label" 		: _("&The Run-level to Boot the Kdump Kernel"),
+     "label" 		: _("&The Runlevel to Boot the Kdump Kernel"),
      "widget" 		: `combobox,
      "items" 		: [
         [ "run_level1", _("1 - Single User Mode") ],
@@ -332,7 +332,7 @@ map<string, map<string,any> > tabs = $[
 	  `Left("KdumpCommandLineAppend")      
         ))),
         `VSpacing(1),
-        `Frame ( _("The Run-level to Boot"),`HBox(`HSpacing(1),`VBox(
+        `Frame ( _("The Runlevel to Boot"),`HBox(`HSpacing(1),`VBox(
           `Left(`HBox(
             `Left("RunLevel"), 
 	    `VBox(
