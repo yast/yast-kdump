@@ -590,7 +590,7 @@ boolean WriteKdumpBootParameter () {
         //Popup::Message(crash_value);
         y2milestone("[kdump] (WriteKdumpBootParameter) adding chrashkernel option with value : %1", crash_value);
         if (!Mode::commandline())
-           Popup::Message(_("For applying changes is necessary reboot."));
+           Popup::Message(_("To apply changes a reboot is necessary."));
 
         Service::Enable("kdump");
         return result;
@@ -610,7 +610,7 @@ boolean WriteKdumpBootParameter () {
        Bootloader::Write();
        Progress::set (old_progress);
        if (!Mode::commandline())
-          Popup::Message(_("For applying changes is necessary reboot."));
+          Popup::Message(_("To apply changes a reboot is necessary."));
     }
     Service::Disable("kdump");
     if (Service::Status("kdump") == 0)
@@ -635,13 +635,13 @@ global boolean Read() {
 
     Progress::New( caption, " ", steps, [
 	    /* Progress stage 1/4 */
-	    _("Read the config file"),
+	    _("Reading the config file..."),
 	    /* Progress stage 2/4 */
-	    _("Read disk partitions"),
+	    _("Reading disk partitions..."),
             /* Progress stage 3/4 */
-            _("Read kernel boot options"),
+            _("Reading kernel boot options..."),
             /* Progress stage 4/4 */
-            _("Read available memory"),
+            _("Reading available memory..."),
  
 	], [
 	    /* Progress step 1/4 */
@@ -675,14 +675,14 @@ global boolean Read() {
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
-    if(!ReadKdumpKernelParam ()) Report::Error(_("Cannot read kernel boot options"));
+    if(!ReadKdumpKernelParam ()) Report::Error(_("Cannot read kernel boot options."));
     //sleep(sl);
 
     // read another database
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
-    if(!ReadAvailableMemory ()) Report::Error(_("Cannot read available memory"));
+    if(!ReadAvailableMemory ()) Report::Error(_("Cannot read available memory."));
     //sleep(sl);
 
     if(Abort()) return false;

@@ -66,11 +66,11 @@ boolean cmdKdumpShow (map options) {
      //TRANSLATORS: CommandLine printed text
      CommandLine::Print(_("Kdump is enabled (boot option \"crashkernel\" is added)"));
      //TRANSLATORS: CommandLine printed text
-     CommandLine::Print(sformat(_("Alocate memory (MB) for kdump is: %1"), Kdump::alocated_memory)); 
+     CommandLine::Print(sformat(_("Allocate memory (MB) for kdump is: %1"), Kdump::alocated_memory)); 
      
   } else {
      //TRANSLATORS: CommandLine printed text
-     CommandLine::Print(_("Kdump is disable"));
+     CommandLine::Print(_("Kdump is disabled"));
   }
   CommandLine::Print("");
   //TRANSLATORS: CommandLine printed text
@@ -225,18 +225,18 @@ boolean cmdKdumpStartup (map options) {
      Kdump::add_crashkernel_param = true;
      Kdump::alocated_memory = tostring(options["alloc_mem"]:nil);
      //TRANSLATORS: CommandLine printed text
-     CommandLine::Print(_("For applying changes is necessary reboot."));
+     CommandLine::Print(_("To apply changes a reboot is necessary."));
      return true;
 
   } else if (options["disable"]:nil!=nil) {
      Kdump::add_crashkernel_param = false;
      //TRANSLATORS: CommandLine printed text
-     CommandLine::Print(_("For applying changes is necessary reboot."));
+     CommandLine::Print(_("To apply changes a reboot is necessary."));
      return true;
 
   } else {
      // TRANSLATORS: CommandLine error message      
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -258,7 +258,7 @@ boolean cmdKdumpDumpLevel (map options) {
      }
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -281,7 +281,7 @@ boolean cmdKdumpDumpFormat (map options) {
      }
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -294,7 +294,7 @@ string cmdParsePassPath (string path_file) {
      password = (string)SCR::Read(.target.string, path_file);  
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(sformat(_("File %1 doesn't exist."),path_file));
+     CommandLine::Error(sformat(_("File %1 does not exist."),path_file));
   }
   return password;
 }
@@ -449,7 +449,7 @@ boolean cmdKdumpDumpTarget (map options) {
      return true;
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -474,7 +474,7 @@ boolean cmdKdumpRawPartition (map options) {
 
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -489,7 +489,7 @@ boolean cmdKdumpCustomKernel (map options) {
 
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -503,7 +503,7 @@ boolean cmdKdumpKernelCommandLine (map options) {
 
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -517,7 +517,7 @@ boolean cmdKdumpKernelCommandLineAppend (map options) {
 
   } else {
      // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -534,7 +534,7 @@ boolean cmdKdumpImmediateReboot (map options) {
 
   } else { 
      // TRANSLATORS: CommandLine error message     
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -556,7 +556,7 @@ boolean cmdKdumpRunLevel (map options) {
 
   } else {  
      // TRANSLATORS: CommandLine error message    
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -577,7 +577,7 @@ boolean cmdKdumpKeepOldDumps (map options) {
 
   } else {   
      // TRANSLATORS: CommandLine error message  
-     CommandLine::Error(_("Wrong options was used."));
+     CommandLine::Error(_("Wrong options were used."));
      return false;
   }
 
@@ -657,7 +657,7 @@ map cmdline_description = $[
         "customkernel" : $[
 	"handler" : cmdKdumpCustomKernel,
 	// TRANSLATORS: CommandLine help
-	"help" 	  : _("The naming scheme is:/boot/vmlinu[zx]-<kernel_string>[.gz] Please eneter only \"kernel_string\"."),
+	"help" 	  : _("The naming scheme is:/boot/vmlinu[zx]-<kernel_string>[.gz] Please enter only \"kernel_string\"."),
 	"example" : [
 		   "customkernel kernel=kdump",
 	            ],
@@ -694,7 +694,7 @@ map cmdline_description = $[
        "runlevel" : $[
 	"handler" : cmdKdumpRunLevel,
 	// TRANSLATORS: CommandLine help
-	"help" 	  : _("The run-level to boot the kdump kernel.(1,2,3,5,s)"),
+	"help" 	  : _("The runlevel to boot the kdump kernel.(1,2,3,5,s)"),
 	"example" : [
 		   "runlevel level=1",
 	            ],
@@ -724,7 +724,7 @@ map cmdline_description = $[
 	"alloc_mem": $[
 		"type" : "integer",
 		// TRANSLATORS: CommandLine help
-		"help" : _("Size of allocate memory MB"),
+		"help" : _("Size of allocated memory MB"),
 	],
         
 	"dump_level": $[
@@ -742,7 +742,7 @@ map cmdline_description = $[
 	"target": $[
 		"type" : "string",
 		// TRANSLATORS: CommandLine help
-		"help" : _("Dump target includes kind of target from: file (local filesystem), ftp, ssh, nfs, cifs"),
+		"help" : _("Dump target includes type of target from: file (local filesystem), ftp, ssh, nfs, cifs"),
 	],
 
 	"server": $[
@@ -760,7 +760,7 @@ map cmdline_description = $[
 	"dir": $[
 		"type" : "string",
 		// TRANSLATORS: CommandLine help
-		"help" : _("Directory for saving dumps images"),
+		"help" : _("Directory for saving dump images"),
 	],
 
 	"share": $[
@@ -778,7 +778,7 @@ map cmdline_description = $[
 	"pass": $[
 		"type" : "string",
 		// TRANSLATORS: CommandLine help
-		"help" : _("Path of file which includes passwort (plain text file)"),
+		"help" : _("Path of file which includes password (plain text file)"),
 	],
 
 	"raw": $[
@@ -803,7 +803,7 @@ map cmdline_description = $[
 	"level": $[
 		"type" : "string",
 		// TRANSLATORS: CommandLine help
-		"help" : _("Option means run-level to boot the kdump kernel. Only values such as 1,2,3,5 or s are allowed"),
+		"help" : _("Option means runlevel to boot the kdump kernel. Only values such as 1,2,3,5 or s are allowed"),
 	],
 
 	"no": $[
