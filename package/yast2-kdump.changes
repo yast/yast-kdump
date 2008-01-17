@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 17 13:05:20 CET 2008 - juhliarik@suse.cz
+
+- added proofread text 
+- V 2.13.10
+
+-------------------------------------------------------------------
 Tue Dec 11 10:39:07 CET 2007 - juhliarik@suse.cz
 
 - added new bugfix for bug# 347241 - kdump package needs to be 
