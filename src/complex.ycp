@@ -69,8 +69,10 @@ boolean PollAbort() {
 symbol ReadDialog() {
   boolean kexec_installed = false;
   boolean kdump_installed = false;
+  boolean kernel_kdump_installed = false;
   boolean kexec_available = false;
   boolean kdump_available = false;
+  boolean kernel_kdump_available = false;
   list <string> package_list = [];
 
   Wizard::RestoreHelp(HELPS["read"]:"");
@@ -81,6 +83,19 @@ symbol ReadDialog() {
   if (Package::Installed("kexec-tools")) {
      kexec_installed = true;
   }
+
+  if (!Arch::ia64) { 
+     if (Package::Installed("kernel-kdump"))
+        kernel_kdump_installed = true;
+     else
+        kernel_kdump_installed = false;
+  } else {
+     kernel_kdump_installed = true;
+  }
+
+
+
+
 
   string kdump ="";
   
@@ -104,7 +119,7 @@ symbol ReadDialog() {
   }
 
   //checking if packages are available
-  if ((!kexec_installed) || (!kdump_installed)) {
+  if ((!kexec_installed) || (!kdump_installed) || (!kernel_kdump_installed)) {
      if (!kexec_installed)
         kexec_available = Package::Available("kexec-tools");
 
@@ -115,6 +130,9 @@ symbol ReadDialog() {
         //   kdump_available = true;
         kdump_available = Package::Available(kdump);
      }
+
+     if (!kernel_kdump_installed)
+        kernel_kdump_available = Package::Available("kernel-kdump");
 
      if ((!kexec_installed) && (!kexec_available)) {
         if (!Mode::commandline()) {
@@ -136,6 +154,17 @@ symbol ReadDialog() {
         return `abort;
      }
      
+     if ((!kernel_kdump_installed) && (!kernel_kdump_available)) {
+        if (!Mode::commandline()) {
+           Popup::Error(_("Package for kernel-kdump is not available."));
+        } else {
+           CommandLine::Error(_("Package for kernel-kdump is not available."));
+        }
+        y2error("[kdump] (ReadDialog ()) Packages for kernel-kdump is not available.");
+        return `abort;
+     }    
+
+
      //add packages for installation
      if (!kexec_installed) 
         package_list = add(package_list, "kexec-tools");
@@ -143,6 +172,9 @@ symbol ReadDialog() {
      if (!kdump_installed)
         package_list = add(package_list, kdump);
      
+     if (!kernel_kdump_installed)
+        package_list = add(package_list, "kernel-kdump");
+
      //install packages       
      if (! PackageSystem::CheckAndInstallPackages(package_list)) {
 
