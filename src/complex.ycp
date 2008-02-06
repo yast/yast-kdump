@@ -84,7 +84,7 @@ symbol ReadDialog() {
      kexec_installed = true;
   }
 
-  if (!Arch::ia64) { 
+  if (!Arch::ia64()) { 
      if (Package::Installed("kernel-kdump"))
         kernel_kdump_installed = true;
      else
