@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb  6 15:09:16 CET 2008 - juhliarik@suse.cz
+
+- added installing kernel-kdump bug#357935
+- V 2.13.11 
+
+-------------------------------------------------------------------
 Thu Jan 17 13:05:20 CET 2008 - juhliarik@suse.cz
 
 - added proofread text 
