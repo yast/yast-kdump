@@ -39,12 +39,14 @@ map HELPS = $[
   /*Enable/Disable Kdump - RadioButtons 1/1*/
   "StartRadioBut" :  _("<p><b>Enable/Disable Kdump</b><br>
     Enable or disable kdump. The boot option crashkernel parameter is added/removed. 
-    For applying changes is necessary reboot.<br></p>"),
+    To apply changes a reboot is necessary.<br></p>
+"),
    
 
   /* Kdump Memor&y [MB] - IntField 1/1*/
   "KdumpMemory" : _("<p><b>Kdump Memory</b><br>
-    Alocating of memory for kdump kernel. <br></p>"),
+    Allocation of memory for kdump kernel. <br></p>
+"),
 
   /* Kdump Memor&y [MB] - IntField 1/1*/
   "DumpLevel" : _("<p><b>Dump Level</b><br>
@@ -94,9 +96,10 @@ map HELPS = $[
   /* Enable Raw Saving in Initrd - ComboBox 1/1*/  
   "RawPartitions": _("<p><b>Enable Raw Saving in Initrd</b> - allows to save 
     the dump in initrd before mounting any filesystem. Then the system is rebooted, and 
-    if filesystem doesn't mount user can repair it with a rescue system. On first normal 
-    boot, the dump is saved to the final dump destination. It is possible select raw partition 
-    from <i>The List of Available Raw Paritions of All Disks Without Known Filesystem</i><br></p>"), 
+    if the filesystem does not mount, the user can repair it with a rescue system. On the first normal 
+    boot, the dump is saved to the final dump destination. It is possible to select raw partition 
+    from <i>The List of Available Raw Paritions of All Disks Without Known Filesystem</i><br>.</p>
+"), 
 
   /* Custom Kdump Kernel - TextEntry 1/1*/
   "InitrdKernel":_("<p><b>Custom Kdump Kernel</b> The user can enter the custom kernel.
@@ -110,13 +113,15 @@ map HELPS = $[
  /* Kdump Command Line Append - TextEntry 1/1*/
   "KdumpCommandLineAppend" : _("<p><b>Kdump Command Line Append</b>
     Set this option means _append_  values to the default command line string. 
-    The string gets also appended if <i>Kdump Command Line</i>
-    is set. <br></p>"),
+    The string will be appended if the <i>Kdump Command Line</i>
+    is set. <br></p>
+"),
 
   /* The Run-level to Boot the Kdump Kernel - ComboBox 1/1*/
-  "RunLevel" : _("<p><b>The Run-level to Boot the Kdump Kernel</b> - 
-    The run-level to boot the kdump kernel. If networks is needed in 
-    the kdump environment, set <i>3</i>.<br></p>"),
+  "RunLevel" : _("<p><b>The Runlevel to Boot the Kdump Kernel</b> - 
+    The runlevel to boot the kdump kernel. If networks are needed in 
+    the kdump environment, set <i>3</i>.<br></p>
+"),
 
   /* Enable Immediate Reboot After Saving the Core - CheckBox 1/1*/
   "EnableReboot" : _("<p><b>Enable Immediate Reboot After Saving the Core</b> - 
@@ -162,7 +167,7 @@ Configure kdump here.<br></p>
     /* Summary dialog help 2/3 */
     _("<p><b><big>Adding a Kdump:</big></b><br>
 Choose an kdump from the list of detected kdumps.
-If your kdump was not detected, use <b>Other (not detected)</b>.
+If your kdump was not detected, select <b>Other (not detected)</b>.
 Then press <b>Configure</b>.</p>
 ") +
 

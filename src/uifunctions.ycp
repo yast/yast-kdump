@@ -455,7 +455,7 @@ boolean ValidTargetKdump (string key, map event) {
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Directory for Saving Dumps\""));
+	Popup::Error(_("You need to specify \"Directory for Saving Dumps\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
@@ -464,14 +464,14 @@ boolean ValidTargetKdump (string key, map event) {
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Server Name\""));
+	Popup::Error(_("You need to specify \"Server Name\""));
         UI::SetFocus(`id("server"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Directory on Server\""));
+	Popup::Error(_("You need to specify \"Directory on Server\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
@@ -481,7 +481,7 @@ boolean ValidTargetKdump (string key, map event) {
         value = tostring(UI::QueryWidget(`id ("user_name"), `Value));
 
         if ((value == nil) || (value == "")) {
-	   Popup::Error(_("You need specify \"User Name\""));
+	   Popup::Error(_("You need to specify \"User Name\""));
            UI::SetFocus(`id("user_name"));
            return false;
         }
@@ -491,14 +491,14 @@ boolean ValidTargetKdump (string key, map event) {
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Server Name\""));
+	Popup::Error(_("You need to specify \"Server Name\""));
         UI::SetFocus(`id("server"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Directory on Server\""));
+	Popup::Error(_("You need to specify \"Directory on Server\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
@@ -507,21 +507,21 @@ boolean ValidTargetKdump (string key, map event) {
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Server Name\""));
+	Popup::Error(_("You need to specify \"Server Name\""));
         UI::SetFocus(`id("server"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("dir"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Directory on Server\""));
+	Popup::Error(_("You need to specify \"Directory on Server\""));
         UI::SetFocus(`id("dir"));
         return false;
      }
      value = tostring(UI::QueryWidget(`id ("share"), `Value));
 
      if ((value == nil) || (value == "")) {
-	Popup::Error(_("You need specify \"Exported Share\""));
+	Popup::Error(_("You need to specify \"Exported Share\""));
         UI::SetFocus(`id("share"));
         return false;
      }
@@ -531,7 +531,7 @@ boolean ValidTargetKdump (string key, map event) {
         value = tostring(UI::QueryWidget(`id ("user_name"), `Value));
 
         if ((value == nil) || (value == "")) {
-	   Popup::Error(_("You need specify \"User Name\""));
+	   Popup::Error(_("You need to specify \"User Name\""));
            UI::SetFocus(`id("user_name"));
            return false;
         } //end of if ((value == nil) || (value == "")) 
@@ -832,7 +832,7 @@ void InitRawPartitions (string key) {
      if ((value != nil) && (value != ""))
         UI::ChangeWidget(`id("raw_partitions"), `Value, value);
      else
-        Popup::Error(_("Partition doesn't exist on your disks"));
+        Popup::Error(_("Partition does not exist on your disks"));
   } else if (size(Kdump::uknown_fs_partitions)>0) {
      UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions); //uknown_fs_partitions);
      //UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);

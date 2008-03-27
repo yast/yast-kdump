@@ -77,27 +77,21 @@ symbol ReadDialog() {
   // Kdump::AbortFunction = PollAbort;
   if (!Confirm::MustBeRoot()) return `abort;
      
-  //checking of installation packages
+  // checking of installation packages
   if (Package::Installed("kexec-tools")) {
      kexec_installed = true;
   }
 
   string kdump ="";
   
-  //only ppc64 includes package kernel-kdump
-  //others include kdump-helper and kexec-tools depend on it
-  //it mean that it is not important check for available kdump-helper
-
+  // only ppc64 includes package kernel-kdump
+  // others include kdump and kexec-tools depend on it
   
-  //if (Arch::ppc64()) {
-  //   kdump = "kernel-kdump";
-  //} else {
-  //   kdump = "kdump-helpers";
-  //}
-
-  //the patch for openSUSE 11, kdump-helpers was rename to kdump package
-  //it valid for all architectures bug#347241
-  kdump = "kdump";
+  if (Arch::ppc64()) {
+     kdump = "kernel-kdump";
+  } else {
+     kdump = "kdump";
+  }
 
   if (Package::Installed(kdump)) {
       kdump_installed =true;
@@ -109,10 +103,6 @@ symbol ReadDialog() {
         kexec_available = Package::Available("kexec-tools");
 
      if (!kdump_installed) {
-        //if (Arch::ppc64())
-        //   kdump_available = Package::Available(kdump);
-        //else
-        //   kdump_available = true;
         kdump_available = Package::Available(kdump);
      }
 
