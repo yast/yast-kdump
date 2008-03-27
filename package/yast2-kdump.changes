@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Mar 27 09:52:43 CET 2008 - juhliarik@suse.cz
+
+- changed dialog buttons (fate #120373) Unified Button Labels
+- changed dependences kdump vs. kernel-kdump (ppc64) 
+- V 2.16.10
+
+-------------------------------------------------------------------
 Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
 
 - added 'StartupNotify=true' to the desktop file (bnc #304964)
