@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wri Jun  13 13:55:16 CET 2008 - juhliarik@suse.cz
+
+- added patch for installing kernel-kdumppae (bnc #399439)
+- added fix for problem with selecting 'Saving Target for Kdump 
+  Image' in ncurses 80x25 (bnc #373551)
+- V 2.13.11.1
+
+-------------------------------------------------------------------
 Wed Feb  6 15:09:16 CET 2008 - juhliarik@suse.cz
 
 - added installing kernel-kdump bug#357935
