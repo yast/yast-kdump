@@ -348,6 +348,9 @@ string tostringKDUMP_SAVE_TARGET() {
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "cifs") {
      result = "cifs://";
 
+     if (findfirstof(KDUMP_SAVE_TARGET["dir"]:"", "/") != 0 )
+	KDUMP_SAVE_TARGET["dir"]="/"+KDUMP_SAVE_TARGET["dir"]:"";
+
      if (KDUMP_SAVE_TARGET["user_name"]:nil == "") {
         result = result+KDUMP_SAVE_TARGET["server"]:nil+"/"+KDUMP_SAVE_TARGET["share"]:nil+KDUMP_SAVE_TARGET["dir"]:nil;
      } else {
@@ -355,7 +358,9 @@ string tostringKDUMP_SAVE_TARGET() {
 
         if (KDUMP_SAVE_TARGET["password"]:nil != "")
            result = result + ":" + KDUMP_SAVE_TARGET["password"]:nil;
-        result = result + "@"+ KDUMP_SAVE_TARGET["server"]:nil+"/"+KDUMP_SAVE_TARGET["share"]:nil+KDUMP_SAVE_TARGET["dir"]:nil; 
+	
+        result = result + "@"+ KDUMP_SAVE_TARGET["server"]:nil+"/"+KDUMP_SAVE_TARGET["share"]:nil+KDUMP_SAVE_TARGET["dir"]:nil;
+	    
 
      }
   }
@@ -504,6 +509,15 @@ boolean ValidTargetKdump (string key, map event) {
      }
 
   } else if (radiobut == "cifs") {
+
+     // fix for bnc #307307 module should check if cifs tools are installed when requested
+     if (!Package::Installed("cifs-mount"))
+     {
+	 y2milestone("SMB/CIFS share cannot be mounted, installing missing 'cifs-mount' package...");
+	 // install cifs-mount package
+	 PackageSystem::CheckAndInstallPackages(["cifs-mount"]);
+     }
+
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
 
      if ((value == nil) || (value == "")) {
