@@ -46,10 +46,8 @@ void DisBackButton (string key) {
   UI::ChangeWidget(`id(`back), `Enabled, false);
 }
 
-
-
-
 map<string,map<string,any> > wid_handling = $[
+
   "DisBackButton" 	: $[
      "widget"		: `custom,
      "custom_widget"	: `Empty(),
@@ -93,6 +91,8 @@ map<string,map<string,any> > wid_handling = $[
      )),
      "init"		: InitKdumpMemory,
      "handle"		: HandleKdumpMemory,
+     "validate_type"    : `function,
+     "validate_function": ValidKdumpMemory,
      "store"		: StoreKdumpMemory,
      "help"		: HelpKdump("KdumpMemory"),
   ],
@@ -357,7 +357,7 @@ map<string, map<string,any> > tabs = $[
      "caption"		: _("Kdump Expert Settings"),
      "tree_item_label"	: _("Expert Settings"),
      "widget_names"	: [
-        "DisBackButton", "KdumpCommandLine",
+	"DisBackButton", "KdumpCommandLine",
         "KdumpCommandLineAppend", "RunLevel",
         "EnableDeleteImages", "NumberDumps", 
         "InitrdKernel", "SelectKernel", "EnableReboot"
@@ -375,9 +375,9 @@ symbol RunKdumpDialogs() {
     "initial_screen"	: "start_up",
     "screens"		: tabs,
     "widget_descr"	: wid_handling,
-    "back_button"	: Label::BackButton(),
+    "back_button"	: Label::BackButton(), 
     "abort_button"	: Label::CancelButton(),
-    "next_button"	: Label::FinishButton(),
+    "next_button"	: Label::OKButton(),
     //"functions"	: " ",
   ]);
 }
