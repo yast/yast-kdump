@@ -14,6 +14,7 @@ textdomain "kdump";
 import "Popup";
 import "Kdump";
 import "Service";
+import "Mode";
 import "Package";
 import "PackageSystem";
 
@@ -1195,7 +1196,7 @@ void InitKdumpMemory (string key) {
 
 /**
   *  Hadle function for option 
-  * "Dump Level"
+  * "KdumpMemory"
   */
 
 symbol HandleKdumpMemory (string key, map event) {
@@ -1214,9 +1215,27 @@ symbol HandleKdumpMemory (string key, map event) {
 }
 
 
+
+/**
+  * Function validates if crashkernel option includes 
+  * several ranges and ask user about rewritting 
+  *
+  *"KdumpMemory"
+  */
+
+boolean ValidKdumpMemory (string key, map event) 
+{
+  if (Kdump::crashkernel_list_ranges && Mode::normal())
+  { 
+     Kdump::crashkernel_list_ranges = !Popup::YesNo( 
+         _("Kernel option includes several ranges. Rewrite it?"));
+  }
+     
+  return true;
+}
 /**
   *  Store function for option 
-  * "Dump Level"
+  * "KdumpMemory"
   */
 
 void StoreKdumpMemory (string key, map event) {

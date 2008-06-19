@@ -196,7 +196,6 @@ boolean cmdKdumpShow (map options) {
      //TRANSLATORS: CommandLine printed text
      CommandLine::Print(sformat(_("Kdump runlevel: %1"), Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil));
   }   
- 
 
   CommandLine::Print("");
   //TRANSLATORS: CommandLine printed text
@@ -225,6 +224,8 @@ boolean cmdKdumpStartup (map options) {
      Kdump::add_crashkernel_param = true;
      Kdump::alocated_memory = tostring(options["alloc_mem"]:nil);
      //TRANSLATORS: CommandLine printed text
+     if (Kdump::crashkernel_list_ranges)
+        CommandLine::Print(_("Kernel option \"crashkernel\" includes ranges. They will be rewritten."));
      CommandLine::Print(_("To apply changes a reboot is necessary."));
      return true;
 

@@ -81,12 +81,20 @@ global list <string> available_partitions =[];
 global list <string> uknown_fs_partitions =[];
 
 /**
- * Total available memory
+ * Total available memory [MB]
  * 
  *
  * integer
  */
 global integer total_memory =0;
+
+/** Boolean option indicates that "crashkernel" includes
+ *  several ranges
+ *
+ * boolean true if there are several ranges (>1)
+ */
+global boolean crashkernel_list_ranges = false;
+
 
 /**
  * Number of cpus
@@ -94,6 +102,23 @@ global integer total_memory =0;
  * integer
  */
 integer number_of_cpus = 1;
+
+/**
+ * kernel version (uname -r)
+ * 
+ * string
+ */
+string kernel_version = "";
+
+
+/**
+ * Position actual boot section in BootCommon::sections list
+ * it is relevant only if XEN boot section is used
+ *
+ * integer
+ */
+integer section_pos = -1;
+
 
 /** Boolean option indicates kernel parameter
  * "crashkernel"
@@ -221,7 +246,7 @@ boolean ReadDiskPartitions () {
   map<string,map> disks = filter( string k, map disk, tg, ``(disk["type"]:`CT_UNKNOWN==`CT_DISK));    
   // extract only disks
   list <string> list_of_disks = (list<string>) Map::Keys(disks);
-  //get a list of all partitions usable for data storage
+  // get a list of all partitions usable for data storage
   list <string> list_disks = (list<string>) Map::Keys(disks);
 
   y2milestone("[kdump] (ReadDiskPartitions)  ----------------Begin of ReadDiskPartitions ()--------------");
@@ -233,7 +258,7 @@ boolean ReadDiskPartitions () {
   });    
   //list<map> data_parts = filter( map p, disks["/dev/sda","partitions"]:[], ``(p["type"]:`primary!=`extended));
 
-  //parse partiotions with uknown file system
+  // parse partiotions with uknown file system
   list<map> unknown = [];
   unknown = filter( map p, data_parts, ``(p["detected_fs"]:nil==`unknown));
  
@@ -254,11 +279,11 @@ boolean ReadDiskPartitions () {
   y2milestone("[kdump] (ReadDiskPartitions) list of udev ids of partitions: %1", udevids);
 
   
-  //combination name + uids to one list
+  // combination name + uids to one list
   integer i = 0;
-  //available_partitions = parts;
+  // available_partitions = parts;
   foreach (string key, udevids, {
-    //string disk_from_partition = filterchars(parts[i]:"", "abcdefghijklmnopqrstuvwxyz/");
+    // string disk_from_partition = filterchars(parts[i]:"", "abcdefghijklmnopqrstuvwxyz/");
     string value = "/dev/disk/by-id/" + udevids[i]:"" +" ( " + parts[i]:"" +" )";
     available_partitions = available_partitions + value;
     i= i+1; 
@@ -302,7 +327,7 @@ integer CmpKernelAndBootOptions (list <string> kernel_option, list <string> boot
 
 list <string> AddDeviceVgamode (map section) {
   string tmp_boot_section = tostring(section["append"]:nil);
-  //adding root device
+  // adding root device
   tmp_boot_section = tmp_boot_section + " root=" + tostring(section["root"]:nil);
   tmp_boot_section = tmp_boot_section + " vga=" + tostring(section["vgamode"]:nil);
   
@@ -320,19 +345,18 @@ list <string> AddDeviceVgamode (map section) {
 
 
 string GetActualBootSection () {
-  //read option from bootlaoder
+  // read option from bootlaoder
 
   string result = "";
   string kernel_boot_options = "";
-  string kernel_version = "";
   integer min_dif_size = 1000;
  
-  //reading bootloader settings
+  // reading bootloader settings
   boolean old_progress = Progress::set (false);
   Bootloader::Read();
   Progress::set (old_progress);
 
-  //reading kernel options
+  // reading kernel options
   string command = "cat /proc/cmdline";
   map options = (map)SCR::Execute (.target.bash_output, command);
   y2milestone("[kdump] (GetActualBootSection) command read boot options from kernel:  %1  output: %2",command, options);  
@@ -341,9 +365,8 @@ string GetActualBootSection () {
      return "";
 
   kernel_boot_options = tostring(options["stdout"]:nil);
-  //Popup::Message(kernel_boot_options);
 
-  //reading version of kernel
+  // reading version of kernel
   command = "uname -r";
   options = (map)SCR::Execute (.target.bash_output, command);
   y2milestone("[kdump] (GetActualBootSection) command read kernel version:  %1  output: %2",command, options);  
@@ -351,29 +374,24 @@ string GetActualBootSection () {
   if (options["exit"]:nil !=  0)
      return "";
 
-  kernel_version = tostring(options["stdout"]:nil);
-
-  //Popup::Message(kernel_version);
-  
+  kernel_version = tostring(options["stdout"]:nil);  
   y2milestone("[kdump] (GetActualBootSection) kerne version: %1",kernel_version);
 
-
-  //boot sections from bootloader
+  // boot sections from bootloader
   list<map<string,any> > sects = BootCommon::sections;
 
-  //deleting non linux sections
+  // deleting non linux sections
   sects = filter (map<string,any> s, sects, ``(
                 ! haskey (s, "chainloader")));
   
   y2milestone("[kdump] (GetActualBootSection) BootCommon::sections only linux sections:  %1",sects);
 
-  //find probably boot section, what was used during start-up
+  // find probably boot section, what was used during start-up
   foreach(map section, sects, {
 
     string image = tostring(section["image"]:nil);
 
     if (image != nil) {
-       //Popup::Message(image);
        command = "/sbin/get_kernel_version "+image;
        options = (map)SCR::Execute (.target.bash_output, command);
 
@@ -387,22 +405,174 @@ string GetActualBootSection () {
                 min_dif_size = value;
                 result = tostring(section["name"]:nil);		
              }
-             //Popup::Message(tostring(value));
-          } //end if (ret == kernel_version)
+          } // end if (ret == kernel_version)
        } // end if (options["exit"]:nil ==  0)     
-    } //end of if (image != nil)           
-  }); //end of foreach(map section, sects, {
-
-  
-  //Popup::Message(result);
+    } // end of if (image != nil)           
+  }); // end of foreach(map section, sects, {
 
   y2milestone("[kdump] (GetActualBootSection) selected boot section :  %1",result);
   return result;
 
 }
 
+/**
+ * get value of crashkernel option
+ * from XEN boot section
+ *  @param string crashkernel=64M@16M
+ *  @return string value of carshkernel option
+ */
+
+string getCrashKernelValue (string crash)
+{
+    y2milestone("crashkernel option %1", crash);
+    string result ="";
+    if ((crash != "") || (crash != nil))
+    {
+	integer position = search(crash, "=");
+	if (position != nil)
+	    result = substring(crash, position+1); 
+	else
+	    y2error("Wrong crashkernel option!");
+
+    }
+    y2milestone("crashkernel value is %1", result);
+    return result;
+
+}
+
+/**
+ * get alocated memory from value of crashkernel option
+ * there can be several ranges -> take the first range
+ *  @param string 64M@16M or 128M-:64M@16M [(reserved_memory*2)-:reserved_memory]
+ *  @return string value of alocated memory (64M)
+ */
+
+string getAlocatedMemory(string crash_value)
+{
+   string result = "";
+   string allocated = "";
+   string range ="";
+   if (search(crash_value,",") != nil)
+   {
+      list<string> ranges = splitstring(crash_value,",");
+      crashkernel_list_ranges = true;
+      range = ranges[0]:"";
+
+   } else {
+      range = crash_value;
+   }
+   y2milestone("The 1st range from crashkernel is %1", result);
+   integer position =  search(range,":");
+ 
+   if (position != nil) 
+      allocated = substring(range, position+1);
+   else
+      allocated = range;
+
+   result = substring(allocated,0,search(allocated,"M"));
+
+   y2milestone("Allocated memory is %1", result);
+   return result;
+}
+
+/**
+ * Build crashkernel value from alocated memory
+ * 
+ *  @return string value of crashkernel
+ */
+
+string BuildCrashkernelValue ()
+{
+    // if user doesn't modified or select don't modify 
+    // return readed value
+    if (crashkernel_list_ranges)
+	return crashkernel_param_value;
+
+    string crash_value = "";
+    crash_value = alocated_memory+"M";
+    if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64()) {
+        crash_value = crash_value + "@16M";
+	y2milestone("Common offset 16M");
+    } else if (Arch::ia64()) {
+        y2milestone("ia64 platform without offset");
+    } else {
+       if (!Mode::commandline())
+          Popup::Error(_("Unsupported architecture, \"crashkernel\" was not added"));
+       y2error("Unsupported platform/architecture...");
+    }
+
+    string reserved_memory = tostring(2*tointeger(alocated_memory));
+    
+
+    crash_value = reserved_memory+"M-:"+crash_value;
+    y2milestone("builded crashkernel value is %1", crash_value);
+    return crash_value;
+
+}
 
 
+/**
+ * Read current kdump configuration
+ * from XEN boot section
+ * read kernel parameter "crashkernel"
+ *  @return boolean successfull
+ */
+
+
+boolean ReadXenKdumpKernelParam (string act_boot_secion)
+{
+
+    string crash = "";
+    if (actual_boot_section == "")
+    {
+	y2milestone("Actual boot section was not found");
+	crashkernel_param = false;
+        add_crashkernel_param = false;
+    } else {
+	integer section_position = -1;
+        foreach(map section, BootCommon::sections, 
+        {
+	    section_position = section_position +1;
+            string name = tostring(section["name"]:nil);
+
+            if (name == act_boot_secion) 
+            {
+		crash = section["xen_append"]:"";
+		section_pos = section_position;
+	    }              
+        });
+    }
+
+    if (crash != "")
+    {
+	list<string> xen_append = splitstring(crash, " ");
+	string crash_arg = "";
+
+	if (size(xen_append)>1)
+	{
+	   foreach(string key, xen_append,
+	   {
+		if (search(key, "crashkernel") != nil)
+		   crash_arg = key;
+           });
+        } else {
+	   crash_arg = crash;
+	}
+
+	if (crash_arg != "")
+	{
+	   crashkernel_param = true;
+     	   add_crashkernel_param = true;
+	   crashkernel_param_value =  getCrashKernelValue(crash_arg);
+           alocated_memory = getAlocatedMemory(crashkernel_param_value);
+	} else {
+ 	   crashkernel_param = false;
+           add_crashkernel_param = false;
+	}
+    }
+
+    return true;
+}
 
 
 /**
@@ -413,11 +583,12 @@ string GetActualBootSection () {
  */
 
 boolean ReadKdumpKernelParam () {
-
-  //boolean old_progress = Progress::set (false);
-  //Bootloader::Read();
-  //Progress::set (old_progress);
+ 
   actual_boot_section =  GetActualBootSection ();
+
+  if (search(kernel_version, "xen") != nil)
+      return ReadXenKdumpKernelParam (actual_boot_section);
+
 
   if (actual_boot_section == "")
      actual_boot_section = Bootloader::getDefaultSection ();
@@ -435,7 +606,8 @@ boolean ReadKdumpKernelParam () {
 
   crashkernel_param_value = result;
   if (result != "false")
-     alocated_memory = substring(result,0,search(result,"M"));
+     alocated_memory = getAlocatedMemory(crashkernel_param_value);
+     //alocated_memory = substring(result,0,search(result,"M")); //FIXME get alocated memory need to be fixed
 
   //Popup::Message(alocated_memory);
 
@@ -443,33 +615,30 @@ boolean ReadKdumpKernelParam () {
 }
 
 /**
- * Read available cpu
+ * Propose reserved/allocated memory
  *
  * 
  *  @return boolean successfull
  */
 
-boolean ReadAvailableCPU () {
-
-  list <map> output =  (list<map>)SCR::Read(.probe.cpu);
-
-  number_of_cpus = size(output);
-  y2milestone("[kdump] (ReadAvailableCPU) SCR::Read(.probe.cpu): %1", output);
-  y2milestone("[kdump] number of CPUs: %1", number_of_cpus);
-  //alocated_memory = "0";
-  if (alocated_memory == "0") {     
-     if ((number_of_cpus > 16) || ((total_memory/1024) > 16))
-        alocated_memory = "256";
-     else if ((number_of_cpus > 4) || ((total_memory/1024) > 4))
-        alocated_memory = "128";
-     else
+boolean ProposeAlocatedMemory () 
+{
+  if (alocated_memory == "0") 
+  {     
+     if ((total_memory > 512) &&  (total_memory/1024) <2)
         alocated_memory = "64";
-     y2milestone("[kdump] allocated memory if not set in \"crashkernel\" param: %1", alocated_memory);
+     else if ((total_memory/1024) > 2)
+        alocated_memory = "128";     
   }
-
-  
+  y2milestone("[kdump] allocated memory if not set in \"crashkernel\" param: %1", alocated_memory);
   return true;
 }
+
+
+
+
+
+
 
 /**
  * Read available memory
@@ -499,7 +668,7 @@ boolean ReadAvailableMemory () {
   //resor = (map)range;
   total_memory = tointeger(temp[0]:nil)/1048576;
   y2milestone("[kdump] (ReadAvailableMemory) total phys. memory [MB]: %1", tostring(total_memory));
-  ReadAvailableCPU ();
+  ProposeAlocatedMemory ();
   return true;
 }
 
@@ -562,32 +731,27 @@ boolean WriteKdumpSettings () {
  *  @return boolean successfull
  */
 boolean WriteKdumpBootParameter () {
-  
   boolean result = true;
   boolean old_progress = false;
   if (add_crashkernel_param) {
-     string crash_value = "";
-     crash_value = alocated_memory+"M@";
-     if ((Arch::i386()) ||(Arch::x86_64())) {
-        crash_value = crash_value + "16M";
-     } else if (Arch::ia64()) {
-        crash_value = crash_value + "0";
-     } else if (Arch::ppc64()) {
-        crash_value = crash_value + "32M";
-     } else {
-        if (!Mode::commandline())
-           Popup::Error(_("Unsupported architecture, \"crashkernel\" was not added"));
-        return false;
-     }
+     string crash_value = BuildCrashkernelValue ();
            
      if ((!crashkernel_param) || (crash_value != crashkernel_param_value)) {
 
-        //Popup::Message(Bootloader::getDefaultSection ());
-        result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", crash_value);
+        // write crashkernel option to boot section
+	if (section_pos == -1)
+	{
+            result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", crash_value);
+	} else {
+	    
+	    BootCommon::sections[section_pos, "xen_append"]= "crashkernel="+crash_value;
+	    result = true;
+	    y2milestone("Write boot section to XEN boot section %1", BootCommon::sections[section_pos]:nil);
+	}
         old_progress = Progress::set (false);
         Bootloader::Write();
         Progress::set (old_progress);
-        //Popup::Message(crash_value);
+        // Popup::Message(crash_value);
         y2milestone("[kdump] (WriteKdumpBootParameter) adding chrashkernel option with value : %1", crash_value);
         if (!Mode::commandline())
            Popup::Message(_("To apply changes a reboot is necessary."));
@@ -597,7 +761,7 @@ boolean WriteKdumpBootParameter () {
      }
 
      
-     //start kernel-kdump at boot
+     // start kernel-kdump at boot
      Service::Enable("kdump");
 
      if (Service::Status("kdump") == 0)
