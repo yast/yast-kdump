@@ -48,7 +48,7 @@
 	y2milestone("I don't know...");
 	map settings = Kdump::Export ();
 	Kdump::modified = false;
-	symbol result = KdumpAutoSequence ();
+	any result = KdumpAutoSequence ();
 	Kdump::SetModified();
 	if (result != `next)
 	    Kdump::Import ((map<string,any>)settings);

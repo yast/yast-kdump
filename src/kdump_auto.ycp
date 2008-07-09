@@ -21,6 +21,7 @@
 
     import "Kdump";
     import "Mode";
+    import "Progress";
 
     include "kdump/wizards.ycp";
 
@@ -42,7 +43,7 @@
 
     if(func == "Import")
     {
-	ret = Kdump::Import(AI2Export ((map<string,any>)param));
+	ret = Kdump::Import(param);
     }
     /**
       * Create a summary
@@ -75,7 +76,7 @@
       * return map or list
       */
     else if (func == "Reset") {
-	Kdump::Reset();
+	Kdump::Import($[]);;
 	ret =  ($[]);
     }
     /**
@@ -91,7 +92,7 @@
       * return map or list
       */
     else if (func == "Export") {
-	ret = Export2AI ((map<string,any>)Kdump::Export());
+	ret = Kdump::Export();
     }
     /**
       * Write configuration data
