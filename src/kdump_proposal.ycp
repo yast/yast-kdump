@@ -1,0 +1,81 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2008 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	kdump_proposal.ycp
+ * Package:	Configuration of kdump
+ * Summary:	Proposal handlingss
+ * Authors:	Jozef Uhliarik <juhliarik@suse.com>
+ *
+ */
+
+{
+    textdomain "kdump";
+
+    import "Kdump";
+    import "Mode";
+
+    include "kdump/wizards.ycp";
+
+    string func  = (string)WFM::Args(0);
+    map    param = (map)WFM::Args(1);
+    map<string,any>    ret   = $[];
+
+    if ( func == "MakeProposal" )
+    {
+	Kdump::Propose();
+    }
+    else if ( func == "AskUser" )
+    {
+	boolean has_next = param["has_next"]:false;
+	y2milestone("I don't know...");
+	map settings = Kdump::Export ();
+	Kdump::modified = false;
+	symbol result = KdumpAutoSequence ();
+	Kdump::SetModified();
+	if (result != `next)
+	    Kdump::Import ((map<string,any>)settings);
+
+	// Fill return map
+	ret = $[ "workflow_sequence" : result ];
+    }
+    else if ( func == "Description" )
+    {
+	ret =
+	    $[
+		// proposal part - kdump label
+	      "rich_text_title"	:	_("Kdump"),
+		// menubutton entry
+	      "menu_title"	:	_("&Kdump"),
+	      "id"		:	"kdump_stuff"
+	    ];
+
+    }
+    else if (func == "Write")
+    {
+	boolean succ = Kdump::Write ();
+	ret =
+	    $[
+		"success"	:	succ
+	    ];
+    }
+
+    return ret;
+}

@@ -51,11 +51,11 @@ include "kdump/helps.ycp";
  * @return true if data was modified
  */
 boolean Modified() {
-    return Kdump::Modified();
+    return Kdump::GetModified();
 }
 
 boolean ReallyAbort() {
-    return !Kdump::Modified() || Popup::ReallyAbort(true);
+    return !Kdump::GetModified() || Popup::ReallyAbort(true);
 }
 
 boolean PollAbort() {

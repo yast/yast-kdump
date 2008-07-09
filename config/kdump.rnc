@@ -1,0 +1,30 @@
+default namespace = "http://www.suse.com/1.0/yast2ns"
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+namespace config = "http://www.suse.com/1.0/configns"
+
+
+kdump =
+  element kdump {
+     kdump_crash_kernel? &
+     kdump_general?
+}
+
+kdump_crash_kernel = element crash_kernel { text }
+
+kdump_general =
+  element general {
+     element KDUMP_KERNELVER { text }? &
+     element KDUMP_COMMANDLINE { text }? &
+     element KDUMP_COMMANDLINE_APPEND { text }? &
+     element KEXEC_OPTIONS { text }? &
+     element KDUMP_RUNLEVEL { text }? &
+     element KDUMP_IMMEDIATE_REBOOT { text }? &
+     element KDUMP_TRANSFER { text }? &
+     element KDUMP_SAVEDIR { text }? &
+     element KDUMP_KEEP_OLD_DUMPS { text }? &
+     element KDUMP_FREE_DISK_SIZE { text }? &
+     element KDUMP_DUMPDEV { text }? &
+     element KDUMP_VERBOSE { text }? &
+     element KDUMP_DUMPLEVEL { text }? &
+     element KDUMP_DUMPFORMAT { text }?
+}

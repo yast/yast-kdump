@@ -48,11 +48,14 @@ import "Popup";
 import "Arch";
 import "Mode";
 import "BootCommon";
+import "Map";
 
 /**
  * Prototypes
  */
-global boolean Modified();
+global boolean GetModified();
+
+global void SetModified();
 
 /**
  * Data was modified?
@@ -174,7 +177,7 @@ global boolean write_only = false;
  * Abort function
  * return boolean return true if abort
  */
-global boolean() AbortFunction = Modified;
+global boolean() AbortFunction = GetModified;
 
 /**
  * map of deafult values for options in UI
@@ -227,11 +230,19 @@ global define boolean Abort() ``{
  * Data was modified?
  * @return true if modified
  */
-global boolean Modified() {
+global boolean GetModified() {
     y2debug("modified=%1",modified);
     return modified;
 }
 
+
+/**
+ * Set data was modified
+ */
+global void SetModified() {
+    modified = true;
+    y2debug("modified=%1",modified);
+}
 
 /**
  * Read disk partitions
@@ -790,8 +801,8 @@ boolean WriteKdumpBootParameter () {
  * Read all kdump settings
  * @return true on success
  */
-global boolean Read() {
-
+global boolean Read() 
+{
     /* Kdump read dialog caption */
     string caption = _("Initializing kdump Configuration");
     integer steps = 4;
@@ -863,8 +874,8 @@ global boolean Read() {
  * Write all kdump settings
  * @return true on success
  */
-global boolean Write() {
-
+global boolean Write() 
+{
     /* Kdump read dialog caption */
     string caption = _("Saving kdump Configuration");
 
@@ -913,5 +924,83 @@ global boolean Write() {
     return true;
 }
 
+/**
+ * Propose all kdump settings
+ *
+ */
+global define void Propose () 
+{
+
+    y2milestone("Proposing new settings of kdump");
+    // adding defualt settings
+    KDUMP_SETTINGS = DEFAULT_CONFIG;
+    // set available partitions...
+    ReadDiskPartitions ();
+    //FIXME: IMO it should be in Write because after writing bootloader...
+    // read bootloader settings
+    Bootloader::Read();
+    // set actual/defualt boot section
+    actual_boot_section = Bootloader::getDefaultSection ();
+
+    // set adding boot option...
+    crashkernel_param = false;
+    add_crashkernel_param = false;      
+
+    // read available memory
+    ReadAvailableMemory ();
+}
+/**
+ * Create a textual summary and a list of unconfigured cards
+ * @return summary of the current configuration
+ */
+global define list<string> Summary () 
+{
+    list<string> result = [];
+    result = add (result, sformat (_("Kdump status: %1"), (add_crashkernel_param ? _("disabled"):_("enabled"))));
+    if (!add_crashkernel_param )
+    {
+    	result = add (result, sformat (_("Value of crashkernel option: %1"), BuildCrashkernelValue()));
+    	result = add (result, sformat (_("Dump format: %1"), KDUMP_SETTINGS["KDUMP_DUMPFORMAT"]:""));
+    	result = add (result, sformat (_("Target of dumps: %1"), KDUMP_SETTINGS["KDUMP_SAVEDIR"]:""));
+    	result = add (result, sformat (_("Number of dumps: %1"), KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"]:""));
+    }
+    return result;
+}
+
+/**
+ * Export kdump settings to a map
+ * @return kdump settings
+ */
+global define map Export () 
+{
+    map out = $[
+	    "crash_kernel" : BuildCrashkernelValue(),
+	    "general" : KDUMP_SETTINGS,
+    ];
+
+    y2milestone ("Kdump exporting settings: %1", out);
+    return out;
+
+}
+
+/**
+ * Import settings from a map
+ * @param settings map of kdump settings
+ * @return boolean true on success
+ */
+global define boolean Import (map settings) 
+{
+    crashkernel_param_value = settings["crash_kernel"]:"";
+    boolean result = true;
+    map <string, string > my_import_map = settings["general"]:$[];
+    foreach (any key, Map::Keys(DEFAULT_CONFIG), 
+    {
+	string str_key = tostring(key);
+    	string val = (string) my_import_map[str_key]:nil;	
+    	if (val != nil) KDUMP_SETTINGS[str_key] = val;
+    	if (val == nil) KDUMP_SETTINGS[str_key] = DEFAULT_CONFIG[str_key]:nil; 
+    });        
+    return result;
+}
 /* EOF */
 }
