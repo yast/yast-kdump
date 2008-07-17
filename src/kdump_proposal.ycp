@@ -41,11 +41,11 @@
     if ( func == "MakeProposal" )
     {
 	Kdump::Propose();
+	ret = $[ "raw_proposal" : Kdump::Summary ()];
     }
     else if ( func == "AskUser" )
     {
 	boolean has_next = param["has_next"]:false;
-	y2milestone("I don't know...");
 	map settings = Kdump::Export ();
 	Kdump::modified = false;
 	any result = KdumpAutoSequence ();
@@ -53,6 +53,8 @@
 	if (result != `next)
 	    Kdump::Import ((map<string,any>)settings);
 
+	// if disable kdump deselect packages for installation
+	// Kdump::CheckPackages();
 	// Fill return map
 	ret = $[ "workflow_sequence" : result ];
     }
@@ -70,10 +72,12 @@
     }
     else if (func == "Write")
     {
-	boolean succ = Kdump::Write ();
+	// Write is called in finish script (kdump_finish.ycp)
+	// it is necessary do it after bootloader write his settings
+	// boolean succ = Kdump::Write ();
 	ret =
 	    $[
-		"success"	:	succ
+		"success"	:	true
 	    ];
     }
 

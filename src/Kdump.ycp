@@ -74,6 +74,10 @@ global boolean proposal_valid = false;
  */
 global list <string> available_partitions =[];
 
+/**
+ * true if propose was called
+ */
+global boolean propose_called = false;
 
 /**
  * List of available partiotions
@@ -98,6 +102,11 @@ global integer total_memory =0;
  */
 global boolean crashkernel_list_ranges = false;
 
+
+/** 
+ *  list of packages for installation
+ */
+global list<string> kdump_packages =[];
 
 /**
  * Number of cpus
@@ -177,7 +186,7 @@ global boolean write_only = false;
  * Abort function
  * return boolean return true if abort
  */
-global boolean() AbortFunction = GetModified;
+global boolean() AbortFunction = nil;
 
 /**
  * map of deafult values for options in UI
@@ -207,12 +216,6 @@ global map <string, string > DEFAULT_CONFIG = $[
  *    
  */
 global map <string, string > KDUMP_SETTINGS = $[];
-
-/**
- * time for progress bar
- *    
- */
-integer sl = 500;
 
 /**
  * Abort function
@@ -523,6 +526,33 @@ string BuildCrashkernelValue ()
 
 
 /**
+ * Check if default boot section is Xen section
+ * remember position of section (important for saving to xen_append)
+ * @param string name of section
+ */
+
+define void CheckXenDefault(string act_boot_secion)
+{
+    if ((act_boot_secion != "") && (act_boot_secion != nil))
+    {
+       integer section_position = -1;
+       foreach(map section, BootCommon::sections, 
+       {
+	    section_position = section_position +1;
+            string name = tostring(section["name"]:nil);
+	    string type = tostring(section["type"]:nil);
+            if ((name == act_boot_secion) && (type == "xen"))
+            { 
+	       section_pos = section_position;
+               y2milestone("default boot section is Xen...");
+            }              
+       });
+       if (section_pos == -1)
+          y2milestone("default boot section is NOT Xen...");
+    }
+}
+
+/**
  * Read current kdump configuration
  * from XEN boot section
  * read kernel parameter "crashkernel"
@@ -618,9 +648,6 @@ boolean ReadKdumpKernelParam () {
   crashkernel_param_value = result;
   if (result != "false")
      alocated_memory = getAlocatedMemory(crashkernel_param_value);
-     //alocated_memory = substring(result,0,search(result,"M")); //FIXME get alocated memory need to be fixed
-
-  //Popup::Message(alocated_memory);
 
   return true;
 }
@@ -644,12 +671,6 @@ boolean ProposeAlocatedMemory ()
   y2milestone("[kdump] allocated memory if not set in \"crashkernel\" param: %1", alocated_memory);
   return true;
 }
-
-
-
-
-
-
 
 /**
  * Read available memory
@@ -685,8 +706,6 @@ boolean ReadAvailableMemory () {
 
 
 
-
-
 /**
  * Read current kdump configuration
  *
@@ -701,12 +720,11 @@ boolean ReadKdumpSettings () {
 
     map <string, string > debug_KDUMP_SETTINGS = KDUMP_SETTINGS;
 
+    // delete KDUMP_SAVEDIR - it can include password
     debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "";
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
     y2milestone("kdump configuration has been read without value \"KDUMP_SAVEDIR\": %1", debug_KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
-
-    
 
     return true;
 }
@@ -720,11 +738,11 @@ boolean ReadKdumpSettings () {
  */
 boolean WriteKdumpSettings () {
     map <string, string > debug_KDUMP_SETTINGS = KDUMP_SETTINGS;
+    // delete KDUMP_SAVEDIR - it can include password
     debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "";
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
     y2milestone("Writing kdump configuration without value \"KDUMP_SAVEDIR\": %1", debug_KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
-
 
     foreach (string option_key, string option_val, KDUMP_SETTINGS, {
 	SCR::Write(add(.sysconfig.kdump, option_key), option_val);
@@ -744,6 +762,13 @@ boolean WriteKdumpSettings () {
 boolean WriteKdumpBootParameter () {
   boolean result = true;
   boolean old_progress = false;
+  if (Mode::installation())
+  {
+     Bootloader::Read();
+     actual_boot_section = Bootloader::getDefaultSection ();
+     y2milestone("Default boot section is %1", actual_boot_section);
+     CheckXenDefault(actual_boot_section);
+  }
   if (add_crashkernel_param) {
      string crash_value = BuildCrashkernelValue ();
            
@@ -764,13 +789,12 @@ boolean WriteKdumpBootParameter () {
         Progress::set (old_progress);
         // Popup::Message(crash_value);
         y2milestone("[kdump] (WriteKdumpBootParameter) adding chrashkernel option with value : %1", crash_value);
-        if (!Mode::commandline())
+        if (Mode::normal())
            Popup::Message(_("To apply changes a reboot is necessary."));
 
         Service::Enable("kdump");
         return result;
      }
-
      
      // start kernel-kdump at boot
      Service::Enable("kdump");
@@ -784,7 +808,7 @@ boolean WriteKdumpBootParameter () {
        old_progress = Progress::set (false);
        Bootloader::Write();
        Progress::set (old_progress);
-       if (!Mode::commandline())
+       if (Mode::normal())
           Popup::Message(_("To apply changes a reboot is necessary."));
     }
     Service::Disable("kdump");
@@ -806,7 +830,6 @@ global boolean Read()
     /* Kdump read dialog caption */
     string caption = _("Initializing kdump Configuration");
     integer steps = 4;
-    //sleep(sl);
 
     Progress::New( caption, " ", steps, [
 	    /* Progress stage 1/4 */
@@ -831,39 +854,33 @@ global boolean Read()
 	""
     );
 
-    //sleep(sl);
     // read database
     if(Abort()) return false;
     Progress::NextStage();
     /* Error message */
     if(!ReadKdumpSettings ()) Report::Error(_("Cannot read config file /etc/sysconfig/kdump"));
-    //sleep(sl);
 
     // read another database
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
     if(!ReadDiskPartitions ()) Report::Error(_("Cannot read disk partitions."));
-    //sleep(sl);
 
    // read another database
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
     if(!ReadKdumpKernelParam ()) Report::Error(_("Cannot read kernel boot options."));
-    //sleep(sl);
 
     // read another database
     if(Abort()) return false;
     Progress::NextStep();
     /* Error message */
     if(!ReadAvailableMemory ()) Report::Error(_("Cannot read available memory."));
-    //sleep(sl);
 
     if(Abort()) return false;
     /* Progress finished */
     Progress::NextStage();
-    //sleep(sl);
 
     if(Abort()) return false;
     modified = false;
@@ -882,7 +899,6 @@ global boolean Write()
     //number of stages
     integer steps = 2;
 
-    sleep(sl);
 
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
@@ -906,22 +922,104 @@ global boolean Write()
     Progress::NextStage();
     /* Error message */
     if(!WriteKdumpSettings ()) Report::Error (_("Cannot write settings."));
-    sleep(sl);
 
     // write/delete bootloader option for kernel "crashkernel"
     if(Abort()) return false;
     Progress::NextStage ();
     /* Error message */
     if(!WriteKdumpBootParameter ()) Report::Error (_("Adding crashkernel parameter to bootloader fault."));
-    sleep(sl);
 
     if(Abort()) return false;
     /* Progress finished */
     Progress::NextStage();
-    sleep(sl);
 
     if(Abort()) return false;
     return true;
+}
+
+/**
+ * Adding necessary packages for installation
+ *
+ */
+
+define void AddPackages()
+{
+    
+    if (Mode::installation()) 
+    {
+        kdump_packages = add(kdump_packages, "kexec-tools");
+	kdump_packages = add(kdump_packages, "yast2-kdump");
+        if (Arch::ppc64())
+            kdump_packages = add(kdump_packages, "kernel-kdump");
+        else
+            kdump_packages = add(kdump_packages, "kdump");          	
+    }
+}
+
+/**
+ * Propose global variables once...
+ * after that remember user settings
+ */
+
+define void ProposeGlobalVars()
+{
+    if (!propose_called)
+    {
+       // set adding boot option...
+       crashkernel_param = false;
+       add_crashkernel_param = true;
+       // added defualt settings
+       KDUMP_SETTINGS = DEFAULT_CONFIG;     
+    }
+    propose_called = true;
+}
+
+
+/**
+ * Check if user enabled kdump
+ * if no deselect packages for installing
+ * if yes add necessary packages for installation
+ */
+global define void CheckPackages()
+{
+    // remove duplicates
+    kdump_packages = toset(kdump_packages);
+    if (!add_crashkernel_param)
+    {
+	y2milestone("deselect packages for installation: %1", kdump_packages);
+        boolean pkg_deselect = false;
+        foreach (string p, kdump_packages, 
+	{
+	    if (Pkg::IsSelected (p))
+	    {
+		Pkg::PkgNeutral (p);
+		pkg_deselect = true;
+	    }
+	});
+	if (pkg_deselect)
+	{
+	    // if package was added in inst. proposal, I can't be sure
+	    // that dependencies will be solved
+	    Pkg::PkgSolve (false);
+	}
+    } else {
+	y2milestone("select packages for installation: %1", kdump_packages);
+	boolean pkg_added = false;
+	foreach (string p, kdump_packages, 
+	{
+	    if (!Pkg::IsSelected (p))
+	    {
+		Pkg::PkgInstall (p);
+		pkg_added = true;
+	    }
+	});
+	if (pkg_added)
+	{
+	    // if package was added in inst. proposal, I can't be sure
+	    // that dependencies will be solved
+	    Pkg::PkgSolve (false);
+	}
+    }
 }
 
 /**
@@ -932,22 +1030,21 @@ global define void Propose ()
 {
 
     y2milestone("Proposing new settings of kdump");
-    // adding defualt settings
-    KDUMP_SETTINGS = DEFAULT_CONFIG;
+
     // set available partitions...
     ReadDiskPartitions ();
-    //FIXME: IMO it should be in Write because after writing bootloader...
-    // read bootloader settings
-    Bootloader::Read();
-    // set actual/defualt boot section
-    actual_boot_section = Bootloader::getDefaultSection ();
 
-    // set adding boot option...
-    crashkernel_param = false;
-    add_crashkernel_param = false;      
-
+    // set default values for global variables
+    ProposeGlobalVars();
     // read available memory
     ReadAvailableMemory ();
+
+    // add packages for installation
+    AddPackages();
+
+    // select packages for installation
+    CheckPackages();
+
 }
 /**
  * Create a textual summary and a list of unconfigured cards
@@ -956,8 +1053,8 @@ global define void Propose ()
 global define list<string> Summary () 
 {
     list<string> result = [];
-    result = add (result, sformat (_("Kdump status: %1"), (add_crashkernel_param ? _("disabled"):_("enabled"))));
-    if (!add_crashkernel_param )
+    result = add (result, sformat (_("Kdump status: %1"), (add_crashkernel_param ? _("enabled") :_("disabled"))));
+    if (add_crashkernel_param )
     {
     	result = add (result, sformat (_("Value of crashkernel option: %1"), BuildCrashkernelValue()));
     	result = add (result, sformat (_("Dump format: %1"), KDUMP_SETTINGS["KDUMP_DUMPFORMAT"]:""));
@@ -975,6 +1072,7 @@ global define map Export ()
 {
     map out = $[
 	    "crash_kernel" : BuildCrashkernelValue(),
+	    "add_crash_kernel" :  add_crashkernel_param,
 	    "general" : KDUMP_SETTINGS,
     ];
 
@@ -991,6 +1089,7 @@ global define map Export ()
 global define boolean Import (map settings) 
 {
     crashkernel_param_value = settings["crash_kernel"]:"";
+    add_crashkernel_param = settings["add_crash_kernel"]:false;
     boolean result = true;
     map <string, string > my_import_map = settings["general"]:$[];
     foreach (any key, Map::Keys(DEFAULT_CONFIG), 

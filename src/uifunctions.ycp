@@ -16,7 +16,7 @@ import "Kdump";
 import "Service";
 import "Package";
 import "PackageSystem";
-
+import "Mode";
 
     // EXAMPLE FUNCTIONS
 /*
@@ -148,12 +148,21 @@ term cifs = `VBox(
   * Function initializes option "Enable/Disable kdump"
   */
 void InitEnableDisalbeKdump (string key) {
-  if ((Kdump::add_crashkernel_param) && (Service::Status("kdump")==0)) {
-     UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"enable_kdump");
+
+  if (Mode::installation())
+  {
+      if (Kdump::add_crashkernel_param)
+         UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"enable_kdump");
+      else 
+         UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"disable_kdump");
 
   } else {
-     UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"disable_kdump");
-  }  
+      if ((Kdump::add_crashkernel_param) && (Service::Status("kdump") == 0 ))
+         UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"enable_kdump");
+      else 
+         UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"disable_kdump");
+  }
+  
 }
 
 /**
@@ -511,11 +520,18 @@ boolean ValidTargetKdump (string key, map event) {
   } else if (radiobut == "cifs") {
 
      // fix for bnc #307307 module should check if cifs tools are installed when requested
-     if (!Package::Installed("cifs-mount"))
+     if (Mode::installation() ||Mode::autoinst() )
      {
-	 y2milestone("SMB/CIFS share cannot be mounted, installing missing 'cifs-mount' package...");
-	 // install cifs-mount package
-	 PackageSystem::CheckAndInstallPackages(["cifs-mount"]);
+	Kdump::kdump_packages = add(Kdump::kdump_packages, "cifs-mount");
+	y2milestone("add cifs-mount to selected packages to installation");
+
+     } else {
+         if (!Package::Installed("cifs-mount"))
+     	 {
+	    y2milestone("SMB/CIFS share cannot be mounted, installing missing 'cifs-mount' package...");
+	    // install cifs-mount package
+	    PackageSystem::CheckAndInstallPackages(["cifs-mount"]);
+         }
      }
 
      value = tostring(UI::QueryWidget(`id ("server"), `Value));
@@ -857,8 +873,6 @@ void InitRawPartitions (string key) {
 }
 
 
-
-
 /**
   * Function stores option 
   * "Enable Raw Saving in Initrd"
@@ -879,12 +893,6 @@ void StoreRawPartitions (string key, map event) {
   
 
 }
-
-
-
-
-
-
 
 
 /**
@@ -1095,25 +1103,34 @@ boolean ValidDumpLevel (string key, map event) {
 
   if ((dumplevel > 0 ) || (dumplevel == nil)) {
 
-     if (Package::Installed("makedumpfile")) {
-        return true;
+     if (Mode::installation() ||Mode::autoinst() )
+     {
+	Kdump::kdump_packages = add(Kdump::kdump_packages, "makedumpfile");
+	y2milestone("add makedumpfile to selected packages to installation");
+
      } else {
-        list <string> package_list = [];
-        package_list = add(package_list, "makedumpfile"); 
-
-        if (!PackageSystem::CheckAndInstallPackages(package_list)) {
-           result = false;
-
-           if (!Mode::commandline()) {
-              Popup::Error(Message::CannotContinueWithoutPackagesInstalled());
-           } else {
-              CommandLine::Error(Message::CannotContinueWithoutPackagesInstalled());
-           }
-           y2error("[kdump] (ValidDumpLevel) Installation of package list %1 failed or aborted", package_list);
+        if (Package::Installed("makedumpfile")) {
+           return true;
         } else {
-           result = true;
-        }
-      } //end of else for if (Package::Installed("makedumpfile"))
+           list <string> package_list = [];
+           package_list = add(package_list, "makedumpfile"); 
+
+           if (!PackageSystem::CheckAndInstallPackages(package_list)) 
+           {
+              result = false;
+
+              if (!Mode::commandline()) 
+              {
+                 Popup::Error(Message::CannotContinueWithoutPackagesInstalled());
+              } else {
+                 CommandLine::Error(Message::CannotContinueWithoutPackagesInstalled());
+              }
+              y2error("[kdump] (ValidDumpLevel) Installation of package list %1 failed or aborted", package_list);
+           } else {
+              result = true;
+           }
+        } //end of else for if (Package::Installed("makedumpfile"))
+     } 
   } //end of if ((dumplevel >0 ) || (dumplevel == nil))
   return result;
 }
@@ -1168,11 +1185,6 @@ symbol HandleDumpLevel(string key, map event) {
   return nil;
 }
 
-
-
-
-
-
 /**
   * Function initializes option 
   * "KdumpMemory"
@@ -1212,7 +1224,6 @@ symbol HandleKdumpMemory (string key, map event) {
   }
 
 }
-
 
 
 /**
@@ -1289,25 +1300,34 @@ boolean ValidDumpFormat (string key, map event) {
 
   if ((value != "elf_format") || (value == nil)) {
 
-     if (Package::Installed("makedumpfile")) {
-        return true;
+     if (Mode::installation() || Mode::autoinst() )
+     {
+	Kdump::kdump_packages = add(Kdump::kdump_packages, "makedumpfile");
+	y2milestone("add makedumpfile to selected packages to installation");
+
      } else {
-        list <string> package_list = [];
-        package_list = add(package_list, "makedumpfile"); 
-
-        if (!PackageSystem::CheckAndInstallPackages(package_list)) {
-           result = false;
-
-           if (!Mode::commandline()) {
-              Popup::Error(Message::CannotContinueWithoutPackagesInstalled());
-           } else {
-              CommandLine::Error(Message::CannotContinueWithoutPackagesInstalled());
-           }
-           y2error("[kdump] (ValidDumpLevel) Installation of package list %1 failed or aborted", package_list);
+        if (Package::Installed("makedumpfile")) {
+           return true;
         } else {
-           result = true;
-        }
-      } //end of else for if (Package::Installed("makedumpfile"))
+           list <string> package_list = [];
+           package_list = add(package_list, "makedumpfile"); 
+
+           if (!PackageSystem::CheckAndInstallPackages(package_list)) 
+           {
+              result = false;
+
+              if (!Mode::commandline()) 
+              {
+                 Popup::Error(Message::CannotContinueWithoutPackagesInstalled());
+              } else {
+                 CommandLine::Error(Message::CannotContinueWithoutPackagesInstalled());
+              }
+              y2error("[kdump] (ValidDumpFormat) Installation of package list %1 failed or aborted", package_list);
+           } else {
+              result = true;
+           }
+        } //end of else for if (Package::Installed("makedumpfile"))
+     } 
   } //end of if ((value != "elf_format") || (value == nil))
   return result;
 }
@@ -1361,8 +1381,6 @@ symbol HandleEnableDeleteImages (string key, map event) {
 
      }
   }
-
-
 }
 
 
@@ -1376,8 +1394,6 @@ void StoreEnableDeleteImages (string key, map event) {
   if (!value) {
      Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"] = "0";
   } 
-
-
 
 }
 

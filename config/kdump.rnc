@@ -6,10 +6,12 @@ namespace config = "http://www.suse.com/1.0/configns"
 kdump =
   element kdump {
      kdump_crash_kernel? &
+     kdump_add_crash_kernel? &
      kdump_general?
 }
 
 kdump_crash_kernel = element crash_kernel { text }
+kdump_add_crash_kernel = element add_crash_kernel { BOOLEAN }
 
 kdump_general =
   element general {
