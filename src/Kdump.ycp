@@ -49,6 +49,8 @@ import "Arch";
 import "Mode";
 import "BootCommon";
 import "Map";
+import "ProductControl";
+import "ProductFeatures";
 
 /**
  * Prototypes
@@ -541,11 +543,13 @@ define void CheckXenDefault(string act_boot_secion)
 	    section_position = section_position +1;
             string name = tostring(section["name"]:nil);
 	    string type = tostring(section["type"]:nil);
+
             if ((name == act_boot_secion) && (type == "xen"))
             { 
 	       section_pos = section_position;
                y2milestone("default boot section is Xen...");
             }              
+
        });
        if (section_pos == -1)
           y2milestone("default boot section is NOT Xen...");
@@ -898,8 +902,15 @@ global boolean Write()
 
     //number of stages
     integer steps = 2;
-
-
+    if (Mode::installation())
+    {
+       boolean write_kdump = ProductFeatures::GetBooleanFeature ("globals", "enable_kdump");
+       if ((write_kdump == nil) || (!write_kdump))
+       {
+	  y2milestone("Installation doesn't support kdump.");
+          return true;
+       }
+    }
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
 	    /* Progress stage 1/2 */
