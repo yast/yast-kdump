@@ -17,7 +17,7 @@ textdomain "kdump";
 
 import "Kdump";
 import "Mode";
-
+import "Progress";
 
 any ret = nil;
 string func = "";
@@ -29,6 +29,8 @@ if(size(WFM::Args()) > 0 && is(WFM::Args(0), string)) {
     if(size(WFM::Args()) > 1 && is(WFM::Args(1), map))
 	param = (map)WFM::Args(1);
 }
+
+boolean progress_orig = Progress::set (false);
 
 y2milestone ("starting kdump_finish");
 y2debug("func=%1", func);
@@ -52,7 +54,7 @@ else
     y2error ("unknown function: %1", func);
     ret = nil;
 }
-
+Progress::set (progress_orig);
 y2debug("ret=%1", ret);
 y2milestone("kdump_finish finished");
 return ret;
