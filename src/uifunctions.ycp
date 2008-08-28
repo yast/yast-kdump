@@ -157,7 +157,7 @@ void InitEnableDisalbeKdump (string key) {
          UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"disable_kdump");
 
   } else {
-      if ((Kdump::add_crashkernel_param) && (Service::Status("kdump") == 0 ))
+      if ((Kdump::add_crashkernel_param) && (Service::Status("boot.kdump") == 0 ))
          UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"enable_kdump");
       else 
          UI::ChangeWidget(`id("EnableDisalbeKdump"),`Value,"disable_kdump");
