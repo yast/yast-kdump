@@ -796,15 +796,15 @@ boolean WriteKdumpBootParameter () {
         if (Mode::normal())
            Popup::Message(_("To apply changes a reboot is necessary."));
 
-        Service::Enable("kdump");
+        Service::Enable("boot.kdump");
         return result;
      }
      
      // start kernel-kdump at boot
-     Service::Enable("kdump");
+     Service::Enable("boot.kdump");
 
-     if (Service::Status("kdump") == 0)
-        Service::Restart("kdump");
+     if (Service::Status("boot.kdump") == 0)
+        Service::Restart("boot.kdump");
   } else {
     if (crashkernel_param) {
        //delete crashkernel paramter from bootloader
@@ -815,9 +815,9 @@ boolean WriteKdumpBootParameter () {
        if (Mode::normal())
           Popup::Message(_("To apply changes a reboot is necessary."));
     }
-    Service::Disable("kdump");
-    if (Service::Status("kdump") == 0)
-       Service::Stop("kdump");
+    Service::Disable("boot.kdump");
+    if (Service::Status("boot.kdump") == 0)
+       Service::Stop("boot.kdump");
     return result;
   }    
   return true;
