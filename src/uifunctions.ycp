@@ -271,7 +271,7 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
    }
  map <string, string > debug_KDUMP_SAVE_TARGET = KDUMP_SAVE_TARGET;
 
- if (debug_KDUMP_SAVE_TARGET["password"]:nil != "")
+ if (debug_KDUMP_SAVE_TARGET["password"]:"" != "")
     debug_KDUMP_SAVE_TARGET["password"] = "**********";
 
  y2milestone("--------------KDUMP_SAVE_TARGET---------------");
@@ -1394,7 +1394,100 @@ void StoreEnableDeleteImages (string key, map event) {
   if (!value) {
      Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"] = "0";
   } 
+}
 
+
+/**
+  * Function initializes option 
+  * "SMTP Server"
+  */
+void InitSMTPServer (string key) {
+  UI::ChangeWidget(`id("SMTPServer"), `Value, Kdump::KDUMP_SETTINGS["KDUMP_SMTP_SERVER"]:"");
+}
+
+/**
+  * Function stores option 
+  * "SMTP Server"
+  */
+void StoreSMTPServer (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_SMTP_SERVER"] = tostring(UI::QueryWidget(`id("SMTPServer"), `Value));
+}
+
+/**
+  * Function initializes option 
+  * "User Name" (SMTP Settings)
+  */
+void InitSMTPUser (string key) {
+  UI::ChangeWidget(`id("SMTPUser"), `Value, Kdump::KDUMP_SETTINGS["KDUMP_SMTP_USER"]:"");
+}
+
+/**
+  * Function stores option 
+  * "User Name" (SMTP Settings)
+  */
+void StoreSMTPUser (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_SMTP_USER"] = tostring(UI::QueryWidget(`id("SMTPUser"), `Value));
+}
+
+/**
+  * Function initializes option 
+  * "Password" (SMTP Settings)
+  */
+void InitSMTPPassword (string key) {
+  UI::ChangeWidget(`id("SMTPPassword"), `Value, Kdump::KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"]:"");
+}
+
+/**
+  * Function stores option 
+  * "Password" (SMTP Settings)
+  */
+void StoreSMTPPassword (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"] = tostring(UI::QueryWidget(`id("SMTPPassword"), `Value));
+}
+
+/**
+  * Function initializes option 
+  * "Notification To"
+  */
+void InitNotificationTo (string key) {
+  UI::ChangeWidget(`id("NotificationTo"), `Value, Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_TO"]:"");
+}
+
+/**
+  * Function stores option 
+  * "Notification To"
+  */
+void StoreNotificationTo (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_TO"] = tostring(UI::QueryWidget(`id("NotificationTo"), `Value));
+}
+
+/**
+  * Function initializes option 
+  * "Notification CC"
+  */
+void InitNotificationCC (string key) {
+  UI::ChangeWidget(`id("NotificationCC"), `Value, Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_CC"]:"");
+}
+
+/**
+  * Function stores option 
+  * "Notification CC"
+  */
+void StoreNotificationCC (string key, map event) {
+  Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_CC"] = tostring(UI::QueryWidget(`id("NotificationCC"), `Value));
+}
+
+
+/**
+  * Function validates options in 
+  * "Dump Format"
+  * install makedumpfile if KDUMP_DUMPFORMAT == "compressed"
+  */
+
+boolean ValidEmail (string key, map event) {
+
+	Popup::Message(key);
+	return true;
 }
 
 /* EOF */

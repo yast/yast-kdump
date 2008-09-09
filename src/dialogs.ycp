@@ -184,6 +184,62 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("RawPartitions"),
   ],
 
+
+/*---------============ Email Notification screen=============------------*/
+
+  "SMTPServer"		: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("SMTP Server"),
+     "widget" 		: `textentry,
+     "init"		: InitSMTPServer,
+     //"handle"		: 
+     "store"		: StoreSMTPServer,
+     "help"		: HelpKdump("SMTPServer"),
+  ],
+
+
+  "SMTPUser"		: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("User Name"),
+     "widget" 		: `textentry,
+     "init"		: InitSMTPUser,
+     //"handle"		: 
+     "store"		: StoreSMTPUser,
+     "help"		: HelpKdump("SMTPUser"),
+  ],
+
+  "SMTPPassword"	: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Password"),
+     "widget" 		: `password,
+     "init"		: InitSMTPPassword,
+     //"handle"		: 
+     "store"		: StoreSMTPPassword,
+     "help"		: HelpKdump("SMTPPassword"),
+  ],
+
+  "NotificationTo"		: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Notification To"),
+     "widget" 		: `textentry,
+     "init"		: InitNotificationTo,
+     "validate_type"    : `function,
+     "validate_function": ValidEmail,
+     "store"		: StoreNotificationTo,
+     "help"		: HelpKdump("NotificationTo"),
+  ],
+
+  "NotificationCC"		: $[
+     //TRANSLATORS: TextEntry Label
+     "label" 		: _("Notification CC"),
+     "widget" 		: `textentry,
+     "init"		: InitNotificationCC,
+     "validate_type"    : `function,
+     "validate_function": ValidEmail,
+     "store"		: StoreNotificationCC,
+     "help"		: HelpKdump("NotificationCC"),
+  ],
+
 /*---------============ Expert Settings screen=============------------*/
 
   "InitrdKernel" 	: $[
@@ -308,10 +364,10 @@ map<string, map<string,any> > tabs = $[
 
 
   "dump_target"	: $[
-     "contents"		: `VBox(
+     "contents"		: `VBox(	
      	"TargetKdump",
         `VSpacing(1),
-        "RawPartitions",          
+        "RawPartitions",
         `VStretch ()
      ),
      "caption"		: _("Dump Target"),
@@ -321,6 +377,33 @@ map<string, map<string,any> > tabs = $[
      ]    
   ],
   
+
+  "email_notification" : $[
+     "contents"		: `VBox(
+	`Frame ( _("SMTP Server"),`HBox(`HSpacing(1),`VBox(
+          `Left("SMTPServer"),
+	  `HBox(
+		"SMTPUser",
+		`HSpacing(1),
+		"SMTPPassword",
+		`HStretch ()
+	   )
+        ))),
+
+	`Frame ( _("Notification Email addresses"),`HBox(`HSpacing(1),`VBox(
+          `Left("NotificationTo"),
+	  `Left("NotificationCC")
+        ))),
+
+        `VStretch ()
+     ),
+     "caption"		: _("Email Notification"),
+     "tree_item_label"	: _("Email Notification"),
+     "widget_names"	: [ 
+        "DisBackButton", "SMTPServer", "SMTPUser", "SMTPPassword", "NotificationTo", "NotificationCC"
+     ]    
+  ],
+
   "exp_settings" 	: $[
      "contents"		: `VBox(
         `Frame ( _("Custom Kernel for Kdump"),`HBox(`HSpacing(1),`VBox(          
@@ -360,14 +443,14 @@ map<string, map<string,any> > tabs = $[
 	"DisBackButton", "KdumpCommandLine",
         "KdumpCommandLineAppend", "RunLevel",
         "EnableDeleteImages", "NumberDumps", 
-        "InitrdKernel", "SelectKernel", "EnableReboot"
+        "InitrdKernel", "SelectKernel", "EnableReboot", "email_notification",
      ]    
   ],
 
 ];
 
 symbol RunKdumpDialogs() {
-  list<string> sim_dialogs = [ "start_up", "dump_filtering", "dump_target" ,"exp_settings"];
+  list<string> sim_dialogs = [ "start_up", "dump_filtering", "dump_target", "email_notification", "exp_settings"];
 
   return DialogTree::ShowAndRun ($[ 
   //return CWMTab::CreateWidget($[ 

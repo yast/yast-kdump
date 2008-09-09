@@ -210,6 +210,37 @@ boolean cmdKdumpShow (map options) {
      //TRANSLATORS: CommandLine printed text
      CommandLine::Print(sformat(_("Numbers of old dumps: %1"),Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"]:nil));
   }
+
+  if (Kdump::KDUMP_SETTINGS["KDUMP_SMTP_SERVER"]:"" != "") {
+     CommandLine::Print("");
+     //TRANSLATORS: CommandLine printed text
+     CommandLine::Print(sformat(_("Kdump SMTP Server: %1"), Kdump::KDUMP_SETTINGS["KDUMP_SMTP_SERVER"]:nil));
+  }
+
+  if (Kdump::KDUMP_SETTINGS["KDUMP_SMTP_USER"]:"" != "") {
+     CommandLine::Print("");
+     //TRANSLATORS: CommandLine printed text
+     CommandLine::Print(sformat(_("Kdump SMTP User: %1"), Kdump::KDUMP_SETTINGS["KDUMP_SMTP_USER"]:nil));
+  }
+
+  if (Kdump::KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"]:"" != "") {
+     CommandLine::Print("");
+     //TRANSLATORS: CommandLine printed text
+     CommandLine::Print(_("Kdump SMTP Password: ********"));
+  }
+
+  if (Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_TO"]:"" != "") {
+     CommandLine::Print("");
+     //TRANSLATORS: CommandLine printed text
+     CommandLine::Print(sformat(_("Kdump Sending Notification To: %1"), Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_TO"]:""));
+  }
+
+  if (Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_CC"]:"" != "") {
+     CommandLine::Print("");
+     //TRANSLATORS: CommandLine printed text
+     CommandLine::Print(sformat(_("Kdump Sending Copy of Notification To: %1"), Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_CC"]:""));
+  }
+
   CommandLine::Print("");
 
 
@@ -555,7 +586,7 @@ boolean cmdKdumpRunLevel (map options) {
         return false;
      }
 
-  } else {  
+  } else {
      // TRANSLATORS: CommandLine error message    
      CommandLine::Error(_("Wrong options were used."));
      return false;
@@ -576,7 +607,7 @@ boolean cmdKdumpKeepOldDumps (map options) {
         return false;
      }
 
-  } else {   
+  } else {
      // TRANSLATORS: CommandLine error message  
      CommandLine::Error(_("Wrong options were used."));
      return false;
@@ -584,6 +615,105 @@ boolean cmdKdumpKeepOldDumps (map options) {
 
 }
 
+boolean cmdKdumpSMTPServer (map options)
+{
+  if (options["server"]:nil!=nil) {
+     string server = tostring(options["server"]:nil);
+
+     if ((server != "") && (server != nil)){
+        Kdump::KDUMP_SETTINGS["KDUMP_SMTP_SERVER"]= server;
+        return true;
+     } else {
+        // TRANSLATORS: CommandLine error message 
+        CommandLine::Error(_("Wrong value of options \"server\"."));
+        return false;
+     }
+
+  } else {
+     // TRANSLATORS: CommandLine error message    
+     CommandLine::Error(_("Wrong options were used."));
+     return false;
+  }
+}
+
+boolean cmdKdumpSMTPUser (map options)
+{
+  if (options["user"]:nil!=nil) {
+     string user = tostring(options["user"]:nil);
+
+     if ((user != "") && (user != nil)){
+        Kdump::KDUMP_SETTINGS["KDUMP_SMTP_USER"]= user;
+        return true;
+     } else {
+        // TRANSLATORS: CommandLine error message 
+        CommandLine::Error(_("Wrong value of options \"user\"."));
+        return false;
+     }
+
+  } else {
+     // TRANSLATORS: CommandLine error message    
+     CommandLine::Error(_("Wrong options were used."));
+     return false;
+  }
+}
+
+
+boolean cmdKdumpSMTPPass (map options)
+{
+  if (options["pass"]:nil!=nil) {
+     string password = cmdParsePassPath(tostring(options["pass"]:nil));
+     if ((password == nil) || (password == ""))
+        return false;
+     Kdump::KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"] = password;
+  } else {
+     // TRANSLATORS: CommandLine error message    
+     CommandLine::Error(_("Wrong options were used."));
+     return false;
+  }
+}
+
+
+boolean cmdKdumpSMTPNotifTo (map options)
+{
+  if (options["email"]:nil!=nil) {
+     string email = tostring(options["email"]:nil);
+
+     if ((email != "") && (email != nil)){
+        Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_TO"]= email;
+        return true;
+     } else {
+        // TRANSLATORS: CommandLine error message 
+        CommandLine::Error(_("Wrong value of options \"email\"."));
+        return false;
+     }
+
+  } else {
+     // TRANSLATORS: CommandLine error message    
+     CommandLine::Error(_("Wrong options were used."));
+     return false;
+  }
+}
+
+boolean cmdKdumpSMTPNotifCC (map options)
+{
+  if (options["email"]:nil!=nil) {
+     string email = tostring(options["email"]:nil);
+
+     if ((email != "") && (email != nil)){
+        Kdump::KDUMP_SETTINGS["KDUMP_NOTIFICATION_CC"]= email;
+        return true;
+     } else {
+        // TRANSLATORS: CommandLine error message 
+        CommandLine::Error(_("Wrong value of options \"email\"."));
+        return false;
+     }
+
+  } else {
+     // TRANSLATORS: CommandLine error message    
+     CommandLine::Error(_("Wrong options were used."));
+     return false;
+  }
+}
 
 map cmdline_description = $[
     "id" 	: "kdump",
@@ -710,6 +840,54 @@ map cmdline_description = $[
 	            ],
         ],
 
+	"smtpserver": $[
+	"handler" : cmdKdumpSMTPServer,
+	// TRANSLATORS: CommandLine help
+	"help" : _("SMTP Server for sending notification messages."),
+	"example" : [
+		   "smtpserver server=smtp.server.com",
+	            ],
+	],
+
+	"smtpuser": $[
+	"handler" : cmdKdumpSMTPUser,
+	// TRANSLATORS: CommandLine help
+	"help" : _("SMTP Username for sending notification messages."),
+	"example" : [
+		   "smtpuser user=foo_user",
+	            ],
+	],
+
+	"smtppass": $[
+	"handler" : cmdKdumpSMTPPass,
+	// TRANSLATORS: CommandLine help
+	"help" : _("SMTP Password for sending notification messages. Path of file which includes password (plain text file)"),
+	"example" : [
+		   "smtppass pass=/path/to/file",
+	            ],
+	],
+
+	"notificationto": $[
+	"handler" : cmdKdumpSMTPNotifTo,
+	// TRANSLATORS: CommandLine help
+	"help" : _("Email address for sending notification messages"),
+	"example" : [
+		   "notificationto email=foo@bar.com",
+		   "notificationto email=\"foo1@bar.com foo2@bar.com\"",
+	            ],
+	],
+
+	"notificationcc": $[
+	"handler" : cmdKdumpSMTPNotifCC,
+	// TRANSLATORS: CommandLine help
+	"help" : _("Email address for sending copy of notification messages"),
+	"example" : [
+		   "notificationcc email=foo@bar.com",
+		   "notificationcc email=\"foo1@bar.com foo2@bar.com\"",
+	            ],
+	],
+
+
     ],
     "options"		: $[
         "enable": $[
@@ -812,6 +990,13 @@ map cmdline_description = $[
 		// TRANSLATORS: CommandLine help
 		"help" : _("Number of dumps. 0 means keep all."),
 	],
+
+	"email": $[
+		"type" : "string",
+		// TRANSLATORS: CommandLine help
+		"help" : _("Email address"),
+	],
+
 	
     ],
     "mappings"		: $[
@@ -861,6 +1046,27 @@ map cmdline_description = $[
         "keepolddumps": [
 		"no",
 	],
+
+        "smtpserver": [
+		"server",
+	],
+
+        "smtpuser": [
+		"user",
+	],
+
+        "smtppass": [
+		"pass",
+	],
+
+        "notificationto": [
+		"email",
+	],
+
+        "notificationcc": [
+		"email",
+	],
+
 
 
     ]
