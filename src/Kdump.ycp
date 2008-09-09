@@ -211,6 +211,11 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KDUMP_VERBOSE"      	    : "3",
      "KDUMP_DUMPLEVEL"		    : "0",
      "KDUMP_DUMPFORMAT"		    : "ELF", //or "compressed"
+     "KDUMP_SMTP_SERVER"	    : "",
+     "KDUMP_SMTP_USER"		    : "",
+     "KDUMP_SMTP_PASSWORD"	    : "",
+     "KDUMP_NOTIFICATION_TO"	    : "",
+     "KDUMP_NOTIFICATION_CC"	    : "",
 ];
 
 /**
@@ -725,9 +730,10 @@ boolean ReadKdumpSettings () {
     map <string, string > debug_KDUMP_SETTINGS = KDUMP_SETTINGS;
 
     // delete KDUMP_SAVEDIR - it can include password
-    debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "";
+    debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "********";
+    debug_KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"] = "********";
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
-    y2milestone("kdump configuration has been read without value \"KDUMP_SAVEDIR\": %1", debug_KDUMP_SETTINGS);
+    y2milestone("kdump configuration has been read without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1", debug_KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
 
     return true;
@@ -743,9 +749,10 @@ boolean ReadKdumpSettings () {
 boolean WriteKdumpSettings () {
     map <string, string > debug_KDUMP_SETTINGS = KDUMP_SETTINGS;
     // delete KDUMP_SAVEDIR - it can include password
-    debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "";
+    debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "********";
+    debug_KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"] = "********";
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
-    y2milestone("Writing kdump configuration without value \"KDUMP_SAVEDIR\": %1", debug_KDUMP_SETTINGS);
+    y2milestone("kdump configuration has been read without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1", debug_KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
 
     foreach (string option_key, string option_val, KDUMP_SETTINGS, {

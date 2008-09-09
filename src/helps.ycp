@@ -136,6 +136,20 @@ map HELPS = $[
   "NumberDumps" : _("<p><b>Number of Old Dumps</b> - 
    Specifies how many old dumps are kept.<br></p>"),
 
+  /* SMTP Server*/
+  "SMTPServer"	: _("<p><b>SMTP Server</b>...</p>"),
+
+  /*SMTP User Name */
+  "SMTPUser"	: _("<p><b>User Name</b>...</p>"),
+
+  /*SMTP Password */
+  "SMTPPassword": _("<p><b>Password</b>...</p>"),
+
+  /* Notification To (email addresses) */
+  "NotificationTo": _("<p><b>Notification To</b>...</p>"),
+
+  /* Notification CC (email addresses) */
+  "NotificationCC": _("<p><b>Notification CC</b>...</p>"),
 
     /* Read dialog help 1/2 */
     "read" : _("<p><b><big>Initializing Kdump Configuration</big></b><br>

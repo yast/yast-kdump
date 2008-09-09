@@ -28,5 +28,10 @@ kdump_general =
      element KDUMP_DUMPDEV { text }? &
      element KDUMP_VERBOSE { text }? &
      element KDUMP_DUMPLEVEL { text }? &
-     element KDUMP_DUMPFORMAT { text }?
+     element KDUMP_DUMPFORMAT { text }? &
+     element KDUMP_SMTP_SERVER { text }? &
+     element KDUMP_SMTP_USER { text }? &
+     element KDUMP_SMTP_PASSWORD { text }? &
+     element KDUMP_NOTIFICATION_TO { text }? &
+     element KDUMP_NOTIFICATION_CC { text }?
 }
