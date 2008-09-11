@@ -97,7 +97,7 @@ map HELPS = $[
   "RawPartitions": _("<p><b>Enable Raw Saving in Initrd</b> - allows to save 
     the dump in initrd before mounting any filesystem. Then the system is rebooted, and 
     if the filesystem does not mount, the user can repair it with a rescue system. On the first normal 
-    boot, the dump is saved to the final dump destination. It is possible to select raw partition 
+    boot, the dump is saved to the final dump destination. It is possible to a select raw partition 
     from <i>The List of Available Raw Paritions of All Disks Without Known Filesystem</i><br>.</p>
 "), 
 
@@ -112,10 +112,9 @@ map HELPS = $[
 
  /* Kdump Command Line Append - TextEntry 1/1*/
   "KdumpCommandLineAppend" : _("<p><b>Kdump Command Line Append</b>
-    Set this option means _append_  values to the default command line string. 
+    Setting this option means _append_  values to the default command line string. 
     The string will be appended if the <i>Kdump Command Line</i>
-    is set. <br></p>
-"),
+    is set. <br></p>\n"),
 
   /* The Run-level to Boot the Kdump Kernel - ComboBox 1/1*/
   "RunLevel" : _("<p><b>The Runlevel to Boot the Kdump Kernel</b> - 
