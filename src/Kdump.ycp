@@ -40,7 +40,7 @@ import "Report";
 import "Summary";
 import "Message";
 import "BootCommon";
-import "Storage";
+//import "Storage";
 import "Map";
 import "Bootloader";
 import "Service";
@@ -203,6 +203,7 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KEXEC_OPTIONS"                : "",  
      "KDUMP_RUNLEVEL"               : "1",
      "KDUMP_IMMEDIATE_REBOOT"       : "yes",
+     "KDUMP_COPY_KERNEL"	    : "no",
      "KDUMP_TRANSFER"               : "",
      "KDUMP_SAVEDIR"      	    : "file:///var/log/dump",
      "KDUMP_KEEP_OLD_DUMPS"         : "5",
@@ -210,7 +211,7 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KDUMP_DUMPDEV"           	    : "",
      "KDUMP_VERBOSE"      	    : "3",
      "KDUMP_DUMPLEVEL"		    : "0",
-     "KDUMP_DUMPFORMAT"		    : "ELF", //or "compressed"
+     "KDUMP_DUMPFORMAT"		    : "compressed", //or "ELF"
      "KDUMP_SMTP_SERVER"	    : "",
      "KDUMP_SMTP_USER"		    : "",
      "KDUMP_SMTP_PASSWORD"	    : "",
@@ -253,67 +254,6 @@ global void SetModified() {
     modified = true;
     y2debug("modified=%1",modified);
 }
-
-/**
- * Read disk partitions
- *
- *  @return boolean successfull
- */
-
-boolean ReadDiskPartitions () {
-  // get complete map from Storage module
-  map<string,map> tg = Storage::GetTargetMap();
-  // extract only real disks from target map.
-  map<string,map> disks = filter( string k, map disk, tg, ``(disk["type"]:`CT_UNKNOWN==`CT_DISK));    
-  // extract only disks
-  list <string> list_of_disks = (list<string>) Map::Keys(disks);
-  // get a list of all partitions usable for data storage
-  list <string> list_disks = (list<string>) Map::Keys(disks);
-
-  y2milestone("[kdump] (ReadDiskPartitions)  ----------------Begin of ReadDiskPartitions ()--------------");
-  y2milestone("[kdump] (ReadDiskPartitions) list of disks: %1", list_disks);
-
-  list<map> data_parts = [];
-  foreach (string key, list_disks, {
-    data_parts = data_parts + filter( map p, disks[key,"partitions"]:[], ``(p["type"]:`primary!=`extended));
-  });    
-  //list<map> data_parts = filter( map p, disks["/dev/sda","partitions"]:[], ``(p["type"]:`primary!=`extended));
-
-  // parse partiotions with uknown file system
-  list<map> unknown = [];
-  unknown = filter( map p, data_parts, ``(p["detected_fs"]:nil==`unknown));
- 
-
-  list<string> uknown_partitions = [];
-  if (size(unknown)>0)
-     uknown_partitions = maplist( map p, unknown, ``(p["device"]:""));
-  y2milestone("[kdump] (ReadDiskPartitions) list of device names of partitions without filesystem: %1", uknown_partitions);
-  uknown_fs_partitions = uknown_partitions;
-  // get list of device names of partitions
-  list<string> parts = maplist( map p, data_parts, ``(p["device"]:""));
- 
-  y2milestone("[kdump] (ReadDiskPartitions) list of device names of partitions: %1", parts);
-
-  // get list of udev ids of partitions, need to prepend "/dev/disk/by-id/"
-  list<string> udevids = maplist( map p, data_parts, ``(p["udev_id",0]:""));
- 
-  y2milestone("[kdump] (ReadDiskPartitions) list of udev ids of partitions: %1", udevids);
-
-  
-  // combination name + uids to one list
-  integer i = 0;
-  // available_partitions = parts;
-  foreach (string key, udevids, {
-    // string disk_from_partition = filterchars(parts[i]:"", "abcdefghijklmnopqrstuvwxyz/");
-    string value = "/dev/disk/by-id/" + udevids[i]:"" +" ( " + parts[i]:"" +" )";
-    available_partitions = available_partitions + value;
-    i= i+1; 
-  });
- 
-  y2milestone("[kdump] (ReadDiskPartitions) list of available partitions (name + uid): %1", available_partitions);
-  y2milestone("[kdump] (ReadDiskPartitions)  ------------End of ReadDiskPartitions ()--------------------------");
-  return true;
-} 
 
 
 /**
@@ -845,8 +785,6 @@ global boolean Read()
     Progress::New( caption, " ", steps, [
 	    /* Progress stage 1/4 */
 	    _("Reading the config file..."),
-	    /* Progress stage 2/4 */
-	    _("Reading disk partitions..."),
             /* Progress stage 3/4 */
             _("Reading kernel boot options..."),
             /* Progress stage 4/4 */
@@ -870,12 +808,6 @@ global boolean Read()
     Progress::NextStage();
     /* Error message */
     if(!ReadKdumpSettings ()) Report::Error(_("Cannot read config file /etc/sysconfig/kdump"));
-
-    // read another database
-    if(Abort()) return false;
-    Progress::NextStep();
-    /* Error message */
-    if(!ReadDiskPartitions ()) Report::Error(_("Cannot read disk partitions."));
 
    // read another database
     if(Abort()) return false;
@@ -1048,9 +980,6 @@ global define void Propose ()
 {
 
     y2milestone("Proposing new settings of kdump");
-
-    // set available partitions...
-    ReadDiskPartitions ();
 
     // set default values for global variables
     ProposeGlobalVars();

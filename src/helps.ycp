@@ -93,14 +93,6 @@ map HELPS = $[
     <i>User Name</i> for connection. <i>Password</i> for connection.<br></p>"),
 
 
-  /* Enable Raw Saving in Initrd - ComboBox 1/1*/  
-  "RawPartitions": _("<p><b>Enable Raw Saving in Initrd</b> - allows to save 
-    the dump in initrd before mounting any filesystem. Then the system is rebooted, and 
-    if the filesystem does not mount, the user can repair it with a rescue system. On the first normal 
-    boot, the dump is saved to the final dump destination. It is possible to a select raw partition 
-    from <i>The List of Available Raw Paritions of All Disks Without Known Filesystem</i><br>.</p>
-"), 
-
   /* Custom Kdump Kernel - TextEntry 1/1*/
   "InitrdKernel":_("<p><b>Custom Kdump Kernel</b> The user can enter the custom kernel.
     The naming scheme is:<i>/boot/vmlinu[zx]-<kernel_string>[.gz]</i>
@@ -116,12 +108,6 @@ map HELPS = $[
     The string will be appended if the <i>Kdump Command Line</i>
     is set. <br></p>\n"),
 
-  /* The Run-level to Boot the Kdump Kernel - ComboBox 1/1*/
-  "RunLevel" : _("<p><b>The Runlevel to Boot the Kdump Kernel</b> - 
-    The runlevel to boot the kdump kernel. If networks are needed in 
-    the kdump environment, set <i>3</i>.<br></p>
-"),
-
   /* Enable Immediate Reboot After Saving the Core - CheckBox 1/1*/
   "EnableReboot" : _("<p><b>Enable Immediate Reboot After Saving the Core</b> - 
     Enable immediately reboot after saving the core in the kdump.<br></p>"),
@@ -131,9 +117,13 @@ map HELPS = $[
     Enable Delete Old Dump Images. If the number of dump files in 
     <i>Number of Old Dumps</i> exceeds this number, older dumps are removed.<br></p>"),
 
-  /* Number of Old Dumps - IntField 1/1*/
-  "NumberDumps" : _("<p><b>Number of Old Dumps</b> - 
-   Specifies how many old dumps are kept.<br></p>"),
+   /*Enable Copy Ke&rnel into the Dump Directory - CheckBox 1/1*/
+  "EnableCopyKernel" : _("<p><b>Enable Copy Kernel into the Dump Directory</b> - 
+    If it is selected the kernel itself and the
+      debugging information (if installed) gets copied into the dump
+      directory.  The default is “off”. It is useful have
+      everything in place for debugging.<br></p>"),
+
 
   /* SMTP Server*/
   "SMTPServer"	: _("<p><b>SMTP Server</b>...</p>"),

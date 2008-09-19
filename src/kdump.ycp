@@ -573,6 +573,24 @@ boolean cmdKdumpImmediateReboot (map options) {
 }
 
 
+boolean cmdKdumpCopyKernel(map options) {
+  if (options["enable"]:nil!=nil) {
+     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"]="yes";
+     return true;
+
+  } else if (options["disable"]:nil!=nil) {
+     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"]="no";
+     return true;
+
+  } else { 
+     // TRANSLATORS: CommandLine error message     
+     CommandLine::Error(_("Wrong options were used."));
+     return false;
+  }
+
+}
+
+
 boolean cmdKdumpRunLevel (map options) {
   if (options["level"]:nil!=nil) {
      string level = filterchars(tostring(options["level"]:nil),"1235s");
@@ -819,6 +837,16 @@ map cmdline_description = $[
 	"example" : [
 		   "immediatereboot enable",
 		   "immediatereboot disable",
+	            ],
+        ],
+
+        "copykernel" : $[
+	"handler" : cmdKdumpCopyKernel,
+	// TRANSLATORS: CommandLine help
+	"help" 	  : _("Copy kernel into dump directory."),
+	"example" : [
+		   "copykernel enable",
+		   "copykernel disable",
 	            ],
         ],
 

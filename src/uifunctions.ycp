@@ -844,57 +844,6 @@ void StoreTargetKdump (string key, map event) {
 
 
 
-
-/**
-  * Function initializes option "Enable Raw Saving in Initrd"
-  * 
-  */
-
-void InitRawPartitions (string key) {
-
-  if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil != "") {
-
-     y2milestone("[kdump] (InitRawPartitions) raw partitions - Kdump::uknown_fs_partitions %1", Kdump::uknown_fs_partitions);
-     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions);
-     string value = tostring(find(string key, Kdump::uknown_fs_partitions, 
-       ``(search(key, tostring(Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil)) != -1)));
-     //Popup::Message(value);
-     if ((value != nil) && (value != ""))
-        UI::ChangeWidget(`id("raw_partitions"), `Value, value);
-     else
-        Popup::Error(_("Partition does not exist on your disks"));
-  } else if (size(Kdump::uknown_fs_partitions)>0) {
-     UI::ChangeWidget(`id("raw_partitions"), `Items, Kdump::uknown_fs_partitions); //uknown_fs_partitions);
-     //UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);
-  } else {
-     UI::ChangeWidget(`id("enable_raw_partitions"), `Value, false);
-     
-  }
-}
-
-
-/**
-  * Function stores option 
-  * "Enable Raw Saving in Initrd"
-  */
-
-void StoreRawPartitions (string key, map event) {
-
-  boolean enabled = (boolean) UI::QueryWidget(`id("enable_raw_partitions"), `Value);
-  if (enabled) {
-     string value = tostring(UI::QueryWidget(`id("raw_partitions"), `Value));
-     integer position = search(value," ");
-     if (position != nil)
-        Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = substring(value, 0, position);
-     //Popup::Message(Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil);
-  } else {
-     Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = "";
-  }
-  
-
-}
-
-
 /**
   * Function initializes option "Kdump Command Line"
   * 
@@ -970,58 +919,6 @@ void StoreEnableReboot(string key, map event) {
 }
 
 
-
-/**
-  * Function initializes option 
-  * "The Run-level to Boot the Kdump Kernel"
-  */
-
-void InitRunLevel (string key) {
-  string value = tostring(Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil);
-  switch (value) {
-    case ("1"):
-      UI::ChangeWidget(`id("RunLevel"), `Value, "run_level1");
-      break;
-    case ("2"):
-      UI::ChangeWidget(`id("RunLevel"), `Value, "run_level2");
-      break;
-    case ("3"):
-      UI::ChangeWidget(`id("RunLevel"), `Value, "run_level3");
-      break;
-    case ("5"):
-      UI::ChangeWidget(`id("RunLevel"), `Value, "run_level5");
-      break;
-    case ("s"):
-      UI::ChangeWidget(`id("RunLevel"), `Value, "run_levelS");
-      break;
-    default:
-      UI::ChangeWidget(`id("RunLevel"), `Value, "run_level1");
-      y2milestone("[yast2-kdump] InitRunLevel: wrong value from /etc/sysconfig/kdump for option KDUMP_RUNLEVEL");
-      break;
-  }   
-}
-
-/**
-  * Function stores option 
-  * "The Run-level to Boot the Kdump Kernel"
-  */
-
-void StoreRunLevel(string key, map event) {
-  string value = tostring(UI::QueryWidget(`id("RunLevel"), `Value));
-  if (value == "run_level1") {
-     Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"] = "1";
-  } else if (value == "run_level2") {
-     Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"] = "2";
-  } else if (value == "run_level3") {
-     Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"] = "3";
-  } else if (value == "run_level5") {
-     Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"] = "5";
-  } else if (value == "run_levelS") {
-     Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"] = "s";
-  }
-
-
-}
 // helper list, each bit has its decimal representation
 list <integer> bit_weight_row = [16, 8, 4, 2, 1];
 
@@ -1394,6 +1291,36 @@ void StoreEnableDeleteImages (string key, map event) {
   if (!value) {
      Kdump::KDUMP_SETTINGS["KDUMP_KEEP_OLD_DUMPS"] = "0";
   } 
+}
+
+
+/**
+  * Function initializes option 
+  * "Enable Copy Kernel into the Dump Directory"
+  */
+
+void InitEnableCopyKernel (string key) {
+  if (Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"]:"false" == "true") {
+     UI::ChangeWidget(`id("EnableCopyKernel"), `Value, true);
+  } else {
+     UI::ChangeWidget(`id("EnableCopyKernel"), `Value, false);
+  }
+}
+
+
+
+/**
+  * Function stores option 
+  * "Enable Copy Kernel into the Dump Directory"
+  */
+
+void StoreEnableCopyKernel (string key, map event) {
+  boolean value = (boolean) UI::QueryWidget(`id("EnableCopyKernel"), `Value);
+  if (!value) {
+     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"] = "false";
+  } else {
+     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"] = "true";
+  }
 }
 
 
