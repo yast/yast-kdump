@@ -166,24 +166,6 @@ map<string,map<string,any> > wid_handling = $[
 
   ], 
 
- "RawPartitions" 	: $[
-     //TRANSLATORS: ComboBox Label
-     "widget" 		: `custom,
-     "custom_widget"	: `VBox(
-	`CheckBoxFrame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"), false, 
-        //`Frame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"),
-          `HBox(`HSpacing(1),`VBox(
-            `Left(`ComboBox(`id("raw_partitions"), 
-                    _("The List of A&vailable Raw Partitions of All Disks Without Known Filesystem")))
-	  ))
-        )
-     ),
-     "init"		: InitRawPartitions,
-     //"handle"		: 
-     "store"		: StoreRawPartitions,
-     "help"		: HelpKdump("RawPartitions"),
-  ],
-
 
 /*---------============ Email Notification screen=============------------*/
 
@@ -224,7 +206,7 @@ map<string,map<string,any> > wid_handling = $[
      "widget" 		: `textentry,
      "init"		: InitNotificationTo,
      "validate_type"    : `function,
-     "validate_function": ValidEmail,
+     //"validate_function": ValidEmail,
      "store"		: StoreNotificationTo,
      "help"		: HelpKdump("NotificationTo"),
   ],
@@ -235,7 +217,7 @@ map<string,map<string,any> > wid_handling = $[
      "widget" 		: `textentry,
      "init"		: InitNotificationCC,
      "validate_type"    : `function,
-     "validate_function": ValidEmail,
+     //"validate_function": ValidEmail,
      "store"		: StoreNotificationCC,
      "help"		: HelpKdump("NotificationCC"),
   ],
@@ -274,23 +256,6 @@ map<string,map<string,any> > wid_handling = $[
   ],
 
 
-  "RunLevel" 		: $[
-     //TRANSLATORS: ComboBox Label
-     "label" 		: _("&The Runlevel to Boot the Kdump Kernel"),
-     "widget" 		: `combobox,
-     "items" 		: [
-        [ "run_level1", _("1 - Single User Mode") ],
-        [ "run_level2", _("2 - Local Multiuser Without Remote Network") ],
-        [ "run_level3", _("3 - Full Multiuser With Network") ],
-        [ "run_level5", _("5 - Full Multiuser With Network and xdm") ],
-        [ "run_levelS", _("s - Single User Mode (only one console)") ],
-     ],
-     "init"		: InitRunLevel,
-     //"handle"		: 
-     "store"		: StoreRunLevel,
-     "help"		: HelpKdump("RunLevel"),
-  ],
-
  "EnableReboot" 	: $[
      //TRANSLATORS: CheckBox Label
      "label" 		: _("&Enable Immediate Reboot After Saving the Core"),
@@ -301,6 +266,15 @@ map<string,map<string,any> > wid_handling = $[
      "help"		: HelpKdump("EnableReboot"),
   ],
 
+ "EnableCopyKernel" 	: $[
+     //TRANSLATORS: CheckBox Label
+     "label" 		: _("Enable Copy Ke&rnel into the Dump Directory"),
+     "widget" 		: `checkbox,
+     "init"		: InitEnableCopyKernel,
+     //"handle"		: 
+     "store"		: StoreEnableCopyKernel,
+     "help"		: HelpKdump("EnableCopyKernel"),
+  ],
 
   "EnableDeleteImages" : $[
      //TRANSLATORS: CheckBox Label
@@ -366,14 +340,12 @@ map<string, map<string,any> > tabs = $[
   "dump_target"	: $[
      "contents"		: `VBox(	
      	"TargetKdump",
-        `VSpacing(1),
-        "RawPartitions",
         `VStretch ()
      ),
      "caption"		: _("Dump Target"),
      "tree_item_label"	: _("Dump Target"),
      "widget_names"	: [ 
-        "DisBackButton", "TargetKdump","RawPartitions"
+        "DisBackButton", "TargetKdump"
      ]    
   ],
   
@@ -414,26 +386,13 @@ map<string, map<string,any> > tabs = $[
           `Left("KdumpCommandLine"),
 	  `Left("KdumpCommandLineAppend")      
         ))),
-        `VSpacing(1),
-        `Frame ( _("The Runlevel to Boot"),`HBox(`HSpacing(1),`VBox(
-          `Left(`HBox(
-            `Left("RunLevel"), 
-	    `VBox(
-              `Label(""),
-              `Left("EnableReboot")
-            ),          
-	    `HStretch ()
-          ))
-        ))),
-
         `VSpacing(1),        
-        `Frame ( _("Number of Dumps"),`HBox(`HSpacing(1),`VBox(
+        `Frame ( _("Dumps Settings"),`HBox(`HSpacing(1),`VBox(
            `Left("EnableDeleteImages"),
-	   `Left("NumberDumps")
+	   `Left("NumberDumps"),
+	   `Left("EnableReboot"),
+	   `Left("EnableCopyKernel")
         ))),
-
-               
-        
 
   	`VStretch ()
      ),
@@ -441,9 +400,9 @@ map<string, map<string,any> > tabs = $[
      "tree_item_label"	: _("Expert Settings"),
      "widget_names"	: [
 	"DisBackButton", "KdumpCommandLine",
-        "KdumpCommandLineAppend", "RunLevel",
+        "KdumpCommandLineAppend",
         "EnableDeleteImages", "NumberDumps", 
-        "InitrdKernel", "SelectKernel", "EnableReboot", "email_notification",
+        "InitrdKernel", "SelectKernel", "EnableReboot","EnableCopyKernel",
      ]    
   ],
 
