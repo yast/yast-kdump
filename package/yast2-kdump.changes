@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Sep 22 16:40:13 CEST 2008 - juhliarik@suse.cz
+
+- added new tree item Email Notification
+- fix for problem with ncurses (bnc #373551)
+- fix problem with long text (bnc #344873)
+- added changes for new kdump (bnc #412140)
+- V 2.17.4
+
+-------------------------------------------------------------------
 Thu Sep 11 07:52:21 CEST 2008 - jsrain@suse.cz
 
 - merged texts from proofread
