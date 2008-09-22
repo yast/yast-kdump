@@ -140,24 +140,19 @@ map<string,map<string,any> > wid_handling = $[
 /*---------============ Dump Target screen=============------------*/
 
   "TargetKdump"		: $[
-     "widget"		: `custom,
-     "custom_widget"	: `VBox(
-           `Frame(_("Saving Target for Kdump Image"),`HBox(`HSpacing(1),`VBox(
-             `RadioButtonGroup(`id("DumpTarget"), `HBox(
-	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem")),
-                `Left(`RadioButton(`id("ftp"), `opt(`notify), "F&TP")),
-       		`Left(`RadioButton(`id("ssh"), `opt(`notify), "&SSH (scp)")),
-       		`Left(`RadioButton(`id("nfs"), `opt(`notify), "N&FS")),
-       		`Left(`RadioButton(`id("cifs"), `opt(`notify), "C&IFS (SMB)"))
-             ))
-             
-           ))),
+     "label" 		: _("&Select Target"),
+     "widget"		: `combobox,
+     "opt"		: [`notify],
+     "items" 		: [
+        [ "local_filesystem", _("Local Directory") ],
+        [ "ftp", _("FTP") ],
+        [ "ssh", _("SSH (scp)") ],
+        [ "nfs", _("NFS") ],
+        [ "cifs", _("CIFS (SMB)") ],
+     ],
 
-           `VSpacing(1),
-           `ReplacePoint(`id("Targets"), ftp)
-           //`VStretch()								    
-     ),
      "init"		: InitTargetKdump,
+     //"handle_events" 	: ["TargetKdump2"],
      "handle"		: HandleTargetKdump,
      "validate_type"    : `function,
      "validate_function": ValidTargetKdump,
@@ -167,11 +162,12 @@ map<string,map<string,any> > wid_handling = $[
   ], 
 
 
+
 /*---------============ Email Notification screen=============------------*/
 
   "SMTPServer"		: $[
      //TRANSLATORS: TextEntry Label
-     "label" 		: _("SMTP Server"),
+     "label" 		: _("&SMTP Server"),
      "widget" 		: `textentry,
      "init"		: InitSMTPServer,
      //"handle"		: 
@@ -182,7 +178,7 @@ map<string,map<string,any> > wid_handling = $[
 
   "SMTPUser"		: $[
      //TRANSLATORS: TextEntry Label
-     "label" 		: _("User Name"),
+     "label" 		: _("&User Name"),
      "widget" 		: `textentry,
      "init"		: InitSMTPUser,
      //"handle"		: 
@@ -192,7 +188,7 @@ map<string,map<string,any> > wid_handling = $[
 
   "SMTPPassword"	: $[
      //TRANSLATORS: TextEntry Label
-     "label" 		: _("Password"),
+     "label" 		: _("&Password"),
      "widget" 		: `password,
      "init"		: InitSMTPPassword,
      //"handle"		: 
@@ -202,7 +198,7 @@ map<string,map<string,any> > wid_handling = $[
 
   "NotificationTo"		: $[
      //TRANSLATORS: TextEntry Label
-     "label" 		: _("Notification To"),
+     "label" 		: _("Notification &To"),
      "widget" 		: `textentry,
      "init"		: InitNotificationTo,
      "validate_type"    : `function,
@@ -213,7 +209,7 @@ map<string,map<string,any> > wid_handling = $[
 
   "NotificationCC"		: $[
      //TRANSLATORS: TextEntry Label
-     "label" 		: _("Notification CC"),
+     "label" 		: _("Notifica&tion CC"),
      "widget" 		: `textentry,
      "init"		: InitNotificationCC,
      "validate_type"    : `function,
@@ -338,8 +334,12 @@ map<string, map<string,any> > tabs = $[
 
 
   "dump_target"	: $[
-     "contents"		: `VBox(	
-     	"TargetKdump",
+     "contents"		: `VBox(
+	`Frame ( _("Saving Target for Kdump Image"),`HBox(`HSpacing(1),`VBox(
+     	   `Left("TargetKdump")
+	))),
+	`VSpacing(1),
+        `ReplacePoint(`id("Targets"), ftp),
         `VStretch ()
      ),
      "caption"		: _("Dump Target"),

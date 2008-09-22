@@ -57,6 +57,10 @@ map <string, string > KDUMP_SAVE_TARGET = $[
    "password"		: "", 
 ];
 
+void StoreTargetKdumpHandle(string type);
+
+string type ="local_filesystem";
+
 /**
  * definition UI terms for saveing dump target
  *  
@@ -66,7 +70,7 @@ map <string, string > KDUMP_SAVE_TARGET = $[
 term local_filesystem = `VBox(
   `Frame(_("Local Filesystem"),`HBox(`HSpacing(1),`VBox(
     `Left(`HBox(
-      `TextEntry(`id("dir"), _("&Directory for Saving Dumps")),      
+      `InputField(`id("dir"), _("&Directory for Saving Dumps")),
       `VBox ( `Label(""),
       `PushButton ( `id ("select_dir"), `opt ( `hstretch ),  _("B&rowse"))
     )))
@@ -78,18 +82,18 @@ term local_filesystem = `VBox(
 term ftp = `VBox(
   `Frame(_("FTP"),`HBox(`HSpacing(1),`VBox(
     `Left(`HBox(
-      `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
+      `Left(`InputField(`id ("server"), _("Server Nam&e"))),
       `HSpacing(1),
       `Left(`IntField(`id ("port"), _("P&ort"), 0,65536,21)),
       `HStretch ()
     )),
     // text entry
-    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
+    `Left(`InputField( `id("dir"), _("&Directory on Server"))),
     `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("Enable Anon&ymous FTP"))),
     
     `Left(`HBox(
        // text entry
-      `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
+      `Left(`InputField(`id ("user_name"), _("&User Name"))),
       `HSpacing(1),
       // password entry
       `Left(`Password(`id ("password"), _("&Password")))
@@ -101,23 +105,23 @@ term ftp = `VBox(
 term ssh = `VBox(
   `Frame(_("SSH (scp)"),`HBox(`HSpacing(1),`VBox(
     `Left(`HBox(
-      `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
+      `Left(`InputField(`id ("server"), _("Server Nam&e"))),
       `HSpacing(1),
       `Left(`IntField(`id ("port"), _("P&ort"), 0,65536,22)),
       `HStretch ()
     )),    
-    `Left(`TextEntry( `id("dir"), _("&Directory on Server"))),
+    `Left(`InputField( `id("dir"), _("&Directory on Server"))),
     // text entry
-    `Left(`TextEntry(`id ("user_name"), _("&User Name")))   
+    `Left(`InputField(`id ("user_name"), _("&User Name")))   
   )))
 
 );
 
 term nfs = `VBox(
   `Frame(_("NFS"),`HBox(`HSpacing(1),`VBox(
-    `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
+    `Left(`InputField(`id ("server"), _("Server Nam&e"))),
      // text entry
-    `Left(`TextEntry( `id("dir"), _("&Directory on Server")))  
+    `Left(`InputField( `id("dir"), _("&Directory on Server")))  
   )))
 
 );
@@ -125,17 +129,17 @@ term nfs = `VBox(
 
 term cifs = `VBox(
   `Frame(_("CIFS (SMB)"),`HBox(`HSpacing(1),`VBox(
-    `Left(`TextEntry(`id ("server"), _("Server Nam&e"))),
+    `Left(`InputField(`id ("server"), _("Server Nam&e"))),
     `Left(`HBox(
       // text entries
-      `Left(`TextEntry(`id ("share"), _("Exported Sha&re"))),
+      `Left(`InputField(`id ("share"), _("Exported Sha&re"))),
       `HSpacing(1),
-      `Left(`TextEntry( `id("dir"), _("&Directory on Server")))
+      `Left(`InputField( `id("dir"), _("&Directory on Server")))
      )),
     `Left(`CheckBox(`id ("anonymous"), `opt (`notify),_("Use Aut&hentication"), true)),
     `Left(`HBox(
        // text entry
-      `Left(`TextEntry(`id ("user_name"), _("&User Name"))),
+      `Left(`InputField(`id ("user_name"), _("&User Name"))),
       `HSpacing(1),
       // password entry
       `Left(`Password(`id ("password"), _("&Password")))
@@ -396,21 +400,23 @@ void InitTargetKdump (string key) {
   SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil);
 
   if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
-     UI::ChangeWidget(`id ("local_filesystem"), `Value, true);
+     //UI::ChangeWidget(`id ("local_filesystem"), `Value, true);
+     UI::ChangeWidget(`id ("TargetKdump"), `Value, "local_filesystem");
      UI::ReplaceWidget (`id ("Targets"), local_filesystem);          
      UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
 
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
      UI::ReplaceWidget (`id ("Targets"), nfs);
-     UI::ChangeWidget(`id ("nfs"), `Value, true);
+     //UI::ChangeWidget(`id ("nfs"), `Value, true);
+     UI::ChangeWidget(`id ("TargetKdump"), `Value, "nfs");
      UI::ChangeWidget(`id ("server"), `Value, KDUMP_SAVE_TARGET["server"]:nil);
      UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
 
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
 
      UI::ReplaceWidget (`id ("Targets"), ssh);
-     UI::ChangeWidget(`id ("ssh"), `Value, true);
-
+     //UI::ChangeWidget(`id ("ssh"), `Value, true);
+     UI::ChangeWidget(`id ("TargetKdump"), `Value, "ssh");
      if (KDUMP_SAVE_TARGET["port"]:nil != "")
         UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
      foreach (string key, ["server",  "user_name", "dir" ], {
@@ -419,8 +425,8 @@ void InitTargetKdump (string key) {
 
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
      UI::ReplaceWidget (`id ("Targets"), ftp);
-     UI::ChangeWidget(`id ("ftp"), `Value, true);
-
+     //UI::ChangeWidget(`id ("ftp"), `Value, true);
+     UI::ChangeWidget(`id ("TargetKdump"), `Value, "ftp");
      if (KDUMP_SAVE_TARGET["port"]:nil != "")
         UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
      foreach (string key, ["server", "dir" ], {
@@ -438,7 +444,8 @@ void InitTargetKdump (string key) {
 
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "cifs") {
      UI::ReplaceWidget (`id ("Targets"), cifs);
-     UI::ChangeWidget(`id ("cifs"), `Value, true);
+     //UI::ChangeWidget(`id ("cifs"), `Value, true);
+     UI::ChangeWidget(`id ("TargetKdump"), `Value, "cifs");
      foreach (string key, ["server", "dir", "share"], {
        UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
      });
@@ -461,7 +468,7 @@ void InitTargetKdump (string key) {
   */
 
 boolean ValidTargetKdump (string key, map event) {
-  string radiobut = tostring(UI::QueryWidget(`id ("DumpTarget"), `Value));
+  string radiobut = tostring(UI::QueryWidget(`id ("TargetKdump"), `Value));
   string value = nil;
   boolean anon = true;
 
@@ -578,11 +585,30 @@ boolean ValidTargetKdump (string key, map event) {
 
 symbol HandleTargetKdump (string key, map event) {
 
-  any radiobutton = event["ID"]:nil;
+  any event_name = event["ID"]:nil;
   //StoreTargetKdump ( key, event);
+  StoreTargetKdumpHandle(type);
+  string radiobutton = tostring(UI::QueryWidget(`id ("TargetKdump"), `Value));
+  type = radiobutton;
 
-  if (radiobutton == "local_filesystem") {
-     UI::ReplaceWidget (`id ("Targets"), local_filesystem);     
+  if (event_name == "anonymous") {
+
+     boolean value = (boolean) UI::QueryWidget(`id ("anonymous"), `Value);
+     string target = tostring(UI::QueryWidget(`id ("TargetKdump"), `Value));
+
+     if (((value) && (target == "ftp"))||((!value) && (target == "cifs"))) {
+        UI::ChangeWidget(`id ("user_name"), `Enabled, false);     
+        UI::ChangeWidget(`id ("password"), `Enabled, false);
+        //KDUMP_SAVE_TARGET["user_name"]="";
+        //KDUMP_SAVE_TARGET["password"]=""; 
+
+     } else if (((value) && (target == "cifs"))||((!value) && (target == "ftp"))) {
+        UI::ChangeWidget(`id ("user_name"), `Enabled, true);     
+        UI::ChangeWidget(`id ("password"), `Enabled, true);
+     }
+
+  } else if (radiobutton == "local_filesystem") {
+     UI::ReplaceWidget (`id ("Targets"), local_filesystem);
      set_network = false;     
      UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil); 
 
@@ -640,34 +666,15 @@ symbol HandleTargetKdump (string key, map event) {
      UI::ChangeWidget(`id ("dir"), `Value, dir);
      //KDUMP_SAVE_TARGET["dir"] = dir;
 
-  } else if (radiobutton == "anonymous") {
-     boolean value = (boolean) UI::QueryWidget(`id ("anonymous"), `Value);
-     string target = tostring(UI::QueryWidget(`id ("DumpTarget"), `Value));
-
-     if (((value) && (target == "ftp"))||((!value) && (target == "cifs"))) {
-        UI::ChangeWidget(`id ("user_name"), `Enabled, false);     
-        UI::ChangeWidget(`id ("password"), `Enabled, false);
-        KDUMP_SAVE_TARGET["user_name"]="";
-        KDUMP_SAVE_TARGET["password"]=""; 
-
-     } else if (((value) && (target == "cifs"))||((!value) && (target == "ftp"))) {
-        UI::ChangeWidget(`id ("user_name"), `Enabled, true);     
-        UI::ChangeWidget(`id ("password"), `Enabled, true);
-     }
-  }
- 
+  } 
+  
   return nil;
 
 }
 
-
-/**
-  * Function stores option 
-  * "Saving Target for kdump Image"
-  */
-
-void StoreTargetKdump (string key, map event) {
-  string radiobut = tostring(UI::QueryWidget(`id ("DumpTarget"), `Value));
+void StoreTargetKdumpHandle(string type)
+{
+  string radiobut = type;
   string value = nil;
 
   if (radiobut == "local_filesystem") {
@@ -833,13 +840,17 @@ void StoreTargetKdump (string key, map event) {
   }
   Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"] = tostringKDUMP_SAVE_TARGET();
 
-  if (radiobut != "local_filesystem") {
+}
 
-     if ((Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil != "3") || 
-         (Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil != "5"))
-         Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"] = "3";
-  }
+/**
+  * Function stores option 
+  * "Saving Target for kdump Image"
+  */
 
+void StoreTargetKdump (string key, map event) {
+  string radiobut = tostring(UI::QueryWidget(`id ("TargetKdump"), `Value));
+  type = tostring(UI::QueryWidget(`id ("TargetKdump"), `Value));
+  
 }
 
 

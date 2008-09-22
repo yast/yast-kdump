@@ -61,7 +61,7 @@ map HELPS = $[
 
   /* Dump Format - RadioButtons  1/6*/
   "TargetKdump" : _("<p><b>Saving Target for Kdump Image</b><br>
-    The target for saving kdump images.<br></p>")+
+    The target for saving kdump images. Select type of target for saving dumps.<br></p>")+
   /* Dump Format - RadioButtons  2/6*/
   _("<p><b>Local Filestem</b> - Save kdump image in the local filesystem.
     <i>Directory for Saving Dumps</i> - The path for saving kdump images.
@@ -126,19 +126,23 @@ map HELPS = $[
 
 
   /* SMTP Server*/
-  "SMTPServer"	: _("<p><b>SMTP Server</b>...</p>"),
+  "SMTPServer"	: _("<p><b>SMTP Server</b> used for sending a notification email after a dump has been taken.</p>"),
 
   /*SMTP User Name */
-  "SMTPUser"	: _("<p><b>User Name</b>...</p>"),
+  "SMTPUser"	: _("<p><b>User Name</b> for SMTP authetication when <i>SMTP Server</i> is set. This is optional,
+  without username/password, plain SMTP will be used.</p>"),
 
   /*SMTP Password */
-  "SMTPPassword": _("<p><b>Password</b>...</p>"),
+  "SMTPPassword": _("<p><b>Password</b> for SMTP authetication when <i>SMTP Server</i> is set. This is optional,
+  without username/password, plain SMTP will be used</p>"),
 
   /* Notification To (email addresses) */
-  "NotificationTo": _("<p><b>Notification To</b>...</p>"),
+  "NotificationTo": _("<p><b>Notification To</b> mail address to which a notification mail will be sent when a dump has been
+  saved.</p>"),
 
   /* Notification CC (email addresses) */
-  "NotificationCC": _("<p><b>Notification CC</b>...</p>"),
+  "NotificationCC": _("<p><b>Notification CC</b> is list of space-separated mail addresses to which notification mail will be
+ sent via Cc if a dump has been saved.</p>"),
 
     /* Read dialog help 1/2 */
     "read" : _("<p><b><big>Initializing Kdump Configuration</big></b><br>
