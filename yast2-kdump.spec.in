@@ -6,6 +6,8 @@ BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-t
 
 Recommends:     makedumpfile
 
+BuildRequires:	yast2 >= 2.17.36
+BuildRequires: yast2-packager >= 2.17.24
 
 Summary:	Configuration of kdump
 

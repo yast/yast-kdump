@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct  3 17:31:33 CEST 2008 - juhliarik@suse.cz
+
+- added fix for installing packages (bnc #431580)
+- V 2.17.5 
+
+-------------------------------------------------------------------
 Mon Sep 22 16:40:13 CEST 2008 - juhliarik@suse.cz
 
 - added new tree item Email Notification
