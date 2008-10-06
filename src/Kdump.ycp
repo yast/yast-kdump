@@ -51,6 +51,7 @@ import "BootCommon";
 import "Map";
 import "ProductControl";
 import "ProductFeatures";
+import "PackagesProposal";
 
 /**
  * Prototypes
@@ -940,34 +941,25 @@ global define void CheckPackages()
         boolean pkg_deselect = false;
         foreach (string p, kdump_packages, 
 	{
-	    if (Pkg::IsSelected (p))
-	    {
-		Pkg::PkgNeutral (p);
+		PackagesProposal::RemoveResolvables ("yast2-kdump", `package, [p]);
 		pkg_deselect = true;
-	    }
 	});
 	if (pkg_deselect)
 	{
-	    // if package was added in inst. proposal, I can't be sure
-	    // that dependencies will be solved
-	    Pkg::PkgSolve (false);
+	    y2milestone("Deselected kdump packages for installation: %1", kdump_packages);
 	}
     } else {
 	y2milestone("select packages for installation: %1", kdump_packages);
 	boolean pkg_added = false;
 	foreach (string p, kdump_packages, 
 	{
-	    if (!Pkg::IsSelected (p))
-	    {
-		Pkg::PkgInstall (p);
+		PackagesProposal::AddResolvables ("yast2-kdump", `package, [p]);
 		pkg_added = true;
-	    }
+	
 	});
 	if (pkg_added)
 	{
-	    // if package was added in inst. proposal, I can't be sure
-	    // that dependencies will be solved
-	    Pkg::PkgSolve (false);
+	    y2milestone("Selected kdump packages for installation: %1", kdump_packages);
 	}
     }
 }
