@@ -733,6 +733,8 @@ boolean WriteKdumpBootParameter () {
 	} else {
 	    
 	    BootCommon::sections[section_pos, "xen_append"]= "crashkernel="+crash_value;
+	    // added flag which means that section was changed bnc #432651
+	    BootCommon::sections[section_pos, "__changed"] = true;
 	    result = true;
 	    y2milestone("Write boot section to XEN boot section %1", BootCommon::sections[section_pos]:nil);
 	}
