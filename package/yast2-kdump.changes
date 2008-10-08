@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Oct  8 10:29:59 CEST 2008 - juhliarik@suse.cz
+
+- added fix for adding crashkernel option (bnc #432651)
+- V 2.17.6
+
+-------------------------------------------------------------------
 Fri Oct  3 17:31:33 CEST 2008 - juhliarik@suse.cz
 
 - added fix for installing packages (bnc #431580)
