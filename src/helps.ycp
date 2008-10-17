@@ -79,7 +79,7 @@ map HELPS = $[
     <i>Server Name</i> - The name of server.
     <i>Port</i> - The port number for connection.
     <i>Directory on Server</i> - The path for saving kdump images.
-    <i>User Name</i> for ssh connection.<br></p>")+
+    <i>User Name</i> for ssh connection.  <i>Password</i> for ssh connection.<br></p>")+
  /* Dump Format - RadioButtons  5/6*/
   _("<p><b>NFS</b> - Save kdump image on NFS.
     <i>Server Name</i> - The name of nfs server.
