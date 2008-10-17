@@ -112,7 +112,13 @@ term ssh = `VBox(
     )),    
     `Left(`InputField( `id("dir"), _("&Directory on Server"))),
     // text entry
-    `Left(`InputField(`id ("user_name"), _("&User Name")))   
+    `Left(`HBox(
+       // text entry
+      `Left(`InputField(`id ("user_name"), _("&User Name"))),
+      `HSpacing(1),
+      // password entry
+      `Left(`Password(`id ("password"), _("&Password")))
+     ))
   )))
 
 );
@@ -199,11 +205,11 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
    KDUMP_SAVE_TARGET["target"]=substring(parse_target,0,pos-1);
    parse_target = substring(parse_target,pos+2);
 
-   //file 
+   // file 
    if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
       KDUMP_SAVE_TARGET["dir"]=parse_target;
    
-   //nfs
+   // nfs
    } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
       pos = search(parse_target, "/");
       //pos1 = pos; 
@@ -212,26 +218,9 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
       //KDUMP_SAVE_TARGET["share"]=substring(parse_target,pos1+1,pos-(pos1+1));
       KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);
 
-   //ssh
-   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
-      pos = search(parse_target, "@");
-      if (pos != nil) {
-         KDUMP_SAVE_TARGET["user_name"]=substring(parse_target,0,pos);
-         parse_target = substring(parse_target,pos+1);
-      }
-      pos1 = search(parse_target, ":");
-      pos = search(parse_target, "/");
-      if (pos1 != nil) {
-         KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos1);
-         KDUMP_SAVE_TARGET["port"]=substring(parse_target,pos1+1,pos-(pos1+1));
-      } else {
-         KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
-      }
-      KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);
-
-   //ftp and cifs
    } else if ((KDUMP_SAVE_TARGET["target"]:nil == "ftp") 
-             || (KDUMP_SAVE_TARGET["target"]:nil == "cifs")) {
+             || (KDUMP_SAVE_TARGET["target"]:nil == "cifs")
+	     || (KDUMP_SAVE_TARGET["target"]:nil == "ssh")) {
 
       pos = search(parse_target, "@");      
 
@@ -248,8 +237,9 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
          }
          parse_target = substring(parse_target,pos+1);
       }
-      //only ftp
-      if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
+      // only ftp & ssh
+      if ((KDUMP_SAVE_TARGET["target"]:nil == "ftp")
+	 || (KDUMP_SAVE_TARGET["target"]:nil == "ssh")) {
          pos1 = search(parse_target, ":");
          pos = search(parse_target, "/");
 
@@ -262,7 +252,7 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
          }
          KDUMP_SAVE_TARGET["dir"]=substring(parse_target,pos);         
       
-      //only cifs
+      // only cifs
       } else {
          pos = search(parse_target, "/"); 
          KDUMP_SAVE_TARGET["server"]=substring(parse_target,0,pos);
@@ -301,34 +291,34 @@ boolean SetUpKDUMP_SAVE_TARGET(string target) {
 string tostringKDUMP_SAVE_TARGET() {
   string result = "";
 
-  //file
+  // file
   if (KDUMP_SAVE_TARGET["target"]:nil == "file") {
      result = "file://";
 
      if (KDUMP_SAVE_TARGET["dir"]:nil != "")
         result = result+KDUMP_SAVE_TARGET["dir"]:nil;
 
-  //ftp
+  // ftp
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ftp") {
      result = "ftp://";
 
      if (KDUMP_SAVE_TARGET["user_name"]:nil == "") {
         result = result+KDUMP_SAVE_TARGET["server"]:nil;
-        //add port if it is set...
+        // add port if it is set...
         if (KDUMP_SAVE_TARGET["port"]:nil != "") {
            result = result+":"+KDUMP_SAVE_TARGET["port"]:nil+KDUMP_SAVE_TARGET["dir"]:nil; 
 
         } else {
            result = result+KDUMP_SAVE_TARGET["dir"]:nil;
         }
-      
+
      } else {
         result = result+KDUMP_SAVE_TARGET["user_name"]:nil;
 
         if (KDUMP_SAVE_TARGET["password"]:nil != "")
            result = result+":"+KDUMP_SAVE_TARGET["password"]:nil;
         result = result+"@"+KDUMP_SAVE_TARGET["server"]:nil;
-        
+
         if (KDUMP_SAVE_TARGET["port"]:nil != "") {
            result = result+":"+KDUMP_SAVE_TARGET["port"]:nil+KDUMP_SAVE_TARGET["dir"]:nil; 
 
@@ -337,14 +327,18 @@ string tostringKDUMP_SAVE_TARGET() {
         }
      }
  
-  //ssh
+  // ssh
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "ssh") {
      result = "ssh://";
 
-     if (KDUMP_SAVE_TARGET["user_name"]:nil != "")
+     if ((KDUMP_SAVE_TARGET["user_name"]:nil != "") && (KDUMP_SAVE_TARGET["password"]:nil == "")) {
         result = result+KDUMP_SAVE_TARGET["user_name"]:nil+"@";
+     } else if ((KDUMP_SAVE_TARGET["user_name"]:nil != "") && (KDUMP_SAVE_TARGET["password"]:nil != "")) {
+	result = result+KDUMP_SAVE_TARGET["user_name"]:nil;
+	result = result+":"+KDUMP_SAVE_TARGET["password"]:nil +"@";	
+     }
      result = result+KDUMP_SAVE_TARGET["server"]:nil;
-     //add port if it is set...
+     // add port if it is set...
      if (KDUMP_SAVE_TARGET["port"]:nil != "") {
         result = result+":"+KDUMP_SAVE_TARGET["port"]:nil+KDUMP_SAVE_TARGET["dir"]:nil; 
 
@@ -353,11 +347,11 @@ string tostringKDUMP_SAVE_TARGET() {
      }
 
 
-  //nfs
+  // nfs
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "nfs") {
      result = "nfs://"+KDUMP_SAVE_TARGET["server"]:nil+KDUMP_SAVE_TARGET["dir"]:nil;
   
-  //cifs 
+  // cifs 
   } else if (KDUMP_SAVE_TARGET["target"]:nil == "cifs") {
      result = "cifs://";
 
@@ -419,7 +413,7 @@ void InitTargetKdump (string key) {
      UI::ChangeWidget(`id ("TargetKdump"), `Value, "ssh");
      if (KDUMP_SAVE_TARGET["port"]:nil != "")
         UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
-     foreach (string key, ["server",  "user_name", "dir" ], {
+     foreach (string key, ["server",  "user_name", "dir", "password"], {
        UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
      });
 
@@ -636,7 +630,7 @@ symbol HandleTargetKdump (string key, map event) {
 
      if (KDUMP_SAVE_TARGET["port"]:nil != "")
         UI::ChangeWidget(`id ("port"), `Value, tointeger(KDUMP_SAVE_TARGET["port"]:nil));
-     foreach (string key, ["server",  "user_name", "dir" ], {
+     foreach (string key, ["server",  "user_name", "dir", "password" ], {
        UI::ChangeWidget(`id (key), `Value, KDUMP_SAVE_TARGET[key]:nil);
      });
 
@@ -770,6 +764,15 @@ void StoreTargetKdumpHandle(string type)
        KDUMP_SAVE_TARGET["user_name"] = value;
     else 
        KDUMP_SAVE_TARGET["user_name"] = "";
+
+   //password
+    value = tostring(UI::QueryWidget(`id ("password"), `Value));
+
+    if ((value != nil) && (KDUMP_SAVE_TARGET["user_name"]:nil != ""))
+       KDUMP_SAVE_TARGET["password"] = value;
+    else
+       KDUMP_SAVE_TARGET["password"] = "";
+
     
   } else if (radiobut == "nfs") {
     KDUMP_SAVE_TARGET["target"] = "nfs";

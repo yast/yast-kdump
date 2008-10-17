@@ -52,6 +52,7 @@ import "Map";
 import "ProductControl";
 import "ProductFeatures";
 import "PackagesProposal";
+import "FileUtils";
 
 /**
  * Prototypes
@@ -64,6 +65,13 @@ global void SetModified();
  * Data was modified?
  */
 global boolean modified = false;
+
+/**
+ * kdump config file
+ */
+
+string kdump_file = "/etc/sysconfig/kdump";
+
 
 /**
  */
@@ -297,6 +305,42 @@ list <string> AddDeviceVgamode (map section) {
 
 }
 
+/**
+ * Function set permission for file.
+ *
+ * @return	boolean true on success
+ * @param	string file name
+ * @param	string permissions
+ *
+ * @example
+ *	FileUtils::Chmod ("/etc/sysconfig/kdump", "600") -> true
+ *	FileUtils::Chmod ("/tmp/doesnt_exist", "644") -> false
+ */
+boolean Chmod (string target, string permissions) 
+{
+    if (! FileUtils::Exists(target)) 
+    {
+	y2error ("Target %1 doesn't exist", target);
+	return false;
+    }
+
+    if (! FileUtils::Exists("/bin/chmod")) 
+    {
+	y2error ("tool: /bin/chmod not found");
+	return false;
+    }
+
+    string cmd = sformat ("/bin/chmod %1 %2", permissions, target);
+    map cmd_out = (map) SCR::Execute (.target.bash_output, cmd);
+
+    if (cmd_out["exit"]:-1 != 0) 
+    {
+	y2error ("Command >%1< returned %2", cmd, cmd_out);
+	return false;
+    }
+    y2milestone("Command: %1 finish successful.", cmd);
+    return true;
+}
 
 /**
  * Read actual boot section
@@ -401,6 +445,41 @@ string getCrashKernelValue (string crash)
     return result;
 
 }
+
+/**
+ * Function check if KDUMP_SAVEDIR or
+ * KDUMP_SMTP_PASSWORD include password
+ *
+ * @return boolean true if inlude password
+ */
+
+boolean checkPassword()
+{
+   if (KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"]:"" != "")
+	return true;
+
+   if ((search(KDUMP_SETTINGS["KDUMP_SAVEDIR"]:"", "file") != nil) 
+      || (search(KDUMP_SETTINGS["KDUMP_SAVEDIR"]:"", "nfs") != nil)
+      || (KDUMP_SETTINGS["KDUMP_SAVEDIR"]:"" == ""))
+	return false;
+
+   if (search(KDUMP_SETTINGS["KDUMP_SAVEDIR"]:"", "@") == nil)
+	return false;
+
+   list<string> temp = splitstring(KDUMP_SETTINGS["KDUMP_SAVEDIR"]:"", "@");
+   string temp_1 = temp[0]:"";
+   integer position = findlastof(temp_1, ":");
+   if (position == nil)
+	return false;
+
+   // if there is 2 times ":" -> it means that password is defined
+   // for example cifs://login:password@server....
+   if (position > 6)
+	return true;
+   else
+	return false;
+}
+
 
 /**
  * get alocated memory from value of crashkernel option
@@ -700,7 +779,12 @@ boolean WriteKdumpSettings () {
 	SCR::Write(add(.sysconfig.kdump, option_key), option_val);
     });
     SCR::Write(.sysconfig.kdump, nil);
-        
+
+
+    if (checkPassword())
+	Chmod(kdump_file, "600");
+    else
+	Chmod(kdump_file, "644");    
     return true;
 }
 
