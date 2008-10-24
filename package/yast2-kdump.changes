@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Oct 24 14:10:01 CEST 2008 - juhliarik@suse.cz
+
+- added fix for problem with value of "KDUMP_KERNELVER" 
+  (bnc #438222)
+- added fix for proposal: disable kdump if machine has less 
+  than 1024MB RAM
+- added fix for problem with wrong value for crashkernel 
+  (bnc #437340)
+- V 2.17.8
+
+-------------------------------------------------------------------
 Fri Oct 17 14:07:00 CEST 2008 - juhliarik@suse.cz
 
 - added fix for adding password for ssh target (bnc #436042)

@@ -206,10 +206,10 @@ global boolean() AbortFunction = nil;
  */
 
 global map <string, string > DEFAULT_CONFIG = $[
-     "KDUMP_KERNELVER"              : "kdump",
+     "KDUMP_KERNELVER"              : "",
      "KDUMP_COMMANDLINE"            : "",
-     "KDUMP_COMMANDLINE_APPEND"     : "",  
-     "KEXEC_OPTIONS"                : "",  
+     "KDUMP_COMMANDLINE_APPEND"     : "",
+     "KEXEC_OPTIONS"                : "",
      "KDUMP_RUNLEVEL"               : "1",
      "KDUMP_IMMEDIATE_REBOOT"       : "yes",
      "KDUMP_COPY_KERNEL"	    : "no",
@@ -692,10 +692,10 @@ boolean ProposeAlocatedMemory ()
 {
   if (alocated_memory == "0") 
   {     
-     if ((total_memory > 512) &&  (total_memory/1024) <2)
+     if ((total_memory >= 512) &&  (total_memory/1024) <2)
         alocated_memory = "64";
-     else if ((total_memory/1024) > 2)
-        alocated_memory = "128";     
+     else if ((total_memory/1024) >= 2)
+        alocated_memory = "128";
   }
   y2milestone("[kdump] allocated memory if not set in \"crashkernel\" param: %1", alocated_memory);
   return true;
@@ -1006,7 +1006,7 @@ define void ProposeGlobalVars()
        crashkernel_param = false;
        add_crashkernel_param = true;
        // added defualt settings
-       KDUMP_SETTINGS = DEFAULT_CONFIG;     
+       KDUMP_SETTINGS = DEFAULT_CONFIG;
     }
     propose_called = true;
 }
@@ -1063,6 +1063,10 @@ global define void Propose ()
     ProposeGlobalVars();
     // read available memory
     ReadAvailableMemory ();
+
+    // propose disable kdump if PC has less than 1024MB RAM
+    if (total_memory < 1024)
+	add_crashkernel_param = false;
 
     // add packages for installation
     AddPackages();
