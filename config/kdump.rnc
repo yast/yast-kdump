@@ -25,7 +25,6 @@ kdump_general =
      element KDUMP_SAVEDIR { text }? &
      element KDUMP_KEEP_OLD_DUMPS { text }? &
      element KDUMP_FREE_DISK_SIZE { text }? &
-     element KDUMP_DUMPDEV { text }? &
      element KDUMP_VERBOSE { text }? &
      element KDUMP_DUMPLEVEL { text }? &
      element KDUMP_DUMPFORMAT { text }? &

@@ -47,6 +47,9 @@ if (func == "Info")
 }
 else if (func == "Write")
 {
+	// propose settings for kdump if autoyast doesn't include settings for yast2-kdump
+	if ((!Kdump::import_called) && (Mode::autoinst()))
+	    Kdump::Propose();
 	Kdump::Write();
 }
 else

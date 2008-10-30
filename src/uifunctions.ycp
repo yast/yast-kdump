@@ -186,7 +186,6 @@ void StoreEnableDisalbeKdump (string key, map event) {
   } else {
      Kdump::add_crashkernel_param = false; 
   }
-
 }
 
 /**
@@ -1314,7 +1313,7 @@ void StoreEnableDeleteImages (string key, map event) {
   */
 
 void InitEnableCopyKernel (string key) {
-  if (Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"]:"false" == "true") {
+  if (Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"]:"no" == "yes") {
      UI::ChangeWidget(`id("EnableCopyKernel"), `Value, true);
   } else {
      UI::ChangeWidget(`id("EnableCopyKernel"), `Value, false);
@@ -1331,9 +1330,9 @@ void InitEnableCopyKernel (string key) {
 void StoreEnableCopyKernel (string key, map event) {
   boolean value = (boolean) UI::QueryWidget(`id("EnableCopyKernel"), `Value);
   if (!value) {
-     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"] = "false";
+     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"] = "no";
   } else {
-     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"] = "true";
+     Kdump::KDUMP_SETTINGS["KDUMP_COPY_KERNEL"] = "yes";
   }
 }
 

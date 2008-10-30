@@ -175,6 +175,14 @@ global boolean add_crashkernel_param = false;
  */
 global string alocated_memory = "0";
 
+/**
+ * Boolean option indicates that Import()
+ * was called and data was proposed
+ *
+ * boolean true if import was called with data
+ */
+
+global boolean import_called = false;
 
 
 /**
@@ -212,12 +220,11 @@ global map <string, string > DEFAULT_CONFIG = $[
      "KEXEC_OPTIONS"                : "",
      "KDUMP_RUNLEVEL"               : "1",
      "KDUMP_IMMEDIATE_REBOOT"       : "yes",
-     "KDUMP_COPY_KERNEL"	    : "no",
+     "KDUMP_COPY_KERNEL"	    : "yes",
      "KDUMP_TRANSFER"               : "",
      "KDUMP_SAVEDIR"      	    : "file:///var/log/dump",
      "KDUMP_KEEP_OLD_DUMPS"         : "5",
      "KDUMP_FREE_DISK_SIZE"    	    : "64",
-     "KDUMP_DUMPDEV"           	    : "",
      "KDUMP_VERBOSE"      	    : "3",
      "KDUMP_DUMPLEVEL"		    : "0",
      "KDUMP_DUMPFORMAT"		    : "compressed", //or "ELF"
@@ -551,6 +558,30 @@ string BuildCrashkernelValue ()
 
 }
 
+/** bnc #439881 - Don't use extended crashkernel syntax for Xen
+ * Fuction convert extended crashkernel value to old style :Y@X
+ *
+ * @param string - extended value of crashkernel
+ * @return string - old style value
+ */
+
+
+string convertCrashkernelForXEN(string crash)
+{
+    string crash_value = "";
+    if (crash != "")
+    {
+	crash_value = getAlocatedMemory(crash)+"M";
+	
+	if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
+        	crash_value = crash_value + "@16M";
+
+    }
+    y2milestone("Converting crashkernel value from: (%1) to :(%2)",crash, crash_value);
+    return crash_value;
+}
+
+
 
 /**
  * Check if default boot section is Xen section
@@ -609,7 +640,7 @@ boolean ReadXenKdumpKernelParam (string act_boot_secion)
             {
 		crash = section["xen_append"]:"";
 		section_pos = section_position;
-	    }              
+	    }
         });
     }
 
@@ -772,7 +803,7 @@ boolean WriteKdumpSettings () {
     debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "********";
     debug_KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"] = "********";
     y2milestone("-------------KDUMP_SETTINGS-------------------");  
-    y2milestone("kdump configuration has been read without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1", debug_KDUMP_SETTINGS);
+    y2milestone("kdump configuration for writing without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1", debug_KDUMP_SETTINGS);
     y2milestone("---------------------------------------------");
 
     foreach (string option_key, string option_val, KDUMP_SETTINGS, {
@@ -802,21 +833,26 @@ boolean WriteKdumpBootParameter () {
   {
      Bootloader::Read();
      actual_boot_section = Bootloader::getDefaultSection ();
-     y2milestone("Default boot section is %1", actual_boot_section);
      CheckXenDefault(actual_boot_section);
   }
+
+  y2milestone("Default boot section is %1", actual_boot_section);
   if (add_crashkernel_param) {
-     string crash_value = BuildCrashkernelValue ();
-           
+
+     string crash_value = "";
+     if (!Mode::autoinst())
+        crash_value = BuildCrashkernelValue ();
+
      if ((!crashkernel_param) || (crash_value != crashkernel_param_value)) {
 
+	if (Mode::autoinst())
+	    crash_value = crashkernel_param_value;
         // write crashkernel option to boot section
 	if (section_pos == -1)
 	{
             result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", crash_value);
 	} else {
-	    
-	    BootCommon::sections[section_pos, "xen_append"]= "crashkernel="+crash_value;
+	    BootCommon::sections[section_pos, "xen_append"]= "crashkernel="+convertCrashkernelForXEN(crash_value);
 	    // added flag which means that section was changed bnc #432651
 	    BootCommon::sections[section_pos, "__changed"] = true;
 	    result = true;
@@ -936,7 +972,15 @@ global boolean Write()
 	  y2milestone("Installation doesn't support kdump.");
           return true;
        }
+
     }
+
+    if ((Mode::installation() || Mode::autoinst()) && (!add_crashkernel_param))
+    {
+	y2milestone("Skip writing of configuration for kdump during installation");
+	return true;
+    }
+
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
 	    /* Progress stage 1/2 */
@@ -989,7 +1033,7 @@ define void AddPackages()
         if (Arch::ppc64())
             kdump_packages = add(kdump_packages, "kernel-kdump");
         else
-            kdump_packages = add(kdump_packages, "kdump");          	
+            kdump_packages = add(kdump_packages, "kdump");
     }
 }
 
@@ -1002,9 +1046,13 @@ define void ProposeGlobalVars()
 {
     if (!propose_called)
     {
-       // set adding boot option...
+       // propose disable kdump if PC has less than 1024MB RAM
+       if (total_memory < 1024)  
+	  add_crashkernel_param = false;
+       else
+	  add_crashkernel_param = true;
+
        crashkernel_param = false;
-       add_crashkernel_param = true;
        // added defualt settings
        KDUMP_SETTINGS = DEFAULT_CONFIG;
     }
@@ -1056,25 +1104,19 @@ global define void CheckPackages()
  */
 global define void Propose () 
 {
-
     y2milestone("Proposing new settings of kdump");
-
-    // set default values for global variables
-    ProposeGlobalVars();
     // read available memory
     ReadAvailableMemory ();
-
-    // propose disable kdump if PC has less than 1024MB RAM
-    if (total_memory < 1024)
-	add_crashkernel_param = false;
+    // set default values for global variables
+    ProposeGlobalVars();
 
     // add packages for installation
     AddPackages();
 
     // select packages for installation
     CheckPackages();
-
 }
+
 /**
  * Create a textual summary and a list of unconfigured cards
  * @return summary of the current configuration
@@ -1117,6 +1159,7 @@ global define map Export ()
  */
 global define boolean Import (map settings) 
 {
+    y2milestone("Importing settings for kdump");
     crashkernel_param_value = settings["crash_kernel"]:"";
     add_crashkernel_param = settings["add_crash_kernel"]:false;
     boolean result = true;
@@ -1127,7 +1170,10 @@ global define boolean Import (map settings)
     	string val = (string) my_import_map[str_key]:nil;	
     	if (val != nil) KDUMP_SETTINGS[str_key] = val;
     	if (val == nil) KDUMP_SETTINGS[str_key] = DEFAULT_CONFIG[str_key]:nil; 
-    });        
+    });
+    if ((haskey(settings, "crash_kernel")) || (haskey(settings, "add_crash_kernel")) ||
+	(size(my_import_map) > 0))
+    	import_called = true;
     return result;
 }
 /* EOF */
