@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 31 12:19:46 CET 2008 - ug@suse.de
+
+- is cloneable for autoyast
+
+-------------------------------------------------------------------
 Fri Oct 24 14:10:01 CEST 2008 - juhliarik@suse.cz
 
 - added fix for problem with value of "KDUMP_KERNELVER" 

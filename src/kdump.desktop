@@ -18,6 +18,7 @@ X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=
 X-SuSE-YaST-AutoInstPath=install
 X-SuSE-YaST-AutoInstSchema=kdump.rnc
+X-SuSE-YaST-AutoInstClonable=true
 
 Icon=yast-kdump
 Exec=/sbin/yast2 kdump 
