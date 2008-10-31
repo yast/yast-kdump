@@ -544,7 +544,7 @@ string BuildCrashkernelValue ()
     } else if (Arch::ia64()) {
         y2milestone("ia64 platform without offset");
     } else {
-       if (!Mode::commandline())
+       if (Mode::normal())
           Popup::Error(_("Unsupported architecture, \"crashkernel\" was not added"));
        y2error("Unsupported platform/architecture...");
     }
@@ -722,11 +722,20 @@ boolean ReadKdumpKernelParam () {
 boolean ProposeAlocatedMemory () 
 {
   if (alocated_memory == "0") 
-  {     
+  {
      if ((total_memory >= 512) &&  (total_memory/1024) <2)
         alocated_memory = "64";
      else if ((total_memory/1024) >= 2)
         alocated_memory = "128";
+
+     // bnc #431492 - UPT-LTE: /proc/vmcore is empty in kdump kerne
+     if ((Arch::ppc64()) && (alocated_memory != ""))
+     {
+	 integer al_mem = tointeger(alocated_memory);
+	 al_mem = al_mem *2;
+	 alocated_memory = tostring(al_mem);
+     }
+
   }
   y2milestone("[kdump] allocated memory if not set in \"crashkernel\" param: %1", alocated_memory);
   return true;

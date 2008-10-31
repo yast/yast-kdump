@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Thu Oct 31 12:26:42 CET 2008 - juhliarik@suse.cz
+
+- added fix for unsupported option KDUMP_DUMPDEV (bnc #438976)
+- added fix for autoyast (bnc #436365)
+- fixed problem with value of crashkernel for XEN (bnc #439881)
+- added pacth for allocating double size of memory for ppc64 
+  (bnc #431492)
+- added fix for problem with Popup in autoyast installation on
+  s390 (bnc #440277)
+- V 2.17.9
+
+-------------------------------------------------------------------
 Fri Oct 31 12:19:46 CET 2008 - ug@suse.de
 
 - is cloneable for autoyast
