@@ -970,10 +970,6 @@ map cmdline_description = $[
 		"target", "server", "port", "share", "dir", "user", "pass",
 	],
 
-        "rawpartition": [
-		"raw",
-	],
-
         "customkernel": [
 		"kernel",
 	],
@@ -988,10 +984,6 @@ map cmdline_description = $[
 
         "immediatereboot": [
 		"enable", "disable",
-	],
-
-        "runlevel": [
-		"level",
 	],
 
         "keepolddumps": [
