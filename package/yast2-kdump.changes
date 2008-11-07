@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Nov  7 11:38:25 CET 2008 - juhliarik@suse.cz
+
+- added fix for unsupported option KDUMP_RUNLEVEL (bnc #440897)
+- added fix for default value of KDUMP_SAVEDIR (bnc #440843)
+- V 2.17.10 
+
+-------------------------------------------------------------------
 Thu Oct 31 12:26:42 CET 2008 - juhliarik@suse.cz
 
 - added fix for unsupported option KDUMP_DUMPDEV (bnc #438976)
