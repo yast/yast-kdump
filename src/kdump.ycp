@@ -165,12 +165,6 @@ boolean cmdKdumpShow (map options) {
     
   
   } //end of if (SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil))
-  
-  if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil != "") {
-     CommandLine::Print("");
-     //TRANSLATORS: CommandLine printed text
-     CommandLine::Print(sformat(_("Save first to raw partition: %1"), Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"]:nil));
-  }
 
   if (Kdump::KDUMP_SETTINGS["KDUMP_KERNELVER"]:nil != "") {
      CommandLine::Print("");
@@ -189,13 +183,7 @@ boolean cmdKdumpShow (map options) {
      //TRANSLATORS: CommandLine printed text
      CommandLine::Print(sformat(_("Kdump command line append: %1"), Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"]:nil));
 
-  }   
-
-  if (Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil != "") {
-     CommandLine::Print("");
-     //TRANSLATORS: CommandLine printed text
-     CommandLine::Print(sformat(_("Kdump runlevel: %1"), Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]:nil));
-  }   
+  }
 
   CommandLine::Print("");
   //TRANSLATORS: CommandLine printed text
@@ -488,31 +476,6 @@ boolean cmdKdumpDumpTarget (map options) {
 }
 
 
-
-boolean cmdKdumpRawPartition (map options) {
-  if (options["raw"]:nil!=nil) {
-
-     string value = tostring(find(string key, Kdump::uknown_fs_partitions, 
-       ``(search(key, tostring(options["raw"]:nil)) != nil)));
-
-     if ((value != "") && (value != nil)) {
-        Kdump::KDUMP_SETTINGS["KDUMP_DUMPDEV"] = tostring(options["raw"]:nil);
-        return true;
-     } else {
-        // TRANSLATORS: CommandLine error message 
-        CommandLine::Error(_("Wrong value of options \"raw\". Partition doesn't exist."));
-        return false;
-     }
-
-  } else {
-     // TRANSLATORS: CommandLine error message 
-     CommandLine::Error(_("Wrong options were used."));
-     return false;
-  }
-
-
-}
-
 boolean cmdKdumpCustomKernel (map options) {
 
   if (options["kernel"]:nil!=nil) {
@@ -584,28 +547,6 @@ boolean cmdKdumpCopyKernel(map options) {
 
   } else { 
      // TRANSLATORS: CommandLine error message     
-     CommandLine::Error(_("Wrong options were used."));
-     return false;
-  }
-
-}
-
-
-boolean cmdKdumpRunLevel (map options) {
-  if (options["level"]:nil!=nil) {
-     string level = filterchars(tostring(options["level"]:nil),"1235s");
-
-     if ((level != "") && (level != nil)){
-        Kdump::KDUMP_SETTINGS["KDUMP_RUNLEVEL"]= tostring(options["level"]:nil);
-        return true;
-     } else {
-        // TRANSLATORS: CommandLine error message 
-        CommandLine::Error(_("Wrong value of options \"level\"."));
-        return false;
-     }
-
-  } else {
-     // TRANSLATORS: CommandLine error message    
      CommandLine::Error(_("Wrong options were used."));
      return false;
   }
@@ -793,16 +734,7 @@ map cmdline_description = $[
 		   "dumptarget taget=cifs server=name_server share=share_name dir=/var/log/dump user=user_name pass=path_to_file_with_password",
 	            ],
         ],
-       
-        "rawpartition" : $[
-	"handler" : cmdKdumpRawPartition,
-	// TRANSLATORS: CommandLine help
-	"help" 	  : _("Raw partition allows to save the dump in initrd before mounting any filesystem."),
-	"example" : [
-		   "rawpartition raw=scsi-SATA_ST3200827AS_5ND4TNCS-part2",
-	            ],
-        ],
-     
+
         "customkernel" : $[
 	"handler" : cmdKdumpCustomKernel,
 	// TRANSLATORS: CommandLine help
@@ -847,15 +779,6 @@ map cmdline_description = $[
 	"example" : [
 		   "copykernel enable",
 		   "copykernel disable",
-	            ],
-        ],
-
-       "runlevel" : $[
-	"handler" : cmdKdumpRunLevel,
-	// TRANSLATORS: CommandLine help
-	"help" 	  : _("The runlevel to boot the kdump kernel.(1,2,3,5,s)"),
-	"example" : [
-		   "runlevel level=1",
 	            ],
         ],
 
