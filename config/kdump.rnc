@@ -18,6 +18,7 @@ kdump_general =
      element KDUMP_KERNELVER { text }? &
      element KDUMP_COMMANDLINE { text }? &
      element KDUMP_COMMANDLINE_APPEND { text }? &
+     element KDUMP_COPY_KERNEL { text }? &
      element KEXEC_OPTIONS { text }? &
      element KDUMP_RUNLEVEL { text }? &
      element KDUMP_IMMEDIATE_REBOOT { text }? &
