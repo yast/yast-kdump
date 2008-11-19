@@ -739,13 +739,13 @@ boolean ProposeAlocatedMemory ()
      if ((Arch::ia64()) && (total_memory >= 1024))
      {
 	 integer total_memory_gigabyte = total_memory/1024;
-         if ((total_memory_gigabyte >= 1) && (total_memory_gigabyt <12))
+         if ((total_memory_gigabyte >= 1) && (total_memory_gigabyte <12))
 	     alocated_memory = "256";
-	 else if ((total_memory_gigabyte >= 12) && (total_memory_gigabyt <128))
+	 else if ((total_memory_gigabyte >= 12) && (total_memory_gigabyte <128))
 	     alocated_memory = "512";
-	 else if ((total_memory_gigabyte >= 128) && (total_memory_gigabyt <512))
+	 else if ((total_memory_gigabyte >= 128) && (total_memory_gigabyte <512))
 	     alocated_memory = "1024";
-	 else if ((total_memory_gigabyte >= 512) && (total_memory_gigabyt <768))
+	 else if ((total_memory_gigabyte >= 512) && (total_memory_gigabyte <768))
 	     alocated_memory = "2048";
 	 else if (total_memory_gigabyte >= 768)
 	     alocated_memory = "3072";
