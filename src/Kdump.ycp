@@ -537,11 +537,11 @@ string BuildCrashkernelValue ()
 
     string crash_value = "";
     crash_value = alocated_memory+"M";
-    if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64()) {
+    if ((Arch::i386()) ||(Arch::x86_64()))  {
         crash_value = crash_value + "@16M";
 	y2milestone("Common offset 16M");
-    } else if (Arch::ia64()) {
-        y2milestone("ia64 platform without offset");
+    } else if ((Arch::ia64()) || Arch::ppc64()) {
+        y2milestone("ia64 or ppc64 platform without offset");
     } else {
        if (Mode::normal())
           Popup::Error(_("Unsupported architecture, \"crashkernel\" was not added"));
