@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 20 15:51:15 CET 2008 - juhliarik@suse.cz
+
+- deleted offset for ppc64 in crashkernel value (bnc #447107)
+- V 2.17.13 
+
+-------------------------------------------------------------------
 Thu Nov 20 12:52:19 CET 2008 - juhliarik@suse.cz
 
 - added fix for problem with "Browse" button (bnc #445894)
