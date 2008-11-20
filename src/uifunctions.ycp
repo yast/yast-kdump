@@ -603,7 +603,11 @@ symbol HandleTargetKdump (string key, map event) {
   } else if (radiobutton == "local_filesystem") {
      UI::ReplaceWidget (`id ("Targets"), local_filesystem);
      set_network = false;     
-     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil); 
+     UI::ChangeWidget(`id ("dir"), `Value, KDUMP_SAVE_TARGET["dir"]:nil);
+     if (event_name == "select_dir") {
+         string dir = UI::AskForExistingDirectory("/", _("Select directory for saving dump images"));
+         UI::ChangeWidget(`id ("dir"), `Value, dir);
+     }
 
   } else if (radiobutton == "ftp") {
      UI::ReplaceWidget (`id ("Targets"), ftp);
@@ -654,13 +658,7 @@ symbol HandleTargetKdump (string key, map event) {
        UI::ChangeWidget(`id ("password"), `Value, KDUMP_SAVE_TARGET["password"]:nil);
      }
 
-  } else if (radiobutton == "select_dir") {
-     string dir = UI::AskForExistingDirectory("/", _("Select directory for saving dump images"));
-     UI::ChangeWidget(`id ("dir"), `Value, dir);
-     //KDUMP_SAVE_TARGET["dir"] = dir;
-
-  } 
-  
+  }
   return nil;
 
 }
