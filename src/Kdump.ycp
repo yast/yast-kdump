@@ -734,7 +734,6 @@ boolean ProposeAlocatedMemory ()
 	 al_mem = al_mem *2;
 	 alocated_memory = tostring(al_mem);
      }
-
      // bnc #446480 - Fine-tune kdump memory proposal
      if ((Arch::ia64()) && (total_memory >= 1024))
      {
@@ -743,8 +742,12 @@ boolean ProposeAlocatedMemory ()
 	     alocated_memory = "256";
 	 else if ((total_memory_gigabyte >= 12) && (total_memory_gigabyte <128))
 	     alocated_memory = "512";
-	 else if ((total_memory_gigabyte >= 128) && (total_memory_gigabyte <512))
+	 else if ((total_memory_gigabyte >= 128) && (total_memory_gigabyte <256))
+	     alocated_memory = "768";
+	 else if ((total_memory_gigabyte >= 256) && (total_memory_gigabyte <378))
 	     alocated_memory = "1024";
+	 else if ((total_memory_gigabyte >= 378) && (total_memory_gigabyte <512))
+	     alocated_memory = "1536";
 	 else if ((total_memory_gigabyte >= 512) && (total_memory_gigabyte <768))
 	     alocated_memory = "2048";
 	 else if (total_memory_gigabyte >= 768)
