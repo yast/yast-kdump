@@ -121,7 +121,7 @@ map HELPS = $[
   "EnableCopyKernel" : _("<p><b>Enable Copy Kernel into the Dump Directory</b> - 
     If it is selected the kernel itself and the
       debugging information (if installed) gets copied into the dump
-      directory.  The default is “off”. It is useful have
+      directory.  The default is \"off\". It is useful have
       everything in place for debugging.<br></p>"),
 
 

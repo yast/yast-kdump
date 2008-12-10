@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec 10 13:21:47 CET 2008 - jsrain@suse.cz
+
+- use correct quote in help text
+
+-------------------------------------------------------------------
 Fri Nov 28 10:13:57 CET 2008 - juhliarik@suse.cz
 
 - updated proposal of alocation memory (bnc #446480)
