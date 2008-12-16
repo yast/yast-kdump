@@ -869,7 +869,10 @@ boolean WriteKdumpBootParameter () {
      if (!Mode::autoinst())
         crash_value = BuildCrashkernelValue ();
 
-     if ((!crashkernel_param) || (crash_value != crashkernel_param_value)) {
+     // bnc #450132 - added check if bootloader is not installed
+     if (((!crashkernel_param) || (crash_value != crashkernel_param_value)) && 
+	(actual_boot_section != "") && (actual_boot_section != nil)) 
+     {
 
 	if (Mode::autoinst())
 	    crash_value = crashkernel_param_value;
@@ -895,7 +898,6 @@ boolean WriteKdumpBootParameter () {
         Service::Enable("boot.kdump");
         return result;
      }
-     
      // start kernel-kdump at boot
      Service::Enable("boot.kdump");
 
