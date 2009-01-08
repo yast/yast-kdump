@@ -53,6 +53,8 @@ import "ProductControl";
 import "ProductFeatures";
 import "PackagesProposal";
 import "FileUtils";
+import "String";
+import "Directory";
 
 /**
  * Prototypes
@@ -841,10 +843,77 @@ boolean WriteKdumpSettings () {
     if (checkPassword())
 	Chmod(kdump_file, "600");
     else
-	Chmod(kdump_file, "644");    
+	Chmod(kdump_file, "644");
     return true;
 }
 
+/**
+ * Add crashkernel arg to 
+ *
+ *
+ *
+ */
+
+boolean addCrashkernelToKexec (string crashkernel_value)
+{
+    if ((crashkernel_value == "") && (crashkernel_value == nil))
+    {
+	y2milestone("crashkernel value empty");
+	return false;
+    }
+    // command for checking if kernel_params exist
+    string cmd = sformat("ls '%1/kernel_params' |tr -d '\n'", String::Quote (Directory::vardir));
+    y2milestone("Checking existing file kernel_params via command %1", cmd);
+
+    map out = (map)WFM::Execute(.local.bash_output, cmd);
+
+    cmd = sformat("%1/kernel_params",Directory::vardir);
+    // check output
+    if (out["stdout"]:"" != cmd)
+    {
+	y2milestone ("File kernel_params was not found, output: %1", out);
+	return false;
+    }
+
+    // command for reading kernel_params
+    cmd = sformat("cat '%1/kernel_params' |tr -d '\n'", String::Quote (Directory::vardir));
+    y2milestone("Reading kernel arguments via command %1", cmd);
+    // read data from /var/lib/YaST2/kernel_params
+    out = (map)WFM::Execute(.local.bash_output, cmd);
+    // check output
+    if (out["exit"]:nil != 0)
+    {
+	y2error ("Reading kernel arguments failed, output: %1", out);
+	return false;
+    }
+
+    string kernel_args = out["stdout"]:"";
+    // check if kernel_params contains any data
+    if (size(kernel_args) <2)
+    {
+	y2error ("%1/kernel_params is empty, kernel_params=%2 ", Directory::vardir, kernel_args);
+	return false;
+    }
+
+    // add crashkernel value to variable
+    kernel_args = kernel_args + " crashkernel=" + crashkernel_value;
+
+    // command for updating kernel_params
+    cmd = sformat("echo \"%1\" > '%2/kernel_params'", 
+          kernel_args, String::Quote (Directory::vardir));
+    y2milestone("Update kernel arguments via command %1", cmd);
+    // read data from /var/lib/YaST2/kernel_params
+    out = (map)WFM::Execute(.local.bash_output, cmd);
+    // check output
+    if (out["exit"]:nil != 0)
+    {
+	y2error ("Writining kernel arguments failed, output: %1", out);
+	return false;
+    }
+
+    return true;
+
+}
 
 /**
  * Write kdump boot argument crashkernel
@@ -894,6 +963,9 @@ boolean WriteKdumpBootParameter () {
         y2milestone("[kdump] (WriteKdumpBootParameter) adding chrashkernel option with value : %1", crash_value);
         if (Mode::normal())
            Popup::Message(_("To apply changes a reboot is necessary."));
+
+	if (Mode::installation())
+	    addCrashkernelToKexec(crash_value);
 
         Service::Enable("boot.kdump");
         return result;
