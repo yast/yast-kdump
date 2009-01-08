@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan  8 14:45:20 CET 2009 - juhliarik@suse.cz
+
+- added fix for adding crashkernel value to kernel_params - using
+  kexec instead of reboot (bnc #441229) 
+- 2.17.16
+
+-------------------------------------------------------------------
 Tue Dec 16 10:20:44 CET 2008 - juhliarik@suse.cz
 
 - added fix for problem with bootloader if "/" is on NFS
