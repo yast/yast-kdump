@@ -417,7 +417,7 @@ symbol RunKdumpDialogs() {
     "initial_screen"	: "start_up",
     "screens"		: tabs,
     "widget_descr"	: wid_handling,
-    "back_button"	: Label::BackButton(), 
+    "back_button"	: "", 
     "abort_button"	: Label::CancelButton(),
     "next_button"	: Label::OKButton(),
     //"functions"	: " ",
