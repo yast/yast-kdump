@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb  9 15:55:32 CET 2009 - juhliarik@suse.de
+
+- added fix for correct using buttons (bnc#440554) 
+- 2.18.0
+
+-------------------------------------------------------------------
 Wed Dec 10 13:21:47 CET 2008 - jsrain@suse.cz
 
 - use correct quote in help text
