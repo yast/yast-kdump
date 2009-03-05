@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  5 13:44:29 CET 2009 - juhliarik@suse.cz
+
+- added fix for validation of autoyast profil (bnc#480466) 
+- 2.18.1
+
+-------------------------------------------------------------------
 Mon Feb  9 15:55:32 CET 2009 - juhliarik@suse.de
 
 - added fix for correct using buttons (bnc#440554) 
