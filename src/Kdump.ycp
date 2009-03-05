@@ -1294,6 +1294,26 @@ global define list<string> Summary ()
     return result;
 }
 
+/** bnc# 480466 - fix problem with validation autoyast profile
+ * Function filters keys for autoyast profile
+ *
+ * @param map <string, string > KDUMP_SETTINGS
+ * @return map <string, string > filtered KDUMP_SETTINGS by DEFAULT_CONFIG
+ */
+
+map <string, string > filterExport(map <string, string >  settings)
+{
+    map <string, string > ret = $[];
+    list <string> keys = (list <string>)Map::Keys(DEFAULT_CONFIG);
+    ret = filter(string key, string value, settings,
+	  {
+	         if (contains(keys, key))
+		     return true;
+	  });
+
+    return ret;
+}
+
 /**
  * Export kdump settings to a map
  * @return kdump settings
@@ -1303,7 +1323,7 @@ global define map Export ()
     map out = $[
 	    "crash_kernel" : BuildCrashkernelValue(),
 	    "add_crash_kernel" :  add_crashkernel_param,
-	    "general" : KDUMP_SETTINGS,
+	    "general" : filterExport(KDUMP_SETTINGS),
     ];
 
     y2milestone ("Kdump exporting settings: %1", out);
@@ -1323,7 +1343,7 @@ global define boolean Import (map settings)
     add_crashkernel_param = settings["add_crash_kernel"]:ProposeCrashkernelParam();
     boolean result = true;
     map <string, string > my_import_map = settings["general"]:$[];
-    foreach (any key, Map::Keys(DEFAULT_CONFIG), 
+    foreach (any key, Map::Keys(DEFAULT_CONFIG),
     {
 	string str_key = tostring(key);
     	string val = (string) my_import_map[str_key]:nil;	
