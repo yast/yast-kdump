@@ -142,7 +142,7 @@ map<string,map<string,any> > wid_handling = $[
   "TargetKdump"		: $[
      "widget"		: `custom,
      "custom_widget"	: `VBox(
-           `Frame(_("Saving Target for Kdump Image"),`HBox(`HSpacing(1),`VBox(
+           `Frame(_("Saving Target for Kdump Image"),`HBox(`HSpacing(1),`MinHeight(2,`VBox(
              `RadioButtonGroup(`id("DumpTarget"), `HBox(
 	        `Left(`RadioButton(`id("local_filesystem"), `opt(`notify), "&Local Filesytem")),
                 `Left(`RadioButton(`id("ftp"), `opt(`notify), "F&TP")),
@@ -151,7 +151,7 @@ map<string,map<string,any> > wid_handling = $[
        		`Left(`RadioButton(`id("cifs"), `opt(`notify), "C&IFS (SMB)"))
              ))
              
-           ))),
+           )))),
 
            `VSpacing(1),
            `ReplacePoint(`id("Targets"), ftp)
@@ -172,7 +172,7 @@ map<string,map<string,any> > wid_handling = $[
      "custom_widget"	: `VBox(
 	`CheckBoxFrame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"), false, 
         //`Frame(`id("enable_raw_partitions"),_("Enable Ra&w Saving in Initrd"),
-          `HBox(`HSpacing(1),`VBox(
+          `HBox(`HSpacing(1), `VBox(
             `Left(`ComboBox(`id("raw_partitions"), 
                     _("The List of A&vailable Raw Partitions of All Disks Without Known Filesystem")))
 	  ))

@@ -355,7 +355,7 @@ string GetActualBootSection () {
 
   //Popup::Message(kernel_version);
   
-  y2milestone("[kdump] (GetActualBootSection) kerne version: %1",kernel_version);
+  y2milestone("[kdump] (GetActualBootSection) kernel version: %1",kernel_version);
 
 
   //boot sections from bootloader

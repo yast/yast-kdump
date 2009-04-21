@@ -74,6 +74,7 @@ symbol ReadDialog() {
   boolean kdump_available = false;
   boolean kernel_kdump_available = false;
   list <string> package_list = [];
+  string kernel_kdump_name = "kernel-kdump";
 
   Wizard::RestoreHelp(HELPS["read"]:"");
   // Kdump::AbortFunction = PollAbort;
@@ -84,18 +85,39 @@ symbol ReadDialog() {
      kexec_installed = true;
   }
 
+  // added patch from bwalle for installing kernel-kdumppae if kernel-bigsmp is used
+
+  // when we use the bigsmp kernel on i386, we need kernel-kdumppae
+  if (Arch::i386()) {
+     // reading version of kernel
+     string command = "uname -r";
+     map version = (map)SCR::Execute (.target.bash_output, command);
+     y2milestone("[kdump] (ReadDialog) command read kernel version:  %1  output: %2",command, version);
+     boolean kernel_bigsmp = false;  
+     if (version["exit"]:nil ==  0)
+     {
+	 if (find(version["stdout"]:"", "bigsmp") != -1)
+             kernel_bigsmp = true; 
+     } else {
+	 y2error("Reading version of kernel fault");
+         kernel_bigsmp = false;
+     }
+     if (kernel_bigsmp) {
+        if (Package::Available("kernel-kdumppae") || Package::Installed("kernel-kdumppae"))
+           kernel_kdump_name = "kernel-kdumppae";
+       else
+           y2milestone ("kernel-kdumppae not available. Falling back to kernel-kdump.");
+     }
+  }
+
   if (!Arch::ia64()) { 
-     if (Package::Installed("kernel-kdump"))
+     if (Package::Installed(kernel_kdump_name))
         kernel_kdump_installed = true;
      else
         kernel_kdump_installed = false;
   } else {
      kernel_kdump_installed = true;
   }
-
-
-
-
 
   string kdump ="";
   
@@ -132,7 +154,7 @@ symbol ReadDialog() {
      }
 
      if (!kernel_kdump_installed)
-        kernel_kdump_available = Package::Available("kernel-kdump");
+        kernel_kdump_available = Package::Available(kernel_kdump_name);
 
      if ((!kexec_installed) && (!kexec_available)) {
         if (!Mode::commandline()) {
@@ -173,7 +195,7 @@ symbol ReadDialog() {
         package_list = add(package_list, kdump);
      
      if (!kernel_kdump_installed)
-        package_list = add(package_list, "kernel-kdump");
+        package_list = add(package_list, kernel_kdump_name);
 
      //install packages       
      if (! PackageSystem::CheckAndInstallPackages(package_list)) {
