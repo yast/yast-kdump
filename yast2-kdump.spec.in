@@ -19,6 +19,9 @@ Summary:	Configuration of kdump
 @BUILD@
 
 @INSTALL@
+%ifarch s390 s390x
+/bin/rm -f $RPM_BUILD_ROOT/@desktopdir@/kdump.desktop
+%endif
 
 @CLEAN@
 
@@ -29,7 +32,9 @@ Summary:	Configuration of kdump
 @clientdir@/kdump.ycp
 @clientdir@/kdump_*.ycp
 @moduledir@/Kdump.*
-@desktopdir@/kdump.desktop
+%ifnarch s390 s390x
+@desktopdir@/*.desktop
+%endif
 @schemadir@/autoyast/rnc/kdump.rnc
 @scrconfdir@/*.scr
 %doc @docdir@
