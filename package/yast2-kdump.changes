@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan  7 15:22:05 CET 2010 - juhliarik@suse.cz
+
+- deleted offset "@16M" from crashkernel option (bnc#565122) and
+  (bnc#563905)
+- 2.17.18 
+
+-------------------------------------------------------------------
 Tue Nov 10 11:47:35 CET 2009 - juhliarik@suse.cz
 
 - disbaled kdump in YaST on s390 (bnc#524164)
