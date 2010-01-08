@@ -364,7 +364,24 @@ string GetActualBootSection () {
   string result = "";
   string kernel_boot_options = "";
   integer min_dif_size = 1000;
- 
+
+  if (Mode::update())
+  {
+     result = Bootloader::getDefaultSection ();
+     integer section_position = -1;
+     foreach(map section, BootCommon::sections, 
+     {
+	section_position = section_position +1;
+        string name = tostring(section["name"]:nil);
+
+        if ((name == result) && (section["xen_append"]:nil != nil))
+        {
+	    section_pos = section_position;
+	    kernel_version = "xen";
+	}
+     });
+     return result;
+  }
   // reading bootloader settings
   boolean old_progress = Progress::set (false);
   Bootloader::Read();
@@ -539,11 +556,9 @@ string BuildCrashkernelValue ()
 
     string crash_value = "";
     crash_value = alocated_memory+"M";
-    if ((Arch::i386()) ||(Arch::x86_64()))  {
-        crash_value = crash_value + "@16M";
-	y2milestone("Common offset 16M");
-    } else if ((Arch::ia64()) || Arch::ppc64()) {
-        y2milestone("ia64 or ppc64 platform without offset");
+    // bnc#563905 problem with offset in crashkernel
+    if ((Arch::i386()) ||(Arch::x86_64()) || (Arch::ia64()) || Arch::ppc64())  {
+        y2milestone("i386, x86_64, ia64 and ppc64 platforms are without offset");
     } else {
        if (Mode::normal())
           Popup::Error(_("Unsupported architecture, \"crashkernel\" was not added"));
@@ -574,8 +589,9 @@ string convertCrashkernelForXEN(string crash)
     {
 	crash_value = getAlocatedMemory(crash)+"M";
 	
-	if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
-        	crash_value = crash_value + "@16M";
+	// bnc#563905 problem with offset in crashkernel
+	//if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
+        //	crash_value = crash_value + "@16M";
 
     }
     y2milestone("Converting crashkernel value from: (%1) to :(%2)",crash, crash_value);
@@ -945,6 +961,17 @@ boolean WriteKdumpBootParameter () {
 
 	if (Mode::autoinst())
 	    crash_value = crashkernel_param_value;
+
+
+	if (Mode::update())
+	{
+	    if (search(crash_value, "@") != nil)
+	    {
+		list<string> tmp_crash_value = splitstring(crash_value, "@");
+		crash_value = tmp_crash_value[0]:"";
+		y2milestone("Delete offset crashkernel value: %1", crash_value);
+	    }
+	}
         // write crashkernel option to boot section
 	if (section_pos == -1)
 	{
@@ -1050,6 +1077,19 @@ global boolean Read()
 
     if(Abort()) return false;
     modified = false;
+    return true;
+}
+
+/**
+ * Update crashkernel argument during update of OS
+ * @return true on success
+ */
+
+global boolean Update()
+{
+    y2milestone("Update kdump settings");
+    ReadKdumpKernelParam ();
+    WriteKdumpBootParameter ();
     return true;
 }
 
