@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 12 10:05:15 CET 2010 - juhliarik@suse.cz
+
+- deleted offset "@16M" for crashkernel value (bnc#567572)
+- 2.19.0 
+
+-------------------------------------------------------------------
 Thu Mar  5 13:44:29 CET 2009 - juhliarik@suse.cz
 
 - added fix for validation of autoyast profil (bnc#480466) 
