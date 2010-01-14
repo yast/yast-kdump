@@ -21,9 +21,8 @@ X-SuSE-YaST-AutoInstSchema=kdump.rnc
 X-SuSE-YaST-AutoInstClonable=true
 
 Icon=yast-kdump
-Exec=/sbin/yast2 kdump 
+Exec=xdg-su -c "/sbin/yast2 kdump"
 
 Name=Kernel Kdump
 GenericName=Kernel Kdump Configuration Tool
-X-KDE-SubstituteUID=true
 StartupNotify=true
