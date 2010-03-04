@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  4 15:17:53 CET 2010 - juhliarik@suse.cz
+
+- added missing help text for "Number of old dumps" (bnc#584586)
+- 2.19.1 
+
+-------------------------------------------------------------------
 Wed Jan 13 18:56:03 CET 2010 - kmachalkova@suse.cz
 
 - Adjusted .desktop file(s) to wrap /sbin/yast2/ calls in xdg-su
