@@ -144,6 +144,10 @@ map HELPS = $[
   "NotificationCC": _("<p><b>Notification CC</b> is list of space-separated mail addresses to which notification mail will be
  sent via Cc if a dump has been saved.</p>"),
 
+ /* Number of Old Dumps (number) */
+  "NumberDumps"   : _("<p><b>Number of Old Dumps</b> specifies how many old dumps are kept. If the number of dump files 
+exceeds this number, older dumps are removed.</p>"),
+
     /* Read dialog help 1/2 */
     "read" : _("<p><b><big>Initializing Kdump Configuration</big></b><br>
 Please wait...<br></p>
