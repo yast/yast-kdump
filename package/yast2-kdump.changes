@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  4 15:20:25 CET 2010 - juhliarik@suse.cz
+
+- added missing help text for "Number of old dumps" (bnc#584586) 
+- 2.17.19
+
+-------------------------------------------------------------------
 Thu Jan  7 15:22:05 CET 2010 - juhliarik@suse.cz
 
 - deleted offset "@16M" from crashkernel option (bnc#565122) and
