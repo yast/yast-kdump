@@ -590,8 +590,9 @@ string convertCrashkernelForXEN(string crash)
 	crash_value = getAlocatedMemory(crash)+"M";
 	
 	// bnc#563905 problem with offset in crashkernel
-	//if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
-        //	crash_value = crash_value + "@16M";
+	// bnc#585371 kdump fails to load with xen: locate_hole failed
+	if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
+        	crash_value = crash_value + "@16M";
 
     }
     y2milestone("Converting crashkernel value from: (%1) to :(%2)",crash, crash_value);
