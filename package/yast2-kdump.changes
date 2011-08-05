@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug  5 12:32:54 CEST 2011 - tgoettlicher@suse.de
+
+- fixed .desktop file (bnc #681249)
+
+-------------------------------------------------------------------
 Tue Mar  9 11:08:33 CET 2010 - juhliarik@suse.cz
 
 - added fix for allocating memory (bnc#578590) 
