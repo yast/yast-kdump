@@ -91,7 +91,11 @@ any KdumpSequence() {
   ];
 
   Wizard::CreateDialog();
-  Wizard::SetTitleIcon("yast-kdump");
+  if (Mode::normal ())
+    Wizard::SetDesktopTitleAndIcon ("kdump");
+  else
+    Wizard::SetTitleIcon("yast-kdump");
+
   any ret = Sequencer::Run(aliases, sequence);
   UI::CloseDialog();
   return ret;
