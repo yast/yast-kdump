@@ -2,7 +2,7 @@
 
 @HEADER@
 Group:	System/YaST
-License: GPL v2 only
+License: GPL-2.0
 Requires:	yast2 yast2-storage yast2-bootloader
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite yast2-storage yast2-bootloader
 
