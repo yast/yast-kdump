@@ -584,7 +584,7 @@ boolean cmdKdumpSMTPServer (map options)
         return true;
      } else {
         // TRANSLATORS: CommandLine error message 
-        CommandLine::Error(_("Wrong value of options \"server\"."));
+        CommandLine::Error(_("Wrong value for option \"server\"."));
         return false;
      }
 
@@ -605,7 +605,7 @@ boolean cmdKdumpSMTPUser (map options)
         return true;
      } else {
         // TRANSLATORS: CommandLine error message 
-        CommandLine::Error(_("Wrong value of options \"user\"."));
+        CommandLine::Error(_("Wrong value for option \"user\"."));
         return false;
      }
 
@@ -642,7 +642,7 @@ boolean cmdKdumpSMTPNotifTo (map options)
         return true;
      } else {
         // TRANSLATORS: CommandLine error message 
-        CommandLine::Error(_("Wrong value of options \"email\"."));
+        CommandLine::Error(_("Wrong value for option \"email\"."));
         return false;
      }
 
@@ -663,7 +663,7 @@ boolean cmdKdumpSMTPNotifCC (map options)
         return true;
      } else {
         // TRANSLATORS: CommandLine error message 
-        CommandLine::Error(_("Wrong value of options \"email\"."));
+        CommandLine::Error(_("Wrong value for option \"email\"."));
         return false;
      }
 
@@ -794,7 +794,7 @@ map cmdline_description = $[
 	"smtpserver": $[
 	"handler" : cmdKdumpSMTPServer,
 	// TRANSLATORS: CommandLine help
-	"help" : _("SMTP Server for sending notification messages."),
+	"help" : _("SMTP server for sending notification messages."),
 	"example" : [
 		   "smtpserver server=smtp.server.com",
 	            ],
@@ -803,7 +803,7 @@ map cmdline_description = $[
 	"smtpuser": $[
 	"handler" : cmdKdumpSMTPUser,
 	// TRANSLATORS: CommandLine help
-	"help" : _("SMTP Username for sending notification messages."),
+	"help" : _("SMTP username for sending notification messages."),
 	"example" : [
 		   "smtpuser user=foo_user",
 	            ],
@@ -812,7 +812,7 @@ map cmdline_description = $[
 	"smtppass": $[
 	"handler" : cmdKdumpSMTPPass,
 	// TRANSLATORS: CommandLine help
-	"help" : _("SMTP Password for sending notification messages. Path of file which includes password (plain text file)"),
+	"help" : _("SMTP password for sending notification messages. Path of file which includes password (plain text file)."),
 	"example" : [
 		   "smtppass pass=/path/to/file",
 	            ],

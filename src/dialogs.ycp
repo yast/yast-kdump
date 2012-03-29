@@ -362,7 +362,7 @@ map<string, map<string,any> > tabs = $[
 	   )
         ))),
 
-	`Frame ( _("Notification Email addresses"),`HBox(`HSpacing(1),`VBox(
+	`Frame ( _("Notification Email Addresses"),`HBox(`HSpacing(1),`VBox(
           `Left("NotificationTo"),
 	  `Left("NotificationCC")
         ))),
@@ -387,7 +387,7 @@ map<string, map<string,any> > tabs = $[
 	  `Left("KdumpCommandLineAppend")      
         ))),
         `VSpacing(1),        
-        `Frame ( _("Dumps Settings"),`HBox(`HSpacing(1),`VBox(
+        `Frame ( _("Dump Settings"),`HBox(`HSpacing(1),`VBox(
            `Left("EnableDeleteImages"),
 	   `Left("NumberDumps"),
 	   `Left("EnableReboot"),
