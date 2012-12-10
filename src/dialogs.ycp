@@ -128,6 +128,7 @@ map<string,map<string,any> > wid_handling = $[
      "items" 		: [
         ["elf_format",  _("E&LF Format")  ],
         ["compressed_format", _("C&ompressed Format") ],
+        ["lzo_format", _("&LZO Format") ],
      ],
      "orientation" 	: `horizontal,
      "init"		: InitDumpFormat,

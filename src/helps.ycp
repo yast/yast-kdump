@@ -56,7 +56,8 @@ map HELPS = $[
 
   /* Dump Format - RadioButtons  1/1*/
   "DumpFormat" : _("<p><b>Dump Format</b><br>
-    <i>Compressed Format</i> - Compress dump data by each page.
+    <i>Compressed Format</i> - Compress dump data by each page using gzip.
+    <i>LZO Format</i> - Compress dump data using the LZO algorithm (faster).
     <i>ELF Format</i> - Create dumpfile in the ELF format<br></p>"),
 
   /* Dump Format - RadioButtons  1/6*/

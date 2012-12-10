@@ -287,7 +287,9 @@ boolean cmdKdumpDumpLevel (map options) {
 boolean cmdKdumpDumpFormat (map options) {
   if (options["dump_format"]:nil!=nil) {
 
-     if ((options["dump_format"]:nil == "ELF") || (options["dump_format"]:nil == "compressed")) {
+     if ((options["dump_format"]:nil == "ELF") ||
+         (options["dump_format"]:nil == "compressed") ||
+         (options["dump_format"]:nil == "lzo")) {
         Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"] = tostring(options["dump_format"]:nil);
         //TRANSLATORS: CommandLine printed text
         CommandLine::Print(_("Dump format was set."));     
@@ -296,7 +298,7 @@ boolean cmdKdumpDumpFormat (map options) {
         // TRANSLATORS: CommandLine error message 
         CommandLine::Error(_("Wrong value of option."));
         //TRANSLATORS: CommandLine printed text help
-        CommandLine::Print(_("Option can include only \"ELF\" or \"compressed\" value."));
+        CommandLine::Print(_("Option can include only \"ELF\", \"compressed\" or \"lzo\" value."));
         return false;
      }
   } else {
@@ -715,10 +717,11 @@ map cmdline_description = $[
         "dumpformat" : $[
 	"handler" : cmdKdumpDumpFormat,
 	// TRANSLATORS: CommandLine help
-	"help" 	  : _("Dump format for dump image ELF/compressed"),
+	"help" 	  : _("Dump format for dump image ELF/compressed/lzo"),
 	"example" : [
 		   "dumpformat dump_format=ELF",
 		   "dumpformat dump_format=compressed",
+		   "dumpformat dump_format=ĺzo",
 	            ],
         ],
 
@@ -866,7 +869,7 @@ map cmdline_description = $[
 	"dump_format": $[
 		"type" : "string",
 		// TRANSLATORS: CommandLine help
-		"help" : _("Dump format can be ELF or compressed"),
+		"help" : _("Dump format can be ELF, compressed or lzo"),
 	],
 
 	"target": $[

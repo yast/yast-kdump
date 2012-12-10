@@ -1191,6 +1191,8 @@ void StoreInitrdKernel (string key, map event) {
 void InitDumpFormat (string key) {
   if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"]:nil == "ELF")
      UI::ChangeWidget(`id("DumpFormat"), `Value, "elf_format");
+  else if (Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"]:nil == "lzo")
+     UI::ChangeWidget(`id("DumpFormat"), `Value, "lzo_format");
   else
      UI::ChangeWidget(`id("DumpFormat"), `Value, "compressed_format");
 }
@@ -1200,6 +1202,7 @@ void InitDumpFormat (string key) {
   * Function validates options in 
   * "Dump Format"
   * install makedumpfile if KDUMP_DUMPFORMAT == "compressed"
+  *                      or KDUMP_DUMPFORMAT == "lzo"
   */
 
 boolean ValidDumpFormat (string key, map event) {
@@ -1249,6 +1252,8 @@ void StoreDumpFormat (string key, map event) {
   string value = tostring(UI::QueryWidget(`id("DumpFormat"), `Value));
   if (value == "elf_format")
      Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"] = "ELF";
+  else if (value == "lzo_format")
+     Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"] = "lzo";
   else
      Kdump::KDUMP_SETTINGS["KDUMP_DUMPFORMAT"] = "compressed";
 }
