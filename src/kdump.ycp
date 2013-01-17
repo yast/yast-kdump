@@ -321,7 +321,6 @@ string cmdParsePassPath (string path_file) {
   return password;
 }
 
-
 boolean cmdKdumpDumpTarget (map options) {
   if (options["target"]:nil!=nil) {
      string target = tostring(options["target"]:nil);
@@ -468,6 +467,7 @@ boolean cmdKdumpDumpTarget (map options) {
          break;
      }
      Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]= tostringKDUMP_SAVE_TARGET();
+     fixCommandLine(KDUMP_SAVE_TARGET["target"]:nil);
      return true;
   } else {
      // TRANSLATORS: CommandLine error message 

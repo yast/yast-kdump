@@ -663,6 +663,27 @@ symbol HandleTargetKdump (string key, map event) {
 
 }
 
+boolean fixCommandLine (string target) {
+    if (!Arch::s390 ())
+ 	return false;
+
+    y2milestone("fixing commandline append for s390");
+    string allowed = nil;
+    if (target == "file") {
+	// allow disks
+	allowed = "3990|2105|3880|9343|6310|2107|1731/03";
+    }
+    else {
+	// allow network devices
+	allowed = "1731/0[15]|3088";
+    }
+
+    string cmd = sformat ("lscss | egrep \"(%1|3215)\" |cut -d\" \" -f1|sed s/^/\\!/|tr \"\n\" ,|sed s/,$//", allowed);
+    map cmd_out = (map) SCR::Execute (.target.bash_output, cmd);
+    Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = sformat("cio_ignore=all,%1", cmd_out["stdout"]:nil);
+    return true;
+}
+
 void StoreTargetKdumpHandle(string type)
 {
   string radiobut = type;
@@ -839,7 +860,7 @@ void StoreTargetKdumpHandle(string type)
        KDUMP_SAVE_TARGET["password"] = "";
   }
   Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"] = tostringKDUMP_SAVE_TARGET();
-
+  fixCommandLine(KDUMP_SAVE_TARGET["target"]:nil);
 }
 
 /**
