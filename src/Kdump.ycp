@@ -741,7 +741,10 @@ boolean ProposeAlocatedMemory ()
 {
   if (alocated_memory == "0") 
   {
-     if ((total_memory >= 512) &&  (total_memory/1024) <2)
+     if (Arch::s390()) {
+	alocated_memory = tostring(128 + (total_memory * 256) * 2.01 / 8 / 1048576);
+     }
+     else if ((total_memory >= 512) &&  (total_memory/1024) <2)
         alocated_memory = "64";
      else if ((total_memory/1024) >= 2)
         alocated_memory = "128";
@@ -819,6 +822,11 @@ boolean ReadAvailableMemory () {
  */
 boolean ReadKdumpSettings () {
     KDUMP_SETTINGS = DEFAULT_CONFIG;
+    if (Arch::s390()) {
+      string cmd = "lscss | egrep \"(3990|2105|3880|9343|6310|2107|1731/03|3215)\" |cut -d\" \" -f1|sed s/^/\\!/|tr \"\n\" ,|sed s/,$//";
+      map cmd_out = (map) SCR::Execute (.target.bash_output, cmd);
+      KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = sformat("cio_ignore=all,%1", cmd_out["stdout"]:nil);
+    }
     foreach (string key,  SCR::Dir(.sysconfig.kdump), {
 	string val = (string) SCR::Read(add(.sysconfig.kdump, key));
         if (val != nil) KDUMP_SETTINGS[key] = val;
@@ -835,8 +843,6 @@ boolean ReadKdumpSettings () {
 
     return true;
 }
-
-
 
 /**
  * Write current kdump configuration
@@ -1318,5 +1324,6 @@ global define boolean Import (map settings)
     	import_called = true;
     return result;
 }
+
 /* EOF */
 }
