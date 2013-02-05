@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Feb  5 16:19:49 CET 2013 - snwint@suse.de
+
+- s390: use secret crash kernel size formula, filter devices (fate #314083)
+- set minimum kdump memory to 128 MB (bnc #755144)
+- clean up mem proposal code
+- 2.17.23
+
+-------------------------------------------------------------------
 Mon Dec 10 10:55:39 CET 2012 - ptesarik@suse.cz
 
 - add "lzo" option to dump format (bnc #784913, fate #314436)

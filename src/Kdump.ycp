@@ -741,21 +741,21 @@ boolean ProposeAlocatedMemory ()
 {
   if (alocated_memory == "0") 
   {
+     // 64 MB is too little (bnc #755144)
+     alocated_memory = "128";
+
+     // magic formula: basically 128 + GB/16
      if (Arch::s390()) {
 	alocated_memory = tostring(128 + (total_memory * 256) * 2.01 / 8 / 1048576);
      }
-     else if ((total_memory >= 512) &&  (total_memory/1024) <2)
-        alocated_memory = "64";
-     else if ((total_memory/1024) >= 2)
-        alocated_memory = "128";
 
      // bnc #431492 - UPT-LTE: /proc/vmcore is empty in kdump kerne
-     if ((Arch::ppc64()) && (alocated_memory != ""))
+     // old code basically doubled the x86 value, so here we go...
+     if ((Arch::ppc64()))
      {
-	 integer al_mem = tointeger(alocated_memory);
-	 al_mem = al_mem *2;
-	 alocated_memory = tostring(al_mem);
+	 alocated_memory = "256";
      }
+
      // bnc #446480 - Fine-tune kdump memory proposal
      // bnc #578590 -"out of memory" error occurs when doing kdump on machine superdome
      if ((Arch::ia64()) && (total_memory >= 1024))
@@ -777,7 +777,9 @@ boolean ProposeAlocatedMemory ()
 	     alocated_memory = "3072";
      }
   }
+
   y2milestone("[kdump] allocated memory if not set in \"crashkernel\" param: %1", alocated_memory);
+
   return true;
 }
 
