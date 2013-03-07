@@ -556,22 +556,12 @@ string BuildCrashkernelValue ()
 
     string crash_value = "";
     crash_value = alocated_memory+"M";
-    // bnc#563905 problem with offset in crashkernel
-    if ((Arch::i386()) ||(Arch::x86_64()) || (Arch::ia64()) || Arch::ppc64())  {
-        y2milestone("i386, x86_64, ia64 and ppc64 platforms are without offset");
-    } else {
-       if (Mode::normal())
-          Popup::Error(_("Unsupported architecture, \"crashkernel\" was not added"));
-       y2error("Unsupported platform/architecture...");
-    }
-
     string reserved_memory = tostring(2*tointeger(alocated_memory));
-    
-
     crash_value = reserved_memory+"M-:"+crash_value;
-    y2milestone("builded crashkernel value is %1", crash_value);
-    return crash_value;
 
+    y2milestone("built crashkernel value is %1", crash_value);
+
+    return crash_value;
 }
 
 /** bnc #439881 - Don't use extended crashkernel syntax for Xen
