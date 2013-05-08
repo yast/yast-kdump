@@ -678,7 +678,7 @@ boolean fixCommandLine (string target) {
 	allowed = "1731/0[15]|3088";
     }
 
-    string cmd = sformat ("lscss | egrep \"(%1|3215)\" |cut -d\" \" -f1|sed s/^/\\!/|tr \"\n\" ,|sed s/,$//", allowed);
+    string cmd = "lscss | egrep -i yes | cut -d\" \" -f1 |sed -e s/^0\\\\.0\\\\.//g -e s/^/\\!/ |tr \"\n\" ,|sed s/,$//";
     map cmd_out = (map) SCR::Execute (.target.bash_output, cmd);
     Kdump::KDUMP_SETTINGS["KDUMP_COMMANDLINE_APPEND"] = sformat("cio_ignore=all,%1", cmd_out["stdout"]:nil);
     return true;

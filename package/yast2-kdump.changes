@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May  8 15:50:29 CEST 2013 - snwint@suse.de
+
+- reduce length of cio_ignore option (bnc #812916)
+- 2.17.26
+
+-------------------------------------------------------------------
 Fri May  3 14:24:09 CEST 2013 - snwint@suse.de
 
 - change defaults: format -> lzo (bnc #812840), level -> 31 (bnc #804500)
