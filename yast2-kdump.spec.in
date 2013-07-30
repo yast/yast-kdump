@@ -12,6 +12,8 @@ Recommends:     makedumpfile
 BuildRequires:	yast2 >= 2.21.22
 BuildRequires: yast2-packager >= 2.17.24
 
+Requires:       yast2-ruby-bindings >= 1.0.0
+
 Summary:	Configuration of kdump
 
 %description
@@ -29,8 +31,8 @@ Configuration of kdump
 %defattr(-,root,root)
 %dir @yncludedir@/kdump
 @yncludedir@/kdump/*
-@clientdir@/kdump.ycp
-@clientdir@/kdump_*.ycp
+@clientdir@/kdump.rb
+@clientdir@/kdump_*.rb
 @moduledir@/Kdump.*
 @desktopdir@/kdump.desktop
 @schemadir@/autoyast/rnc/kdump.rnc
