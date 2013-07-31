@@ -1,31 +1,32 @@
-# Makefile.am for kdump/src
+# Sources for kdump
+
+module_DATA = \
+  modules/Kdump.rb
+
+client_DATA = \
+  clients/kdump_auto.rb \
+  clients/kdump_finish.rb \
+  clients/kdump_proposal.rb \
+  clients/kdump.rb
 
 yncludedir = @yncludedir@/kdump
+ynclude_DATA = \
+  include/kdump/wizards.rb \
+  include/kdump/uifunctions.rb \
+  include/kdump/dialogs.rb \
+  include/kdump/complex.rb \
+  include/kdump/helps.rb
 
-client_DATA =			\
-	kdump.ycp		\
-	kdump_auto.ycp		\
-	kdump_proposal.ycp	\
-	kdump_finish.ycp
+scrconf_DATA = \
+  scrconf/cfg_kdump.scr
 
-ynclude_DATA =			\
-	helps.ycp		\
-	wizards.ycp		\
-	dialogs.ycp		\
-	complex.ycp		\
-	uifunctions.ycp
+schemafilesdir = $(schemadir)/autoyast/rnc
+schemafiles_DATA = \
+  autoyast-rnc/kdump.rnc
 
-desktop_DATA =			\
-	kdump.desktop
+desktop_DATA = \
+  desktop/kdump.desktop
 
-module_DATA =			\
-	Kdump.ycp
-
-# create a symlink for local build, #145327
-kdump:
-	ln -sf . $@
-ycpchook = kdump
-
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
+EXTRA_DIST = $(module_DATA) $(client_DATA) $(ynclude_DATA) $(scrconf_DATA) $(schemafiles_DATA) $(desktop_DATA)
 
 include $(top_srcdir)/Makefile.am.common
