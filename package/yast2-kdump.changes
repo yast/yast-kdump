@@ -11,6 +11,12 @@ Thu Mar 29 15:17:59 CEST 2012 - jsuchome@suse.cz
 - merged proofread texts
 
 -------------------------------------------------------------------
+Mon Jul  2 17:06:39 UTC 2012 - crrodriguez@opensuse.org
+
+- Package must also recommend kdump, otherwise it is pretty much 
+  useless.
+
+-------------------------------------------------------------------
 Thu Sep 29 11:48:29 CEST 2011 - visnov@suse.cz
 
 - set dialog title
