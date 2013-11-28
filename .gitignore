@@ -27,3 +27,9 @@ Makefile.am.common
 .dep
 tmp.*
 *.log
+/doc/autodocs
+!/doc/autodocs/Makefile.am
+/testsuite/config/
+/testsuite/run/
+/testsuite/*.exp
+testsuite/yast2-kdump.*
