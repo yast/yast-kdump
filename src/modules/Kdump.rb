@@ -32,6 +32,8 @@ require "yast"
 
 module Yast
   class KdumpClass < Module
+    attr_reader :use_fadump
+
     def main
       textdomain "kdump"
 
@@ -1265,6 +1267,35 @@ module Yast
         @import_called = true
       end
       result
+    end
+
+    # Returns whether FADump (Firmware assisted dump) is supported
+    # by the current system
+    #
+    # @return [Boolean] is supported
+    def fadump_supported?
+      Arch.ppc64
+    end
+
+    # Sets whether to use FADump (Firmware assisted dump)
+    #
+    # @param [Boolean] new state
+    # @return [Boolean] whether successfully set
+    def use_fadump(new_value)
+      if !fadump_supported? and new_value == true
+        Builtins.y2milestone("FADump is not supported on this hardware")
+        return false
+      end
+
+      @KDUMP_SETTINGS["KDUMP_FADUMP"] = (new_value ? "yes" : "no")
+      true
+    end
+
+    # Returns whether FADump (Firmware assisted dump) is currently in use
+    #
+    # @return [Boolean] currently in use
+    def use_fadump?
+      @KDUMP_SETTINGS["KDUMP_FADUMP"] == "yes"
     end
 
     publish :function => :GetModified, :type => "boolean ()"
