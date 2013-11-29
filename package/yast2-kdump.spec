@@ -28,6 +28,7 @@ License:        GPL-2.0
 Requires:	yast2 yast2-storage yast2-bootloader
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-testsuite yast2-storage yast2-bootloader
 BuildRequires:  yast2-devtools >= 3.0.6
+BuildRequires:  rubygem-rspec
 
 Recommends:     kdump makedumpfile
 
