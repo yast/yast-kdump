@@ -1282,7 +1282,7 @@ module Yast
     # @param [Boolean] new state
     # @return [Boolean] whether successfully set
     def use_fadump(new_value)
-      if !fadump_supported? and new_value == true
+      if !fadump_supported? && new_value == true
         Builtins.y2milestone("FADump is not supported on this hardware")
         return false
       end

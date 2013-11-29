@@ -42,6 +42,17 @@ module Yast
         "KdumpMemory"            => _(
           "<p><b>Kdump Memory</b><br>\n    Allocation of memory for kdump kernel. <br></p>\n"
         ),
+        # fadump
+        "FADump"                 => _(
+          # T: help text for a combo box
+          # description taken from http://lparbox.com/how-to/aix/19
+          "<p><b>Firmware-Assisted Dump</b><br>\n" +
+            "    Dumps are not generated before the partition is reinitialized but take place " +
+            "    when the partition is restarting. When performing a firmware-assisted dump, " +
+            "    system memory is frozen and the partition rebooted, which allows a new instance " + 
+            "    of the operating system to dump data from the previous kernel crash." +
+            "    This feature is suitable only when the system has more than 1.5 GB of memory.</p>"
+        ),
         # Kdump Memor&y [MB] - IntField 1/1
         "DumpLevel"              => _(
           "<p><b>Dump Level</b><br>\n" +

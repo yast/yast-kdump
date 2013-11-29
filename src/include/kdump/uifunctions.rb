@@ -1461,6 +1461,30 @@ module Yast
       nil
     end
 
+    # Initializes FADump settings in UI
+    def InitFADump(key)
+      if Kdump.fadump_supported? && UI.WidgetExists(Id("FADump"))
+        UI.ReplaceWidget(
+          Id("FADump"),
+          VBox(
+            CheckBox(
+              Id("use_fadump"),
+              # T: Checkbox label
+              _("Use &Firmware-Assisted Dump"),
+              Kdump.use_fadump?
+            ),
+            VSpacing(1)
+          )
+        )
+      end
+    end
+
+    # Stores FADump settings taken from UI
+    def StoreFADump(key, event)
+      if UI.WidgetExists(Id("use_fadump"))
+        Kdump.use_fadump(UI.QueryWidget(Id("use_fadump"), :Value))
+      end
+    end
 
     # Function initializes option
     # "Custom kdump Kernel"
