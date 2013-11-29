@@ -53,6 +53,7 @@ module Yast
       Yast.import "ProductFeatures"
       Yast.import "PackagesProposal"
       Yast.import "FileUtils"
+      Yast.import "Directory"
 
       # Data was modified?
       @modified = false
@@ -782,10 +783,36 @@ module Yast
       )
       Builtins.y2milestone("---------------------------------------------")
 
+      @initial_kdump_settings = deep_copy(@KDUMP_SETTINGS)
+
       true
     end
 
+    # Updates initrd and reports whether it was successful.
+    # Failed update is reported using Report library.
+    #
+    # @return [Boolean] whether successful
+    def update_initrd
+      # See FATE#315780
+      # See https://www.suse.com/support/kb/doc.php?id=7012786
+      update_command = (use_fadump? ? "mkdumprd -f" : "mkinitrd")
+      update_logfile = File.join(Directory.vardir, "y2logmkinitrd")
 
+      run_command = update_command + " >> #{update_logfile} 2>&1"
+      y2milestone("Running command: #{run_command}")
+      ret = SCR.Execute(path(".target.bash"), run_command)
+
+      if ret != 0
+        y2error("Error updating initrd, see #{update_logfile} or call {update_command} manually")
+        Report.Error(_(
+          "Error updating initrd while calling '%{cmd}'.\n" +
+          "See %{log} for details."
+        ) % { :cmd => update_command, :log => update_logfile })
+        return false
+      end
+
+      true
+    end
 
     # Write current kdump configuration
     #
@@ -810,6 +837,7 @@ module Yast
       end
       SCR.Write(path(".sysconfig.kdump"), nil)
 
+      update_initrd if use_fadump_changed?
 
       if checkPassword
         Chmod(@kdump_file, "600")
@@ -1296,6 +1324,13 @@ module Yast
     # @return [Boolean] currently in use
     def use_fadump?
       @KDUMP_SETTINGS["KDUMP_FADUMP"] == "yes"
+    end
+
+    # Has the use_fadump? been changed?
+    #
+    # @return [Boolean] whether changed
+    def use_fadump_changed?
+      @initial_kdump_settings["KDUMP_FADUMP"] != @KDUMP_SETTINGS["KDUMP_FADUMP"]
     end
 
     publish :function => :GetModified, :type => "boolean ()"
