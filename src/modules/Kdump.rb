@@ -192,6 +192,9 @@ module Yast
       # map <string, string > of kdump settings
       #
       @KDUMP_SETTINGS = {}
+
+      # initial kdump settings replaced in Read function
+      @initial_kdump_settings = deep_copy(@KDUMP_SETTINGS)
     end
 
     # Abort function
