@@ -119,6 +119,13 @@ module Yast
           ),
           "help"              => HelpKdump("KdumpMemory")
         },
+        "FADump"   => {
+          "widget" => :custom,
+          "custom_widget" => Empty(),
+          "init"   => fun_ref(method(:InitFADump), "void (string)"),
+          "handle" => fun_ref(method(:HandleFADump), "void (string, map)"),
+          "help"   => HelpKdump("FADump"),
+        },
         #---------============ Dump Filtering screen=============------------
         "DumpLevel"              => {
           "widget"            => :custom,
@@ -411,8 +418,8 @@ module Yast
         "start_up"           => {
           "contents"        => VBox(
             "EnableDisalbeKdump",
-            #`VStretch ()
             VSpacing(1),
+            Left(ReplacePoint(Id("FADump"), Empty())),
             Frame(
               _("Kdump Memory"),
               HBox(HSpacing(1), VBox(Left("KdumpMemory")))
@@ -424,6 +431,7 @@ module Yast
           "widget_names"    => [
             "DisBackButton",
             "EnableDisalbeKdump",
+            (Kdump.fadump_supported? ? "FADump":""),
             "KdumpMemory"
           ]
         },

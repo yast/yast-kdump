@@ -32,6 +32,8 @@ require "yast"
 
 module Yast
   class KdumpClass < Module
+    FADUMP_KEY = "KDUMP_FADUMP"
+
     def main
       textdomain "kdump"
 
@@ -51,6 +53,7 @@ module Yast
       Yast.import "ProductFeatures"
       Yast.import "PackagesProposal"
       Yast.import "FileUtils"
+      Yast.import "Directory"
 
       # Data was modified?
       @modified = false
@@ -189,6 +192,9 @@ module Yast
       # map <string, string > of kdump settings
       #
       @KDUMP_SETTINGS = {}
+
+      # initial kdump settings replaced in Read function
+      @initial_kdump_settings = deep_copy(@KDUMP_SETTINGS)
     end
 
     # Abort function
@@ -780,10 +786,36 @@ module Yast
       )
       Builtins.y2milestone("---------------------------------------------")
 
+      @initial_kdump_settings = deep_copy(@KDUMP_SETTINGS)
+
       true
     end
 
+    # Updates initrd and reports whether it was successful.
+    # Failed update is reported using Report library.
+    #
+    # @return [Boolean] whether successful
+    def update_initrd
+      # See FATE#315780
+      # See https://www.suse.com/support/kb/doc.php?id=7012786
+      update_command = (using_fadump? ? "mkdumprd -f" : "mkinitrd")
+      update_logfile = File.join(Directory.vardir, "y2logmkinitrd")
 
+      run_command = update_command + " >> #{update_logfile} 2>&1"
+      y2milestone("Running command: #{run_command}")
+      ret = SCR.Execute(path(".target.bash"), run_command)
+
+      if ret != 0
+        y2error("Error updating initrd, see #{update_logfile} or call {update_command} manually")
+        Report.Error(_(
+          "Error updating initrd while calling '%{cmd}'.\n" +
+          "See %{log} for details."
+        ) % { :cmd => update_command, :log => update_logfile })
+        return false
+      end
+
+      true
+    end
 
     # Write current kdump configuration
     #
@@ -808,6 +840,9 @@ module Yast
       end
       SCR.Write(path(".sysconfig.kdump"), nil)
 
+      if using_fadump_changed? && ! update_initrd
+        return false
+      end
 
       if checkPassword
         Chmod(@kdump_file, "600")
@@ -1041,7 +1076,10 @@ module Yast
       return false if Abort()
       Progress.NextStage
       # Error message
-      Report.Error(_("Cannot write settings.")) if !WriteKdumpSettings()
+      if ! WriteKdumpSettings()
+        Report.Error(_("Cannot write settings."))
+        return false
+      end
 
       # write/delete bootloader option for kernel "crashkernel"
       return false if Abort()
@@ -1265,6 +1303,44 @@ module Yast
         @import_called = true
       end
       result
+    end
+
+    # Returns whether FADump (Firmware assisted dump) is supported
+    # by the current system
+    #
+    # @return [Boolean] is supported
+    def fadump_supported?
+      Arch.ppc64
+    end
+
+    # Sets whether to use FADump (Firmware assisted dump)
+    #
+    # @param [Boolean] new state
+    # @return [Boolean] whether successfully set
+    def use_fadump(new_value)
+      # Trying to use fadump on unsupported hardware
+      if !fadump_supported? && new_value
+        Builtins.y2milestone("FADump is not supported on this hardware")
+        Report.Error(_("Cannot use Firmware-assisted dump.\nIt is not supported on this hardware."))
+        return false
+      end
+
+      @KDUMP_SETTINGS[FADUMP_KEY] = (new_value ? "yes" : "no")
+      true
+    end
+
+    # Returns whether FADump (Firmware assisted dump) is currently in use
+    #
+    # @return [Boolean] currently in use
+    def using_fadump?
+      @KDUMP_SETTINGS[FADUMP_KEY] == "yes"
+    end
+
+    # Has the using_fadump? been changed?
+    #
+    # @return [Boolean] whether changed
+    def using_fadump_changed?
+      @initial_kdump_settings[FADUMP_KEY] != @KDUMP_SETTINGS[FADUMP_KEY]
     end
 
     publish :function => :GetModified, :type => "boolean ()"

@@ -32,4 +32,7 @@ tmp.*
 /testsuite/config/
 /testsuite/run/
 /testsuite/*.exp
-testsuite/yast2-kdump.*
+/testsuite/yast2-kdump.*
+/test-driver
+/test/*.trs
+/testsuite/*.bak
