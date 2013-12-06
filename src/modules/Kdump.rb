@@ -1321,6 +1321,7 @@ module Yast
       # Trying to use fadump on unsupported hardware
       if !fadump_supported? && new_value
         Builtins.y2milestone("FADump is not supported on this hardware")
+        Report.Error(_("Cannot use Firmware-assisted dump.\nIt is not supported on this hardware."))
         return false
       end
 

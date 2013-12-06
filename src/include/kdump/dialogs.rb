@@ -123,7 +123,7 @@ module Yast
           "widget" => :custom,
           "custom_widget" => Empty(),
           "init"   => fun_ref(method(:InitFADump), "void (string)"),
-          "store"  => fun_ref(method(:StoreFADump), "void (string, map)"),
+          "handle" => fun_ref(method(:HandleFADump), "void (string, map)"),
           "help"   => HelpKdump("FADump"),
         },
         #---------============ Dump Filtering screen=============------------

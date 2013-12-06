@@ -1469,6 +1469,7 @@ module Yast
           VBox(
             CheckBox(
               Id("use_fadump"),
+              Opt(:notify),
               # T: Checkbox label
               _("Use &Firmware-Assisted Dump"),
               Kdump.use_fadump?
@@ -1479,11 +1480,15 @@ module Yast
       end
     end
 
-    # Stores FADump settings taken from UI
-    def StoreFADump(key, event)
-      if UI.WidgetExists(Id("use_fadump"))
-        Kdump.use_fadump(UI.QueryWidget(Id("use_fadump"), :Value))
+    def HandleFADump(key, event)
+      return if event["ID"] != "use_fadump"
+
+      # If cannot adjust the fadump usage
+      if ! Kdump.use_fadump(UI.QueryWidget(Id("use_fadump"), :Value))
+        UI.ChangeWidget(Id("use_fadump"), :Value, false)
       end
+
+      nil
     end
 
     # Function initializes option
