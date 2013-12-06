@@ -26,7 +26,7 @@ describe "#use_fadump" do
     expect(Yast::Kdump.use_fadump(false)).to be_true
   end
 
-  it "returns false it's not supported on this architecture" do
+  it "returns false if it's not supported on this architecture" do
     Yast::Kdump.stub(:fadump_supported?).and_return(false)
     expect(Yast::Kdump.use_fadump(true)).to be_false
   end
