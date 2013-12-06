@@ -32,7 +32,7 @@ require "yast"
 
 module Yast
   class KdumpClass < Module
-    attr_reader :use_fadump
+    FADUMP_KEY = "KDUMP_FADUMP"
 
     def main
       textdomain "kdump"
@@ -840,7 +840,9 @@ module Yast
       end
       SCR.Write(path(".sysconfig.kdump"), nil)
 
-      update_initrd if use_fadump_changed?
+      if use_fadump_changed? && ! update_initrd
+        return false
+      end
 
       if checkPassword
         Chmod(@kdump_file, "600")
@@ -1074,7 +1076,10 @@ module Yast
       return false if Abort()
       Progress.NextStage
       # Error message
-      Report.Error(_("Cannot write settings.")) if !WriteKdumpSettings()
+      if ! WriteKdumpSettings()
+        Report.Error(_("Cannot write settings."))
+        return false
+      end
 
       # write/delete bootloader option for kernel "crashkernel"
       return false if Abort()
@@ -1313,12 +1318,13 @@ module Yast
     # @param [Boolean] new state
     # @return [Boolean] whether successfully set
     def use_fadump(new_value)
-      if !fadump_supported? && new_value == true
+      # Trying to use fadump on unsupported hardware
+      if !fadump_supported? && new_value
         Builtins.y2milestone("FADump is not supported on this hardware")
         return false
       end
 
-      @KDUMP_SETTINGS["KDUMP_FADUMP"] = (new_value ? "yes" : "no")
+      @KDUMP_SETTINGS[FADUMP_KEY] = (new_value ? "yes" : "no")
       true
     end
 
@@ -1326,14 +1332,14 @@ module Yast
     #
     # @return [Boolean] currently in use
     def use_fadump?
-      @KDUMP_SETTINGS["KDUMP_FADUMP"] == "yes"
+      @KDUMP_SETTINGS[FADUMP_KEY] == "yes"
     end
 
     # Has the use_fadump? been changed?
     #
     # @return [Boolean] whether changed
     def use_fadump_changed?
-      @initial_kdump_settings["KDUMP_FADUMP"] != @KDUMP_SETTINGS["KDUMP_FADUMP"]
+      @initial_kdump_settings[FADUMP_KEY] != @KDUMP_SETTINGS[FADUMP_KEY]
     end
 
     publish :function => :GetModified, :type => "boolean ()"
