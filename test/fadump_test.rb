@@ -40,32 +40,32 @@ describe "#use_fadump" do
   end
 end
 
-describe "#use_fadump?" do
+describe "#using_fadump?" do
  it "returns that fadump is in use if previously set" do
    Yast::Kdump.stub(:fadump_supported?).and_return(true)
 
    Yast::Kdump.use_fadump(true)
-   expect(Yast::Kdump.use_fadump?).to be_true
+   expect(Yast::Kdump.using_fadump?).to be_true
 
    Yast::Kdump.use_fadump(false)
-   expect(Yast::Kdump.use_fadump?).to be_false
+   expect(Yast::Kdump.using_fadump?).to be_false
  end
 end
 
-describe "#use_fadump_changed?" do
+describe "#using_fadump_changed?" do
   it "returns false if use_fadump not changed" do
     Yast::Kdump.ReadKdumpSettings
 
-    expect(Yast::Kdump.use_fadump_changed?).to be_false
+    expect(Yast::Kdump.using_fadump_changed?).to be_false
   end
 
   it "returns true if use_fadump changed" do
     Yast::Kdump.ReadKdumpSettings
 
     Yast::Kdump.stub(:fadump_supported?).and_return(true)
-    original_value = Yast::Kdump.use_fadump?
+    original_value = Yast::Kdump.using_fadump?
     Yast::Kdump.use_fadump(! original_value)
 
-    expect(Yast::Kdump.use_fadump_changed?).to be_true
+    expect(Yast::Kdump.using_fadump_changed?).to be_true
   end
 end

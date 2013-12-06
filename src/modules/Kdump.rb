@@ -798,7 +798,7 @@ module Yast
     def update_initrd
       # See FATE#315780
       # See https://www.suse.com/support/kb/doc.php?id=7012786
-      update_command = (use_fadump? ? "mkdumprd -f" : "mkinitrd")
+      update_command = (using_fadump? ? "mkdumprd -f" : "mkinitrd")
       update_logfile = File.join(Directory.vardir, "y2logmkinitrd")
 
       run_command = update_command + " >> #{update_logfile} 2>&1"
@@ -840,7 +840,7 @@ module Yast
       end
       SCR.Write(path(".sysconfig.kdump"), nil)
 
-      if use_fadump_changed? && ! update_initrd
+      if using_fadump_changed? && ! update_initrd
         return false
       end
 
@@ -1332,14 +1332,14 @@ module Yast
     # Returns whether FADump (Firmware assisted dump) is currently in use
     #
     # @return [Boolean] currently in use
-    def use_fadump?
+    def using_fadump?
       @KDUMP_SETTINGS[FADUMP_KEY] == "yes"
     end
 
-    # Has the use_fadump? been changed?
+    # Has the using_fadump? been changed?
     #
     # @return [Boolean] whether changed
-    def use_fadump_changed?
+    def using_fadump_changed?
       @initial_kdump_settings[FADUMP_KEY] != @KDUMP_SETTINGS[FADUMP_KEY]
     end
 
