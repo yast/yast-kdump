@@ -363,7 +363,7 @@ module Yast
             "Handles usage of firmware-assisted dump"
           ),
           "example" => [
-            "fadump         # shows the current status (enabled/disabled)",
+            "fadump status  # shows the current status (enabled/disabled)",
             "fadump enable  # enables using fadump",
             "fadump disable # disables using fadump",
           ],
