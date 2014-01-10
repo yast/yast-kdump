@@ -1264,9 +1264,13 @@ module Yast
         return Kdump.use_fadump(true)
       elsif options["disable"]
         return Kdump.use_fadump(false)
-      else
+      elsif options["status"]
         show_fadump_status
         return true
+      else
+        # TRANSLATORS: CommandLine error message
+        CommandLine.Error(_("Wrong options were used."))
+        return false
       end
     end
 
