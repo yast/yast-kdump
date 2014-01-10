@@ -221,6 +221,10 @@ module Yast
             # TRANSLATORS: CommandLine help
             "help" => _("Disable option")
           },
+          "status"      => {
+            # TRANSLATORS: CommandLine help
+            "help" => _("Shows current option status")
+          },
           "alloc_mem"   => {
             "type" => "integer",
             # TRANSLATORS: CommandLine help
@@ -350,6 +354,23 @@ module Yast
           "notificationcc"          => ["email"]
         }
       }
+
+      if Kdump.fadump_supported?
+        @cmdline_description["actions"]["fadump"] = {
+          "handler" => fun_ref(method(:cmd_handle_fadump), "boolean (map)"),
+          # TRANSLATORS: CommandLine help
+          "help" => _(
+            "Handles usage of firmware-assisted dump"
+          ),
+          "example" => [
+            "fadump         # shows the current status (enabled/disabled)",
+            "fadump enable  # enables using fadump",
+            "fadump disable # disables using fadump",
+          ],
+        }
+
+        @cmdline_description["mappings"]["fadump"] = ["enable", "disable", "status"]
+      end
 
       # is this proposal or not?
       @propose = false
@@ -625,8 +646,8 @@ module Yast
         Builtins.sformat(
           _("Kdump immediate reboots: %1"),
           Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes" ?
-            _("ENABLED") :
-            _("DISABLED")
+            _("Enabled") :
+            _("Disabled")
         )
       )
 
@@ -701,6 +722,10 @@ module Yast
 
       CommandLine.Print("")
 
+      if Kdump.fadump_supported?
+        show_fadump_status
+        CommandLine.Print("")
+      end
 
       true
     end
@@ -1223,6 +1248,28 @@ module Yast
         return false
       end
     end
+
+    def show_fadump_status
+      CommandLine.Print(
+        _("Firmware-assisted dump: %{status}") %
+          { :status => Kdump.using_fadump? ?
+            _("Enabled") :
+            _("Disabled")
+          }
+      )
+    end
+
+    def cmd_handle_fadump(options)
+      if options["enable"] != nil
+        return Kdump.use_fadump(true)
+      elsif options["disable"] != nil
+        return Kdump.use_fadump(false)
+      else options["status"] != nil
+        show_fadump_status
+        return true
+      end
+    end
+
   end
 end
 
