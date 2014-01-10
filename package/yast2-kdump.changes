@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 10 16:25:05 CET 2014 - locilka@suse.com
+
+- Added command-line support for firmware-assisted dump
+  (FATE#315780)
+- 3.1.2
+
+-------------------------------------------------------------------
 Fri Nov 29 11:04:38 CET 2013 - locilka@suse.com
 
 - Added support for firmware-assisted dump (for ppc64 only)
