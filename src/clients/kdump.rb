@@ -1260,11 +1260,11 @@ module Yast
     end
 
     def cmd_handle_fadump(options)
-      if options["enable"] != nil
+      if options["enable"]
         return Kdump.use_fadump(true)
-      elsif options["disable"] != nil
+      elsif options["disable"]
         return Kdump.use_fadump(false)
-      else options["status"] != nil
+      else
         show_fadump_status
         return true
       end
