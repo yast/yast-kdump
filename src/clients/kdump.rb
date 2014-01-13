@@ -1269,7 +1269,7 @@ module Yast
         return true
       else
         # TRANSLATORS: CommandLine error message
-        CommandLine.Error(_("Wrong options were used."))
+        CommandLine.Error(_("No option has been defined."))
         return false
       end
     end
