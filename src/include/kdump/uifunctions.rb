@@ -1472,7 +1472,7 @@ module Yast
               Opt(:notify),
               # T: Checkbox label
               _("Use &Firmware-Assisted Dump"),
-              Kdump.use_fadump?
+              Kdump.using_fadump?
             ),
             VSpacing(1)
           )
