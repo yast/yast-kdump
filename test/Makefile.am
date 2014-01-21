@@ -1,5 +1,6 @@
 TESTS = \
-  fadump_test.rb
+  fadump_test.rb \
+  kdump_test.rb
 
 TEST_EXTENSIONS = .rb
 RB_LOG_COMPILER = rspec
