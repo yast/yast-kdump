@@ -138,7 +138,7 @@ module Yast
       # "crashkernel"
       #
       # string value number of alocate memory
-      @alocated_memory = "0"
+      @allocated_memory = "0"
 
       # Boolean option indicates that Import()
       # was called and data was proposed
@@ -465,12 +465,12 @@ module Yast
     end
 
 
-    # get alocated memory from value of crashkernel option
+    # get allocated memory from value of crashkernel option
     # there can be several ranges -> take the first range
     #  @param string 64M@16M or 128M-:64M@16M [(reserved_memory*2)-:reserved_memory]
-    #  @return [String] value of alocated memory (64M)
+    #  @return [String] value of allocated memory (64M)
 
-    def getAlocatedMemory(crash_value)
+    def getAllocatedMemory(crash_value)
       result = ""
       allocated = ""
       range = ""
@@ -496,7 +496,7 @@ module Yast
       result
     end
 
-    # Build crashkernel value from alocated memory
+    # Build crashkernel value from allocated memory
     #
     #  @return [String] value of crashkernel
 
@@ -506,7 +506,7 @@ module Yast
       return @crashkernel_param_value if @crashkernel_list_ranges
 
       crash_value = ""
-      crash_value = Ops.add(@alocated_memory, "M")
+      crash_value = Ops.add(@allocated_memory, "M")
 
       # bnc#563905 problem with offset in crashkernel
       if Arch.i386 || Arch.x86_64 || Arch.ia64 || Arch.ppc64
@@ -523,7 +523,7 @@ module Yast
       end
 
       reserved_memory = Builtins.tostring(
-        Ops.multiply(2, Builtins.tointeger(@alocated_memory))
+        Ops.multiply(2, Builtins.tointeger(@allocated_memory))
       )
 
 
@@ -542,7 +542,7 @@ module Yast
     def convertCrashkernelForXEN(crash)
       crash_value = ""
       if crash != ""
-        crash_value = Ops.add(getAlocatedMemory(crash), "M") 
+        crash_value = Ops.add(getAllocatedMemory(crash), "M") 
         # bnc#563905 problem with offset in crashkernel
         #if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
         #	crash_value = crash_value + "@16M";
@@ -621,7 +621,7 @@ module Yast
           @crashkernel_param = true
           @add_crashkernel_param = true
           @crashkernel_param_value = getCrashKernelValue(crash_arg)
-          @alocated_memory = getAlocatedMemory(@crashkernel_param_value)
+          @allocated_memory = getAllocatedMemory(@crashkernel_param_value)
         else
           @crashkernel_param = false
           @add_crashkernel_param = false
@@ -662,7 +662,7 @@ module Yast
 
       @crashkernel_param_value = result
       if result != "false"
-        @alocated_memory = getAlocatedMemory(@crashkernel_param_value)
+        @allocated_memory = getAllocatedMemory(@crashkernel_param_value)
       end
 
       true
@@ -673,50 +673,50 @@ module Yast
     #
     #  @return [Boolean] successfull
 
-    def ProposeAlocatedMemory
-      if @alocated_memory == "0"
+    def ProposeAllocatedMemory
+      if @allocated_memory == "0"
         if Ops.greater_or_equal(@total_memory, 512) &&
             Ops.less_than(Ops.divide(@total_memory, 1024), 2)
-          @alocated_memory = "64"
+          @allocated_memory = "64"
         elsif Ops.greater_or_equal(Ops.divide(@total_memory, 1024), 2)
-          @alocated_memory = "128"
+          @allocated_memory = "128"
         end
 
         # bnc #431492 - UPT-LTE: /proc/vmcore is empty in kdump kerne
-        if Arch.ppc64 && @alocated_memory != ""
-          al_mem = Builtins.tointeger(@alocated_memory)
+        if Arch.ppc64 && @allocated_memory != ""
+          al_mem = Builtins.tointeger(@allocated_memory)
           al_mem = Ops.multiply(al_mem, 2)
-          @alocated_memory = Builtins.tostring(al_mem)
+          @allocated_memory = Builtins.tostring(al_mem)
         end
         # bnc #446480 - Fine-tune kdump memory proposal
         if Arch.ia64 && Ops.greater_or_equal(@total_memory, 1024)
           total_memory_gigabyte = Ops.divide(@total_memory, 1024)
           if Ops.greater_or_equal(total_memory_gigabyte, 1) &&
               Ops.less_than(total_memory_gigabyte, 8)
-            @alocated_memory = "256"
+            @allocated_memory = "256"
           elsif Ops.greater_or_equal(total_memory_gigabyte, 8) &&
               Ops.less_than(total_memory_gigabyte, 128)
-            @alocated_memory = "512"
+            @allocated_memory = "512"
           elsif Ops.greater_or_equal(total_memory_gigabyte, 128) &&
               Ops.less_than(total_memory_gigabyte, 256)
-            @alocated_memory = "768"
+            @allocated_memory = "768"
           elsif Ops.greater_or_equal(total_memory_gigabyte, 256) &&
               Ops.less_than(total_memory_gigabyte, 378)
-            @alocated_memory = "1024"
+            @allocated_memory = "1024"
           elsif Ops.greater_or_equal(total_memory_gigabyte, 378) &&
               Ops.less_than(total_memory_gigabyte, 512)
-            @alocated_memory = "1536"
+            @allocated_memory = "1536"
           elsif Ops.greater_or_equal(total_memory_gigabyte, 512) &&
               Ops.less_than(total_memory_gigabyte, 768)
-            @alocated_memory = "2048"
+            @allocated_memory = "2048"
           elsif Ops.greater_or_equal(total_memory_gigabyte, 768)
-            @alocated_memory = "3072"
+            @allocated_memory = "3072"
           end
         end
       end
       Builtins.y2milestone(
         "[kdump] allocated memory if not set in \"crashkernel\" param: %1",
-        @alocated_memory
+        @allocated_memory
       )
       true
     end
@@ -756,7 +756,7 @@ module Yast
         "[kdump] (ReadAvailableMemory) total phys. memory [MB]: %1",
         Builtins.tostring(@total_memory)
       )
-      ProposeAlocatedMemory()
+      ProposeAllocatedMemory()
       true
     end
 
@@ -1356,7 +1356,7 @@ module Yast
     publish :variable => :crashkernel_param, :type => "boolean"
     publish :variable => :crashkernel_param_value, :type => "string"
     publish :variable => :add_crashkernel_param, :type => "boolean"
-    publish :variable => :alocated_memory, :type => "string"
+    publish :variable => :allocated_memory, :type => "string"
     publish :variable => :import_called, :type => "boolean"
     publish :variable => :actual_boot_section, :type => "string"
     publish :variable => :write_only, :type => "boolean"

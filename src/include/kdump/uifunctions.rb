@@ -1384,7 +1384,7 @@ module Yast
         UI.ChangeWidget(
           Id("memory_buffer"),
           :Value,
-          Builtins.tointeger(Kdump.alocated_memory)
+          Builtins.tointeger(Kdump.allocated_memory)
         )
         UI.ChangeWidget(
           Id("usable_memory"),
@@ -1454,7 +1454,7 @@ module Yast
 
     def StoreKdumpMemory(key, event)
       event = deep_copy(event)
-      Kdump.alocated_memory = Builtins.tostring(
+      Kdump.allocated_memory = Builtins.tostring(
         UI.QueryWidget(Id("memory_buffer"), :Value)
       )
 

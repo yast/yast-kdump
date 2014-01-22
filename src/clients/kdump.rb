@@ -420,7 +420,7 @@ module Yast
         CommandLine.Print(
           Builtins.sformat(
             _("Allocate memory (MB) for kdump is: %1"),
-            Kdump.alocated_memory
+            Kdump.allocated_memory
           )
         )
       else
@@ -737,7 +737,7 @@ module Yast
       if Ops.get(options, "enable") != nil &&
           Ops.get(options, "alloc_mem") != nil
         Kdump.add_crashkernel_param = true
-        Kdump.alocated_memory = Builtins.tostring(Ops.get(options, "alloc_mem"))
+        Kdump.allocated_memory = Builtins.tostring(Ops.get(options, "alloc_mem"))
         #TRANSLATORS: CommandLine printed text
         if Kdump.crashkernel_list_ranges
           CommandLine.Print(

@@ -6,23 +6,22 @@ include Yast
 Yast.import "Kdump"
 
 describe Kdump do
-  # NOTE Kdump misspells "allocate" as "alocate"
-  # alocated_memory is a string   in megabytes
-  # total_memory    is an integer in megabytes
-  describe "#ProposeAlocatedMemory" do
+  # allocated_memory is a string   in megabytes
+  # total_memory     is an integer in megabytes
+  describe "#ProposeAllocatedMemory" do
     context "when already proposed" do
       before(:each) do
-        Kdump.alocated_memory = "42"
+        Kdump.allocated_memory = "42"
       end
       it "returns the current value" do
-        Kdump.ProposeAlocatedMemory
-        expect(Kdump.alocated_memory).to eq "42"
+        Kdump.ProposeAllocatedMemory
+        expect(Kdump.allocated_memory).to eq "42"
       end
     end
 
     context "when not yet proposed" do
       before(:each) do
-        Kdump.alocated_memory = "0"
+        Kdump.allocated_memory = "0"
       end
 
       PHYSICAL_TO_PROPOSED_MB = {
@@ -63,8 +62,8 @@ describe Kdump do
           pair.each do |physical_mb, proposed_mb|
             it "proposes #{proposed_mb}MB for #{physical_mb}MB physical memory" do
               Kdump.total_memory = physical_mb
-              Kdump.ProposeAlocatedMemory
-              expect(Kdump.alocated_memory).to eq proposed_mb.to_s
+              Kdump.ProposeAllocatedMemory
+              expect(Kdump.allocated_memory).to eq proposed_mb.to_s
             end
           end
         end
