@@ -90,7 +90,7 @@ module Yast
               ),
               Left(
                 IntField(
-                  Id("memory_buffer"),
+                  Id("allocated_memory"),
                   Opt(:notify),
                   _("Kdump Memor&y [MB]"),
                   32,

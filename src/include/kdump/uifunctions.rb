@@ -1382,7 +1382,7 @@ module Yast
           Builtins.tostring(Kdump.total_memory)
         )
         UI.ChangeWidget(
-          Id("memory_buffer"),
+          Id("allocated_memory"),
           :Value,
           Builtins.tointeger(Kdump.allocated_memory)
         )
@@ -1392,14 +1392,14 @@ module Yast
           Builtins.tostring(
             Ops.subtract(
               Kdump.total_memory,
-              Convert.to_integer(UI.QueryWidget(Id("memory_buffer"), :Value))
+              Convert.to_integer(UI.QueryWidget(Id("allocated_memory"), :Value))
             )
           )
         )
       else
         UI.ChangeWidget(Id("total_memory"), :Value, "0")
         UI.ChangeWidget(Id("usable_memory"), :Value, "0")
-        UI.ChangeWidget(Id("memory_buffer"), :Enabled, false)
+        UI.ChangeWidget(Id("allocated_memory"), :Enabled, false)
       end
 
       nil
@@ -1411,10 +1411,10 @@ module Yast
     def HandleKdumpMemory(key, event)
       event = deep_copy(event)
       ret = Ops.get(event, "ID")
-      if ret == "memory_buffer"
-        value = Convert.to_integer(UI.QueryWidget(Id("memory_buffer"), :Value))
+      if ret == "allocated_memory"
+        value = Convert.to_integer(UI.QueryWidget(Id("allocated_memory"), :Value))
         if Ops.greater_than(value, Kdump.total_memory)
-          UI.ChangeWidget(Id("memory_buffer"), :Value, Kdump.total_memory)
+          UI.ChangeWidget(Id("allocated_memory"), :Value, Kdump.total_memory)
           UI.ChangeWidget(Id("usable_memory"), :Value, "0")
         else
           UI.ChangeWidget(
@@ -1423,7 +1423,7 @@ module Yast
             Builtins.tostring(
               Ops.subtract(
                 Kdump.total_memory,
-                Convert.to_integer(UI.QueryWidget(Id("memory_buffer"), :Value))
+                Convert.to_integer(UI.QueryWidget(Id("allocated_memory"), :Value))
               )
             )
           )
@@ -1455,7 +1455,7 @@ module Yast
     def StoreKdumpMemory(key, event)
       event = deep_copy(event)
       Kdump.allocated_memory = Builtins.tostring(
-        UI.QueryWidget(Id("memory_buffer"), :Value)
+        UI.QueryWidget(Id("allocated_memory"), :Value)
       )
 
       nil
