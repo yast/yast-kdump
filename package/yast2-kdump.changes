@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 23 09:27:46 UTC 2014 - mvidner@suse.com
+
+- run a tool to propose the crashkernel value (FATE#315241)
+- 3.1.3
+
+-------------------------------------------------------------------
 Fri Jan 10 16:25:05 CET 2014 - locilka@suse.com
 
 - Added command-line support for firmware-assisted dump
