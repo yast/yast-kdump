@@ -673,12 +673,15 @@ module Yast
     def write_temporary_config_file
       # FIXME parameterize Write instead of copying the old config
       # NOTE make sure we do not lose 600 mode (cp is ok)
-      SCR.Execute(path(".target.bash"), "cp #{@kdump_file} #{TEMPORARY_CONFIG_FILE}")
+      command = "cp #{@kdump_file} #{TEMPORARY_CONFIG_FILE}"
+      retcode = SCR.Execute(path(".target.bash"), command)
+      # if this fails the system is broken; SCR has logged the details
+      raise "cannot copy files" if retcode != 0
     end
 
     PROPOSE_ALLOCATED_MEMORY_MB_COMMAND = "kdumptool --configfile #{TEMPORARY_CONFIG_FILE} calibrate"
     # if the command fails
-    PROPOSE_ALLOCATED_MEMORY_MB_DEFAULT = "128"
+    PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK = "128"
 
     # Propose reserved/allocated memory
     # Store the result as a string! to @allocated_memory
@@ -689,12 +692,11 @@ module Yast
 
       write_temporary_config_file
       out = SCR.Execute(path(".target.bash_output"), PROPOSE_ALLOCATED_MEMORY_MB_COMMAND)
-      if out["exit"] == 0
-        @allocated_memory = out.fetch("stdout", "0").chomp
-      else
+      @allocated_memory = out["stdout"].chomp
+      if out["exit"] != 0 or @allocated_memory.empty?
         # stderr has been already logged
         Builtins.y2error("failed to propose allocated memory")
-        @allocated_memory = PROPOSE_ALLOCATED_MEMORY_MB_DEFAULT
+        @allocated_memory = PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK
       end
       Builtins.y2milestone(
         "[kdump] allocated memory if not set in \"crashkernel\" param: %1",

@@ -25,6 +25,14 @@ describe Kdump do
       end
 
       context "when the proposal tool is not implemented yet" do
+        before(:each) do
+          SCR.stub(:Execute).
+            with(path(".target.bash"), /^cp/).and_return(0)
+          SCR.stub(:Execute).
+            with(path(".target.bash_output"), /^kdumptool/).
+            and_return({"exit" => 1, "stdout" => "", "stderr" => "not there" })
+        end
+
         it "proposes a positive integer" do
           Kdump.ProposeAllocatedMemory
           expect(Kdump.allocated_memory.to_i).to be > 0
