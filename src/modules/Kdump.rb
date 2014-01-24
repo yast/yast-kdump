@@ -668,51 +668,35 @@ module Yast
       true
     end
 
+    TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig"
+
+    def write_temporary_config_file
+      # FIXME parameterize Write instead of copying the old config
+      # NOTE make sure we do not lose 600 mode (cp is ok)
+      command = "cp #{@kdump_file} #{TEMPORARY_CONFIG_FILE}"
+      retcode = SCR.Execute(path(".target.bash"), command)
+      # if this fails the system is broken; SCR has logged the details
+      raise "cannot copy files" if retcode != 0
+    end
+
+    PROPOSE_ALLOCATED_MEMORY_MB_COMMAND = "kdumptool --configfile #{TEMPORARY_CONFIG_FILE} calibrate"
+    # if the command fails
+    PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK = "128"
+
     # Propose reserved/allocated memory
-    #
-    #
-    #  @return [Boolean] successfull
-
+    # Store the result as a string! to @allocated_memory
+    # @return [Boolean] true, always successful
     def ProposeAllocatedMemory
-      if @allocated_memory == "0"
-        if Ops.greater_or_equal(@total_memory, 512) &&
-            Ops.less_than(Ops.divide(@total_memory, 1024), 2)
-          @allocated_memory = "64"
-        elsif Ops.greater_or_equal(Ops.divide(@total_memory, 1024), 2)
-          @allocated_memory = "128"
-        end
+      # only propose once
+      return true if @allocated_memory != "0"
 
-        # bnc #431492 - UPT-LTE: /proc/vmcore is empty in kdump kerne
-        if Arch.ppc64 && @allocated_memory != ""
-          al_mem = Builtins.tointeger(@allocated_memory)
-          al_mem = Ops.multiply(al_mem, 2)
-          @allocated_memory = Builtins.tostring(al_mem)
-        end
-        # bnc #446480 - Fine-tune kdump memory proposal
-        if Arch.ia64 && Ops.greater_or_equal(@total_memory, 1024)
-          total_memory_gigabyte = Ops.divide(@total_memory, 1024)
-          if Ops.greater_or_equal(total_memory_gigabyte, 1) &&
-              Ops.less_than(total_memory_gigabyte, 8)
-            @allocated_memory = "256"
-          elsif Ops.greater_or_equal(total_memory_gigabyte, 8) &&
-              Ops.less_than(total_memory_gigabyte, 128)
-            @allocated_memory = "512"
-          elsif Ops.greater_or_equal(total_memory_gigabyte, 128) &&
-              Ops.less_than(total_memory_gigabyte, 256)
-            @allocated_memory = "768"
-          elsif Ops.greater_or_equal(total_memory_gigabyte, 256) &&
-              Ops.less_than(total_memory_gigabyte, 378)
-            @allocated_memory = "1024"
-          elsif Ops.greater_or_equal(total_memory_gigabyte, 378) &&
-              Ops.less_than(total_memory_gigabyte, 512)
-            @allocated_memory = "1536"
-          elsif Ops.greater_or_equal(total_memory_gigabyte, 512) &&
-              Ops.less_than(total_memory_gigabyte, 768)
-            @allocated_memory = "2048"
-          elsif Ops.greater_or_equal(total_memory_gigabyte, 768)
-            @allocated_memory = "3072"
-          end
-        end
+      write_temporary_config_file
+      out = SCR.Execute(path(".target.bash_output"), PROPOSE_ALLOCATED_MEMORY_MB_COMMAND)
+      @allocated_memory = out["stdout"].chomp
+      if out["exit"] != 0 or @allocated_memory.empty?
+        # stderr has been already logged
+        Builtins.y2error("failed to propose allocated memory")
+        @allocated_memory = PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK
       end
       Builtins.y2milestone(
         "[kdump] allocated memory if not set in \"crashkernel\" param: %1",
