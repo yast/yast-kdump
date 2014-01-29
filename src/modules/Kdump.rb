@@ -671,6 +671,9 @@ module Yast
     TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig"
 
     def write_temporary_config_file
+      # In inst_sys there is not kdump_file
+      return unless FileUtils.Exists(@kdump_file)
+
       # FIXME parameterize Write instead of copying the old config
       # NOTE make sure we do not lose 600 mode (cp is ok)
       command = "cp #{@kdump_file} #{TEMPORARY_CONFIG_FILE}"
