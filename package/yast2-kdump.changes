@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 29 15:24:47 UTC 2014 - jreidinger@suse.com
+
+- Fix internal error popup during installation(BNC#861075) 
+- 3.1.4
+
+-------------------------------------------------------------------
 Thu Jan 23 09:27:46 UTC 2014 - mvidner@suse.com
 
 - run a tool to propose the crashkernel value (FATE#315241)
