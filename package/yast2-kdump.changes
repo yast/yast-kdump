@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 28 12:22:11 UTC 2014 - fisiu@opensuse.org
+
+- Enable all possible values for dump data format.
+- 3.1.5
+
+-------------------------------------------------------------------
 Wed Jan 29 15:24:47 UTC 2014 - jreidinger@suse.com
 
 - Fix internal error popup during installation(BNC#861075) 

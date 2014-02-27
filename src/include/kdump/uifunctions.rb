@@ -1527,8 +1527,12 @@ module Yast
     def InitDumpFormat(key)
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "ELF"
         UI.ChangeWidget(Id("DumpFormat"), :Value, "elf_format")
-      else
+      elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "compressed"
         UI.ChangeWidget(Id("DumpFormat"), :Value, "compressed_format")
+      elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "lzo"
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "lzo_format")
+      else
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "none_format")
       end
 
       nil
@@ -1591,8 +1595,12 @@ module Yast
       value = Builtins.tostring(UI.QueryWidget(Id("DumpFormat"), :Value))
       if value == "elf_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "ELF")
-      else
+      elsif value == "compressed_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "compressed")
+      elsif value == "lzo_format"
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "lzo")
+      else
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "none")
       end
 
       nil
