@@ -191,8 +191,10 @@ module Yast
           "label"             => _("&Dump Format"),
           "widget"            => :radio_buttons,
           "items"             => [
-            ["elf_format", _("E&LF Format")],
-            ["compressed_format", _("C&ompressed Format")]
+            ["none_format", _("&No Dump")],
+            ["elf_format", _("&ELF Format")],
+            ["compressed_format", _("C&ompressed Format")],
+            ["lzo_format", _("&LZO Compressed Format")]
           ],
           "orientation"       => :horizontal,
           "init"              => fun_ref(

@@ -63,8 +63,10 @@ module Yast
         # Dump Format - RadioButtons  1/1
         "DumpFormat"             => _(
           "<p><b>Dump Format</b><br>\n" +
-            "    <i>Compressed Format</i> - Compress dump data by each page.\n" +
-            "    <i>ELF Format</i> - Create dumpfile in the ELF format<br></p>"
+            "    <i>No Dump</i> - Only save the kernel log.<br>\n" +
+            "    <i>ELF Format</i> - Create dump file in the ELF format.<br>\n" +
+            "    <i>Compressed Format</i> - Compress dump data by each page with gzip.<br>\n" +
+            "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>"
         ),
         # Dump Format - RadioButtons  1/6
         "TargetKdump"            => _(

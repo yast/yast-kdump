@@ -87,11 +87,13 @@ module Yast
             "handler" => fun_ref(method(:cmdKdumpDumpFormat), "boolean (map)"),
             # TRANSLATORS: CommandLine help
             "help"    => _(
-              "Dump format for dump image ELF/compressed"
+              "Dump format for dump image none/ELF/compressed/lzo"
             ),
             "example" => [
+              "dumpformat dump_format=none",
               "dumpformat dump_format=ELF",
-              "dumpformat dump_format=compressed"
+              "dumpformat dump_format=compressed",
+              "dumpformat dump_format=lzo"
             ]
           },
           "dumptarget"              => {
@@ -243,7 +245,7 @@ module Yast
             "type" => "string",
             # TRANSLATORS: CommandLine help
             "help" => _(
-              "Dump format can be ELF or compressed"
+              "Dump format can be none, ELF, compressed or lzo"
             )
           },
           "target"      => {
@@ -804,7 +806,7 @@ module Yast
           CommandLine.Error(_("Wrong value of option."))
           #TRANSLATORS: CommandLine printed text help
           CommandLine.Print(
-            _("Option can include only \"ELF\" or \"compressed\" value.")
+            _("Option can include only \"none\", \"ELF\", \"compressed\" or \"lzo\" value.")
           )
           return false
         end
