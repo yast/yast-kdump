@@ -91,7 +91,7 @@ module Yast
                   InputField(Id("dir"), _("&Directory for Saving Dumps")),
                   VBox(
                     Label(""),
-                    PushButton(Id("select_dir"), Opt(:hstretch), _("B&rowse"))
+                    PushButton(Id("select_dir"), _("B&rowse"))
                   )
                 )
               )
