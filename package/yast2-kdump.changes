@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar 13 09:41:09 UTC 2014 - vmoravec@suse.com
+
+- Fix wrong systemd unit name in Kdump module (bnc#867714)
+- 3.1.7
+
+-------------------------------------------------------------------
 Mon Mar  3 14:04:12 UTC 2014 - jreidinger@suse.com
 
 - Do not stretch browse button (BNC#865352)
