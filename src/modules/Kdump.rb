@@ -33,7 +33,7 @@ require "yast"
 module Yast
   class KdumpClass < Module
     FADUMP_KEY = "KDUMP_FADUMP"
-    KDUMP_SERVICE_NAME = "kdump.service"
+    KDUMP_SERVICE_NAME = "kdump"
 
     def main
       textdomain "kdump"
