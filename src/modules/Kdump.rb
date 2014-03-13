@@ -33,6 +33,7 @@ require "yast"
 module Yast
   class KdumpClass < Module
     FADUMP_KEY = "KDUMP_FADUMP"
+    KDUMP_SERVICE_NAME = "kdump"
 
     def main
       textdomain "kdump"
@@ -542,7 +543,7 @@ module Yast
     def convertCrashkernelForXEN(crash)
       crash_value = ""
       if crash != ""
-        crash_value = Ops.add(getAllocatedMemory(crash), "M") 
+        crash_value = Ops.add(getAllocatedMemory(crash), "M")
         # bnc#563905 problem with offset in crashkernel
         #if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
         #	crash_value = crash_value + "@16M";
@@ -905,14 +906,14 @@ module Yast
             Popup.Message(_("To apply changes a reboot is necessary."))
           end
 
-          Service.Enable("boot.kdump")
+          Service.Enable(KDUMP_SERVICE_NAME)
           return result
         end
 
         # start kernel-kdump at boot
-        Service.Enable("boot.kdump")
+        Service.Enable(KDUMP_SERVICE_NAME)
 
-        Service.Restart("boot.kdump") if Service.Status("boot.kdump") == 0
+        Service.Restart(KDUMP_SERVICE_NAME) if Service.Status(KDUMP_SERVICE_NAME) == 0
       else
         if @crashkernel_param
           #delete crashkernel paramter from bootloader
@@ -928,8 +929,8 @@ module Yast
             Popup.Message(_("To apply changes a reboot is necessary."))
           end
         end
-        Service.Disable("boot.kdump")
-        Service.Stop("boot.kdump") if Service.Status("boot.kdump") == 0
+        Service.Disable(KDUMP_SERVICE_NAME)
+        Service.Stop(KDUMP_SERVICE_NAME) if Service.Status(KDUMP_SERVICE_NAME) == 0
         return result
       end
       true
