@@ -32,6 +32,8 @@ require "yast"
 
 module Yast
   class KdumpClass < Module
+    include Yast::Logger
+
     FADUMP_KEY = "KDUMP_FADUMP"
     KDUMP_SERVICE_NAME = "kdump"
 
@@ -747,6 +749,15 @@ module Yast
     end
 
 
+    def log_settings_censoring_passwords(message)
+      debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
+      debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"]       = "********"
+      debug_KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"] = "********"
+
+      log.info "-------------KDUMP_SETTINGS-------------------"
+      log.info "#{message}; here with censored passwords: #{debug_KDUMP_SETTINGS}"
+      log.info "---------------------------------------------"
+    end
 
     # Read current kdump configuration
     #
@@ -760,17 +771,7 @@ module Yast
         Ops.set(@KDUMP_SETTINGS, key, val) if val != nil
       end
 
-      debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
-
-      # delete KDUMP_SAVEDIR - it can include password
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SAVEDIR", "********")
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", "********")
-      Builtins.y2milestone("-------------KDUMP_SETTINGS-------------------")
-      Builtins.y2milestone(
-        "kdump configuration has been read without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1",
-        debug_KDUMP_SETTINGS
-      )
-      Builtins.y2milestone("---------------------------------------------")
+      log_settings_censoring_passwords("kdump configuration has been read")
 
       @initial_kdump_settings = deep_copy(@KDUMP_SETTINGS)
 
@@ -805,17 +806,7 @@ module Yast
 
     # Writes a file in the /etc/sysconfig/kdump format
     def WriteKdumpSettingsTo(scr_path, file_name)
-
-      debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
-      # delete KDUMP_SAVEDIR - it can include password
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SAVEDIR", "********")
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", "********")
-      Builtins.y2milestone("-------------KDUMP_SETTINGS-------------------")
-      Builtins.y2milestone(
-        "kdump configuration for writing without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1",
-        debug_KDUMP_SETTINGS
-      )
-      Builtins.y2milestone("---------------------------------------------")
+      log_settings_censoring_passwords("kdump configuration for writing")
 
       Builtins.foreach(@KDUMP_SETTINGS) do |option_key, option_val|
         SCR.Write(
