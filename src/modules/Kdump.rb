@@ -670,17 +670,16 @@ module Yast
     end
 
     TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig"
+    TEMPORARY_CONFIG_PATH = Path.new(".temporary.sysconfig.kdump")
 
     def write_temporary_config_file
-      # In inst_sys there is not kdump_file
-      return unless FileUtils.Exists(@kdump_file)
-
-      # FIXME parameterize Write instead of copying the old config
-      # NOTE make sure we do not lose 600 mode (cp is ok)
-      command = "cp #{@kdump_file} #{TEMPORARY_CONFIG_FILE}"
-      retcode = SCR.Execute(path(".target.bash"), command)
-      # if this fails the system is broken; SCR has logged the details
-      raise "cannot copy files" if retcode != 0
+      SCR.RegisterAgent(TEMPORARY_CONFIG_PATH,
+                        term(:ag_ini,
+                             term(:SysConfigFile, TEMPORARY_CONFIG_FILE)
+                             )
+                        )
+      WriteKdumpSettingsTo(TEMPORARY_CONFIG_PATH, TEMPORARY_CONFIG_FILE)
+      SCR.UnregisterAgent(TEMPORARY_CONFIG_PATH)
     end
 
     PROPOSE_ALLOCATED_MEMORY_MB_COMMAND = "kdumptool --configfile #{TEMPORARY_CONFIG_FILE} calibrate"
@@ -805,10 +804,9 @@ module Yast
       true
     end
 
-    # Write current kdump configuration
-    #
-    #  @return [Boolean] successfull
-    def WriteKdumpSettings
+    # Writes a file in the /etc/sysconfig/kdump format
+    def WriteKdumpSettingsTo(scr_path, file_name)
+
       debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
       # delete KDUMP_SAVEDIR - it can include password
       Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SAVEDIR", "********")
@@ -822,24 +820,31 @@ module Yast
 
       Builtins.foreach(@KDUMP_SETTINGS) do |option_key, option_val|
         SCR.Write(
-          Builtins.add(path(".sysconfig.kdump"), option_key),
+          Builtins.add(scr_path, option_key),
           option_val
         )
       end
-      SCR.Write(path(".sysconfig.kdump"), nil)
+      SCR.Write(scr_path, nil)
+
+      if checkPassword
+        Chmod(file_name, "600")
+      else
+        Chmod(file_name, "644")
+      end
+    end
+
+    # Write current kdump configuration
+    #
+    #  @return [Boolean] successful
+    def WriteKdumpSettings
+      WriteKdumpSettingsTo(path(".sysconfig.kdump"), @kdump_file)
 
       if using_fadump_changed? && ! update_initrd
         return false
       end
 
-      if checkPassword
-        Chmod(@kdump_file, "600")
-      else
-        Chmod(@kdump_file, "644")
-      end
       true
     end
-
 
     # Write kdump boot argument crashkernel
     # set kernel-kdump start at boot
