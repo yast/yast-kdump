@@ -761,14 +761,14 @@ module Yast
 
     # Read current kdump configuration
     #
-    #  @return [Boolean] successfull
+    #  @return [Boolean] successful
     def ReadKdumpSettings
       @KDUMP_SETTINGS = deep_copy(@DEFAULT_CONFIG)
-      Builtins.foreach(SCR.Dir(path(".sysconfig.kdump"))) do |key|
+      SCR.Dir(path(".sysconfig.kdump")).each do |key|
         val = Convert.to_string(
-          SCR.Read(Builtins.add(path(".sysconfig.kdump"), key))
+          SCR.Read(path(".sysconfig.kdump") + key)
         )
-        Ops.set(@KDUMP_SETTINGS, key, val) if val != nil
+        @KDUMP_SETTINGS[key] = val
       end
 
       log_settings_censoring_passwords("kdump configuration has been read")
@@ -808,11 +808,8 @@ module Yast
     def WriteKdumpSettingsTo(scr_path, file_name)
       log_settings_censoring_passwords("kdump configuration for writing")
 
-      Builtins.foreach(@KDUMP_SETTINGS) do |option_key, option_val|
-        SCR.Write(
-          Builtins.add(scr_path, option_key),
-          option_val
-        )
+      @KDUMP_SETTINGS.each do |option_key, option_val|
+        SCR.Write(scr_path + option_key, option_val)
       end
       SCR.Write(scr_path, nil)
 
