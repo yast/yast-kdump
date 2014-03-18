@@ -743,7 +743,6 @@ module Yast
         "[kdump] (ReadAvailableMemory) total phys. memory [MB]: %1",
         Builtins.tostring(@total_memory)
       )
-      ProposeAllocatedMemory()
       true
     end
 
@@ -1180,6 +1179,7 @@ module Yast
       ReadAvailableMemory()
       # set default values for global variables
       ProposeGlobalVars()
+      ProposeAllocatedMemory()
 
       # add packages for installation
       AddPackages()
