@@ -504,18 +504,13 @@ module Yast
     #  @return [String] value of crashkernel
 
     def BuildCrashkernelValue
-      # if user doesn't modified or select don't modify
-      # return readed value
+      # If user didn't modify or select return old value.
       return @crashkernel_param_value if @crashkernel_list_ranges
 
-      crash_value = ""
-      crash_value = Ops.add(@allocated_memory, "M")
+      crash_value = @allocated_memory + "M"
+      reserved_memory = (@allocated_memory.to_i * 2).to_s
+      crash_value = reserved_memory + "M-:" + crash_value
 
-      reserved_memory = Builtins.tostring(
-        Ops.multiply(2, Builtins.tointeger(@allocated_memory))
-      )
-
-      crash_value = Ops.add(Ops.add(reserved_memory, "M-:"), crash_value)
       Builtins.y2milestone("built crashkernel value is %1", crash_value)
 
       crash_value
