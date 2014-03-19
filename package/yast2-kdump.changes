@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 18 15:54:20 UTC 2014 - mvidner@suse.com
+
+- actually write the sysconfig data for kdumptool calibrate (FATE#315241)
+- 3.1.8
+
+-------------------------------------------------------------------
 Thu Mar 13 09:41:09 UTC 2014 - vmoravec@suse.com
 
 - Fix wrong systemd unit name in Kdump module (bnc#867714)

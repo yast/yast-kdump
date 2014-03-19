@@ -32,6 +32,8 @@ require "yast"
 
 module Yast
   class KdumpClass < Module
+    include Yast::Logger
+
     FADUMP_KEY = "KDUMP_FADUMP"
     KDUMP_SERVICE_NAME = "kdump"
 
@@ -670,17 +672,16 @@ module Yast
     end
 
     TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig"
+    TEMPORARY_CONFIG_PATH = Path.new(".temporary.sysconfig.kdump")
 
     def write_temporary_config_file
-      # In inst_sys there is not kdump_file
-      return unless FileUtils.Exists(@kdump_file)
-
-      # FIXME parameterize Write instead of copying the old config
-      # NOTE make sure we do not lose 600 mode (cp is ok)
-      command = "cp #{@kdump_file} #{TEMPORARY_CONFIG_FILE}"
-      retcode = SCR.Execute(path(".target.bash"), command)
-      # if this fails the system is broken; SCR has logged the details
-      raise "cannot copy files" if retcode != 0
+      SCR.RegisterAgent(TEMPORARY_CONFIG_PATH,
+                        term(:ag_ini,
+                             term(:SysConfigFile, TEMPORARY_CONFIG_FILE)
+                             )
+                        )
+      WriteKdumpSettingsTo(TEMPORARY_CONFIG_PATH, TEMPORARY_CONFIG_FILE)
+      SCR.UnregisterAgent(TEMPORARY_CONFIG_PATH)
     end
 
     PROPOSE_ALLOCATED_MEMORY_MB_COMMAND = "kdumptool --configfile #{TEMPORARY_CONFIG_FILE} calibrate"
@@ -744,35 +745,33 @@ module Yast
         "[kdump] (ReadAvailableMemory) total phys. memory [MB]: %1",
         Builtins.tostring(@total_memory)
       )
-      ProposeAllocatedMemory()
       true
     end
 
 
+    def log_settings_censoring_passwords(message)
+      debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
+      debug_KDUMP_SETTINGS["KDUMP_SAVEDIR"]       = "********"
+      debug_KDUMP_SETTINGS["KDUMP_SMTP_PASSWORD"] = "********"
+
+      log.info "-------------KDUMP_SETTINGS-------------------"
+      log.info "#{message}; here with censored passwords: #{debug_KDUMP_SETTINGS}"
+      log.info "---------------------------------------------"
+    end
 
     # Read current kdump configuration
     #
-    #  @return [Boolean] successfull
+    #  @return [Boolean] successful
     def ReadKdumpSettings
       @KDUMP_SETTINGS = deep_copy(@DEFAULT_CONFIG)
-      Builtins.foreach(SCR.Dir(path(".sysconfig.kdump"))) do |key|
+      SCR.Dir(path(".sysconfig.kdump")).each do |key|
         val = Convert.to_string(
-          SCR.Read(Builtins.add(path(".sysconfig.kdump"), key))
+          SCR.Read(path(".sysconfig.kdump") + key)
         )
-        Ops.set(@KDUMP_SETTINGS, key, val) if val != nil
+        @KDUMP_SETTINGS[key] = val
       end
 
-      debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
-
-      # delete KDUMP_SAVEDIR - it can include password
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SAVEDIR", "********")
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", "********")
-      Builtins.y2milestone("-------------KDUMP_SETTINGS-------------------")
-      Builtins.y2milestone(
-        "kdump configuration has been read without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1",
-        debug_KDUMP_SETTINGS
-      )
-      Builtins.y2milestone("---------------------------------------------")
+      log_settings_censoring_passwords("kdump configuration has been read")
 
       @initial_kdump_settings = deep_copy(@KDUMP_SETTINGS)
 
@@ -805,41 +804,34 @@ module Yast
       true
     end
 
+    # Writes a file in the /etc/sysconfig/kdump format
+    def WriteKdumpSettingsTo(scr_path, file_name)
+      log_settings_censoring_passwords("kdump configuration for writing")
+
+      @KDUMP_SETTINGS.each do |option_key, option_val|
+        SCR.Write(scr_path + option_key, option_val)
+      end
+      SCR.Write(scr_path, nil)
+
+      if checkPassword
+        Chmod(file_name, "600")
+      else
+        Chmod(file_name, "644")
+      end
+    end
+
     # Write current kdump configuration
     #
-    #  @return [Boolean] successfull
+    #  @return [Boolean] successful
     def WriteKdumpSettings
-      debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
-      # delete KDUMP_SAVEDIR - it can include password
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SAVEDIR", "********")
-      Ops.set(debug_KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", "********")
-      Builtins.y2milestone("-------------KDUMP_SETTINGS-------------------")
-      Builtins.y2milestone(
-        "kdump configuration for writing without value \"KDUMP_SAVEDIR\" and \"KDUMP_SMTP_PASSWORD\": %1",
-        debug_KDUMP_SETTINGS
-      )
-      Builtins.y2milestone("---------------------------------------------")
-
-      Builtins.foreach(@KDUMP_SETTINGS) do |option_key, option_val|
-        SCR.Write(
-          Builtins.add(path(".sysconfig.kdump"), option_key),
-          option_val
-        )
-      end
-      SCR.Write(path(".sysconfig.kdump"), nil)
+      WriteKdumpSettingsTo(path(".sysconfig.kdump"), @kdump_file)
 
       if using_fadump_changed? && ! update_initrd
         return false
       end
 
-      if checkPassword
-        Chmod(@kdump_file, "600")
-      else
-        Chmod(@kdump_file, "644")
-      end
       true
     end
-
 
     # Write kdump boot argument crashkernel
     # set kernel-kdump start at boot
@@ -1175,6 +1167,7 @@ module Yast
       ReadAvailableMemory()
       # set default values for global variables
       ProposeGlobalVars()
+      ProposeAllocatedMemory()
 
       # add packages for installation
       AddPackages()
