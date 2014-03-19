@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 19 13:28:54 CET 2014 - snwint@suse.de
+
+- kdump for all (bnc #869086, bnc #804512)
+- 3.1.9
+
+-------------------------------------------------------------------
 Tue Mar 18 15:54:20 UTC 2014 - mvidner@suse.com
 
 - actually write the sysconfig data for kdumptool calibrate (FATE#315241)

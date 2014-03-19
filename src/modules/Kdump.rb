@@ -504,34 +504,15 @@ module Yast
     #  @return [String] value of crashkernel
 
     def BuildCrashkernelValue
-      # if user doesn't modified or select don't modify
-      # return readed value
+      # If user didn't modify or select return old value.
       return @crashkernel_param_value if @crashkernel_list_ranges
 
-      crash_value = ""
-      crash_value = Ops.add(@allocated_memory, "M")
+      crash_value = @allocated_memory + "M"
+      reserved_memory = (@allocated_memory.to_i * 2).to_s
+      crash_value = reserved_memory + "M-:" + crash_value
 
-      # bnc#563905 problem with offset in crashkernel
-      if Arch.i386 || Arch.x86_64 || Arch.ia64 || Arch.ppc64
-        Builtins.y2milestone(
-          "i386, x86_64, ia64 and ppc64 platforms are without offset"
-        )
-      else
-        if Mode.normal
-          Popup.Error(
-            _("Unsupported architecture, \"crashkernel\" was not added")
-          )
-        end
-        Builtins.y2error("Unsupported platform/architecture...")
-      end
+      log.info "built crashkernel value is #{crash_value}"
 
-      reserved_memory = Builtins.tostring(
-        Ops.multiply(2, Builtins.tointeger(@allocated_memory))
-      )
-
-
-      crash_value = Ops.add(Ops.add(reserved_memory, "M-:"), crash_value)
-      Builtins.y2milestone("builded crashkernel value is %1", crash_value)
       crash_value
     end
 
