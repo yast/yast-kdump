@@ -511,27 +511,13 @@ module Yast
       crash_value = ""
       crash_value = Ops.add(@allocated_memory, "M")
 
-      # bnc#563905 problem with offset in crashkernel
-      if Arch.i386 || Arch.x86_64 || Arch.ia64 || Arch.ppc64
-        Builtins.y2milestone(
-          "i386, x86_64, ia64 and ppc64 platforms are without offset"
-        )
-      else
-        if Mode.normal
-          Popup.Error(
-            _("Unsupported architecture, \"crashkernel\" was not added")
-          )
-        end
-        Builtins.y2error("Unsupported platform/architecture...")
-      end
-
       reserved_memory = Builtins.tostring(
         Ops.multiply(2, Builtins.tointeger(@allocated_memory))
       )
 
-
       crash_value = Ops.add(Ops.add(reserved_memory, "M-:"), crash_value)
-      Builtins.y2milestone("builded crashkernel value is %1", crash_value)
+      Builtins.y2milestone("built crashkernel value is %1", crash_value)
+
       crash_value
     end
 
