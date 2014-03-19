@@ -511,7 +511,7 @@ module Yast
       reserved_memory = (@allocated_memory.to_i * 2).to_s
       crash_value = reserved_memory + "M-:" + crash_value
 
-      Builtins.y2milestone("built crashkernel value is %1", crash_value)
+      log.info "built crashkernel value is #{crash_value}"
 
       crash_value
     end
