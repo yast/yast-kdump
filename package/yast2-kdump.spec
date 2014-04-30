@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.9
+Version:        3.1.10
 Release:        0
 
 Url:            https://github.com/yast/yast-kdump
@@ -31,7 +31,12 @@ BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-testsuite yast2-
 BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:  rubygem-rspec
 
-Recommends:     kdump makedumpfile
+Recommends:     makedumpfile
+%ifarch aarch64
+Recommends:     kdump
+%else
+Requires:       kdump
+%endif
 
 # Wizard::SetDesktopTitleAndIcon
 BuildRequires:	yast2 >= 2.21.22
