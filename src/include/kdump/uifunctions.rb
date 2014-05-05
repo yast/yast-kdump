@@ -227,19 +227,12 @@ module Yast
 
     # Function initializes option "Enable/Disable kdump"
     def InitEnableDisalbeKdump(key)
-      if Mode.installation
-        if Kdump.add_crashkernel_param
-          UI.ChangeWidget(Id("EnableDisalbeKdump"), :Value, "enable_kdump")
-        else
-          UI.ChangeWidget(Id("EnableDisalbeKdump"), :Value, "disable_kdump")
-        end
-      else
-        if Kdump.add_crashkernel_param && Service.Status("boot.kdump") == 0
-          UI.ChangeWidget(Id("EnableDisalbeKdump"), :Value, "enable_kdump")
-        else
-          UI.ChangeWidget(Id("EnableDisalbeKdump"), :Value, "disable_kdump")
-        end
-      end
+      enable = Kdump.add_crashkernel_param
+      enable &&= Service.enabled?(KdumpClass::KDUMP_SERVICE_NAME) unless Mode.installation
+
+      value = enable ? "enable_kdump" : "disable_kdump"
+
+      UI.ChangeWidget(Id("EnableDisalbeKdump"), :Value, value)
 
       nil
     end
