@@ -228,7 +228,7 @@ module Yast
     # Function initializes option "Enable/Disable kdump"
     def InitEnableDisalbeKdump(key)
       enable = Kdump.add_crashkernel_param
-      enable &&= Service.enabled?("kdump.service") unless Mode.installation
+      enable &&= Service.enabled?(KdumpClass::KDUMP_SERVICE_NAME) unless Mode.installation
 
       value = enable ? "enable_kdump" : "disable_kdump"
 
