@@ -151,14 +151,6 @@ module Yast
       @import_called = false
 
 
-      # String option identify which boot section was used
-      # during boot process
-      #
-      # string value actual boot section
-
-      @actual_boot_section = ""
-
-
       # Write only, used during autoinstallation.
       # Don't run services and SuSEconfig, it's all done at one place.
       @write_only = false
@@ -223,54 +215,6 @@ module Yast
       nil
     end
 
-
-    # Compare boot section options with
-    #
-    # options from running kernel
-    #  @return [Fixnum] return number of differences
-
-    def CmpKernelAndBootOptions(kernel_option, boot_options)
-      kernel_option = deep_copy(kernel_option)
-      boot_options = deep_copy(boot_options)
-      result = Builtins.size(kernel_option)
-      dif_size = Ops.subtract(
-        Builtins.size(boot_options),
-        Builtins.size(kernel_option)
-      )
-      dif_size = Ops.multiply(dif_size, -1) if Ops.less_than(dif_size, 0)
-      Builtins.foreach(kernel_option) do |option|
-        if Builtins.contains(boot_options, option)
-          result = Ops.subtract(result, 1)
-        end
-      end
-
-      result = Ops.add(result, dif_size)
-      result
-    end
-
-
-    # Function add into option from boot
-    # section root device and vgamode
-    #
-    #  @return [Array<String>] boot section + root and vgamode
-
-
-    def AddDeviceVgamode(section)
-      section = deep_copy(section)
-      tmp_boot_section = Builtins.tostring(Ops.get(section, "append"))
-      # adding root device
-      tmp_boot_section = Ops.add(
-        Ops.add(tmp_boot_section, " root="),
-        Builtins.tostring(Ops.get(section, "root"))
-      )
-      tmp_boot_section = Ops.add(
-        Ops.add(tmp_boot_section, " vga="),
-        Builtins.tostring(Ops.get(section, "vgamode"))
-      )
-
-      Builtins.splitstring(tmp_boot_section, " ")
-    end
-
     # Function set permission for file.
     #
     # @return	[Boolean] true on success
@@ -300,136 +244,6 @@ module Yast
       end
       Builtins.y2milestone("Command: %1 finish successful.", cmd)
       true
-    end
-
-    # Read actual boot section
-    #
-    # read kernal version and boot options
-    #  @return [String] actual boot section
-
-
-    def GetActualBootSection
-      # read option from bootlaoder
-
-      result = ""
-      kernel_boot_options = ""
-      min_dif_size = 1000
-      if Mode.update
-        result = Bootloader.getDefaultSection
-        section_position = -1
-        Builtins.foreach(BootCommon.sections) do |section|
-          section_position = Ops.add(section_position, 1)
-          name = Builtins.tostring(Ops.get(section, "name"))
-          if name == result && Ops.get(section, "xen_append") != nil
-            @section_pos = section_position
-            @kernel_version = "xen"
-          end
-        end
-        return result
-      end
-
-      # reading bootloader settings
-      old_progress = Progress.set(false)
-      Bootloader.Read
-      Progress.set(old_progress)
-
-      # reading kernel options
-      command = "cat /proc/cmdline"
-      options = Convert.to_map(
-        SCR.Execute(path(".target.bash_output"), command)
-      )
-      Builtins.y2milestone(
-        "[kdump] (GetActualBootSection) command read boot options from kernel:  %1  output: %2",
-        command,
-        options
-      )
-
-      return "" if Ops.get(options, "exit") != 0
-
-      kernel_boot_options = Builtins.tostring(Ops.get(options, "stdout"))
-
-      # reading version of kernel
-      command = "uname -r"
-      options = Convert.to_map(
-        SCR.Execute(path(".target.bash_output"), command)
-      )
-      Builtins.y2milestone(
-        "[kdump] (GetActualBootSection) command read kernel version:  %1  output: %2",
-        command,
-        options
-      )
-
-      return "" if Ops.get(options, "exit") != 0
-
-      @kernel_version = Builtins.tostring(Ops.get(options, "stdout"))
-      Builtins.y2milestone(
-        "[kdump] (GetActualBootSection) kerne version: %1",
-        @kernel_version
-      )
-
-      # boot sections from bootloader
-      sects = deep_copy(BootCommon.sections)
-
-      # deleting non linux sections
-      sects = Builtins.filter(sects) { |s| !Builtins.haskey(s, "chainloader") }
-
-      Builtins.y2milestone(
-        "[kdump] (GetActualBootSection) BootCommon::sections only linux sections:  %1",
-        sects
-      )
-
-      # find probably boot section, what was used during start-up
-      Builtins.foreach(sects) do |section|
-        image = Builtins.tostring(Ops.get(section, "image"))
-        if image != nil
-          command = Ops.add("/sbin/get_kernel_version ", image)
-          options = Convert.to_map(
-            SCR.Execute(path(".target.bash_output"), command)
-          )
-
-          if Ops.get(options, "exit") == 0
-            ret = Builtins.tostring(Ops.get(options, "stdout"))
-
-            if ret == @kernel_version
-              #Popup::Message("hura!");
-              value = CmpKernelAndBootOptions(
-                Builtins.splitstring(kernel_boot_options, " "),
-                AddDeviceVgamode(section)
-              )
-              if Ops.less_than(value, min_dif_size)
-                min_dif_size = value
-                result = Builtins.tostring(Ops.get(section, "name"))
-              end
-            end # end if (ret == kernel_version)
-          end # end if (options["exit"]:nil ==  0)
-        end # end of if (image != nil)
-      end # end of foreach(map section, sects, {
-
-      Builtins.y2milestone(
-        "[kdump] (GetActualBootSection) selected boot section :  %1",
-        result
-      )
-      result
-    end
-
-    # get value of crashkernel option
-    # from XEN boot section
-    #  @param string crashkernel=64M@16M
-    #  @return [String] value of carshkernel option
-
-    def getCrashKernelValue(crash)
-      Builtins.y2milestone("crashkernel option %1", crash)
-      result = ""
-      if crash != "" || crash != nil
-        position = Builtins.search(crash, "=")
-        if position != nil
-          result = Builtins.substring(crash, Ops.add(position, 1))
-        else
-          Builtins.y2error("Wrong crashkernel option!")
-        end
-      end
-      Builtins.y2milestone("crashkernel value is %1", result)
-      result
     end
 
     # Function check if KDUMP_SAVEDIR or
@@ -516,127 +330,17 @@ module Yast
       crash_value
     end
 
-    # bnc #439881 - Don't use extended crashkernel syntax for Xen
-    # Fuction convert extended crashkernel value to old style :Y@X
-    #
-    # @param string - extended value of crashkernel
-    # @return [String] - old style value
-
-
-    def convertCrashkernelForXEN(crash)
-      crash_value = ""
-      if crash != ""
-        crash_value = Ops.add(getAllocatedMemory(crash), "M")
-        # bnc#563905 problem with offset in crashkernel
-        #if ((Arch::i386()) ||(Arch::x86_64()) || Arch::ppc64())
-        #	crash_value = crash_value + "@16M";
-      end
-      Builtins.y2milestone(
-        "Converting crashkernel value from: (%1) to :(%2)",
-        crash,
-        crash_value
-      )
-      crash_value
-    end
-
-
-
-    # Check if default boot section is Xen section
-    # remember position of section (important for saving to xen_append)
-    # @param string name of section
-
-    def CheckXenDefault(act_boot_secion)
-      if act_boot_secion != "" && act_boot_secion != nil
-        section_position = -1
-        Builtins.foreach(BootCommon.sections) do |section|
-          section_position = Ops.add(section_position, 1)
-          name = Builtins.tostring(Ops.get(section, "name"))
-          type = Builtins.tostring(Ops.get(section, "type"))
-          if name == act_boot_secion && type == "xen"
-            @section_pos = section_position
-            Builtins.y2milestone("default boot section is Xen...")
-          end
-        end
-        if @section_pos == -1
-          Builtins.y2milestone("default boot section is NOT Xen...")
-        end
-      end
-
-      nil
-    end
-
-    # Read current kdump configuration
-    # from XEN boot section
-    # read kernel parameter "crashkernel"
-    #  @return [Boolean] successfull
-
-
-    def ReadXenKdumpKernelParam(act_boot_secion)
-      crash = ""
-      if @actual_boot_section == ""
-        Builtins.y2milestone("Actual boot section was not found")
-        @crashkernel_param = false
-        @add_crashkernel_param = false
-      else
-        section_position = -1
-        Builtins.foreach(BootCommon.sections) do |section|
-          section_position = Ops.add(section_position, 1)
-          name = Builtins.tostring(Ops.get(section, "name"))
-          if name == act_boot_secion
-            crash = Ops.get_string(section, "xen_append", "")
-            @section_pos = section_position
-          end
-        end
-      end
-
-      if crash != ""
-        xen_append = Builtins.splitstring(crash, " ")
-        crash_arg = ""
-
-        if Ops.greater_than(Builtins.size(xen_append), 1)
-          Builtins.foreach(xen_append) do |key|
-            crash_arg = key if Builtins.search(key, "crashkernel") != nil
-          end
-        else
-          crash_arg = crash
-        end
-
-        if crash_arg != ""
-          @crashkernel_param = true
-          @add_crashkernel_param = true
-          @crashkernel_param_value = getCrashKernelValue(crash_arg)
-          @allocated_memory = getAllocatedMemory(@crashkernel_param_value)
-        else
-          @crashkernel_param = false
-          @add_crashkernel_param = false
-        end
-      end
-
-      true
-    end
-
-
     # Read current kdump configuration
     #
     # read kernel parameter "crashkernel"
     #  @return [Boolean] successfull
 
     def ReadKdumpKernelParam
-      @actual_boot_section = GetActualBootSection()
-
-      if Builtins.search(@kernel_version, "xen") != nil
-        return ReadXenKdumpKernelParam(@actual_boot_section)
-      end
-
-
-      if @actual_boot_section == ""
-        @actual_boot_section = Bootloader.getDefaultSection
-      end
-
-      result = Bootloader.getKernelParam(@actual_boot_section, "crashkernel")
+      result = Bootloader.kernel_param(:common, "crashkernel")
+      result = Bootloader.kernel_param(:xen_guest, "crashkernel") if result == :missing
 
       #Popup::Message(result);
-      if result == "false"
+      if result == :missing
         @crashkernel_param = false
         @add_crashkernel_param = false
       else
@@ -645,7 +349,7 @@ module Yast
       end
 
       @crashkernel_param_value = result
-      if result != "false"
+      if result != :missing
         @allocated_memory = getAllocatedMemory(@crashkernel_param_value)
       end
 
@@ -766,6 +470,7 @@ module Yast
     def update_initrd
       # See FATE#315780
       # See https://www.suse.com/support/kb/doc.php?id=7012786
+      # FIXME what about dracut?
       update_command = (using_fadump? ? "mkdumprd -f" : "mkinitrd")
       update_logfile = File.join(Directory.vardir, "y2logmkinitrd")
 
@@ -821,13 +526,7 @@ module Yast
     def WriteKdumpBootParameter
       result = true
       old_progress = false
-      if Mode.installation
-        Bootloader.Read
-        @actual_boot_section = Bootloader.getDefaultSection
-        CheckXenDefault(@actual_boot_section)
-      end
 
-      Builtins.y2milestone("Default boot section is %1", @actual_boot_section)
       if @add_crashkernel_param
         crash_value = ""
         crash_value = BuildCrashkernelValue() if !Mode.autoinst
@@ -846,27 +545,7 @@ module Yast
             end
           end
 
-          # write crashkernel option to boot section
-          if @section_pos == -1
-            result = Bootloader.setKernelParam(
-              @actual_boot_section,
-              "crashkernel",
-              crash_value
-            )
-          else
-            Ops.set(
-              BootCommon.sections,
-              [@section_pos, "xen_append"],
-              Ops.add("crashkernel=", convertCrashkernelForXEN(crash_value))
-            )
-            # added flag which means that section was changed bnc #432651
-            Ops.set(BootCommon.sections, [@section_pos, "__changed"], true)
-            result = true
-            Builtins.y2milestone(
-              "Write boot section to XEN boot section %1",
-              Ops.get(BootCommon.sections, @section_pos)
-            )
-          end
+          Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => crash_value)
           old_progress = Progress.set(false)
           Bootloader.Write
           Progress.set(old_progress)
@@ -890,11 +569,7 @@ module Yast
       else
         if @crashkernel_param
           #delete crashkernel paramter from bootloader
-          result = Bootloader.setKernelParam(
-            @actual_boot_section,
-            "crashkernel",
-            "false"
-          )
+          Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => :missing)
           old_progress = Progress.set(false)
           Bootloader.Write
           Progress.set(old_progress)
@@ -1320,7 +995,6 @@ module Yast
     publish :variable => :add_crashkernel_param, :type => "boolean"
     publish :variable => :allocated_memory, :type => "string"
     publish :variable => :import_called, :type => "boolean"
-    publish :variable => :actual_boot_section, :type => "string"
     publish :variable => :write_only, :type => "boolean"
     publish :variable => :AbortFunction, :type => "boolean ()"
     publish :variable => :DEFAULT_CONFIG, :type => "map <string, string>"
