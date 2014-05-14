@@ -50,6 +50,12 @@ Requires:       kdump
 %description
 Configuration of kdump
 
+%package devel-doc
+Summary:        Development documentation for yast2-kdump
+
+%description devel-doc
+Development documentation for yast2-kdump including generated code documentation
+
 %prep
 %setup -q
 
@@ -70,5 +76,10 @@ Configuration of kdump
 %{yast_desktopdir}/kdump.desktop
 %{yast_schemadir}/autoyast/rnc/kdump.rnc
 %{yast_scrconfdir}/*.scr
+%doc %{yast_docdir}/COPYING
+
+%files devel-doc
+%defattr(-,root,root)
 %doc %{yast_docdir}
+%exclude %doc %{yast_docdir}/COPYING
 
