@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.11
+Version:        3.1.12
 Release:        0
 
 Url:            https://github.com/yast/yast-kdump
@@ -26,7 +26,7 @@ Source0:        %{name}-%{version}.tar.bz2
 
 Group:	        System/YaST
 License:        GPL-2.0
-Requires:	yast2 yast2-storage yast2-bootloader
+Requires:	yast2 yast2-storage yast2-bootloader >= 3.1.35
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-testsuite yast2-storage yast2-bootloader
 BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:  rubygem-rspec

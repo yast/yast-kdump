@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May 14 12:39:20 UTC 2014 - jreidinger@suse.com
+
+- fix setting kdump parameters for xen (bnc#869608)
+- 3.1.12
+
+-------------------------------------------------------------------
 Mon May  5 11:03:34 UTC 2014 - jreidinger@suse.com
 
 - use directly kdump service instead of boot.kdump wrapper
