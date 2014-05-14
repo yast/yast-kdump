@@ -991,7 +991,6 @@ module Yast
     publish :variable => :crashkernel_list_ranges, :type => "boolean"
     publish :variable => :kdump_packages, :type => "list <string>"
     publish :variable => :crashkernel_param, :type => "boolean"
-    publish :variable => :crashkernel_param_value, :type => "string"
     publish :variable => :add_crashkernel_param, :type => "boolean"
     publish :variable => :allocated_memory, :type => "string"
     publish :variable => :import_called, :type => "boolean"
