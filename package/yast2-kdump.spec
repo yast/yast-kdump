@@ -1,7 +1,7 @@
 #
 # spec file for package yast2-kdump
 #
-# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2014 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -17,40 +17,47 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.11
+Version:        3.1.12
 Release:        0
-
-Url:            https://github.com/yast/yast-kdump
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Source0:        %{name}-%{version}.tar.bz2
-
-Group:	        System/YaST
+Summary:        Configuration of kdump
 License:        GPL-2.0
-Requires:	yast2 yast2-storage yast2-bootloader
-BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-testsuite yast2-storage yast2-bootloader
-BuildRequires:  yast2-devtools >= 3.1.10
+Group:          System/YaST
+Url:            https://github.com/yast/yast-kdump
+Source0:        %{name}-%{version}.tar.bz2
+BuildRequires:  perl-XML-Writer
 BuildRequires:  rubygem-rspec
-
+BuildRequires:  update-desktop-files
+BuildRequires:  yast2
+# Wizard::SetDesktopTitleAndIcon
+BuildRequires:  yast2 >= 2.21.22
+BuildRequires:  yast2-bootloader
+BuildRequires:  yast2-devtools >= 3.1.10
+BuildRequires:  yast2-packager >= 2.17.24
+BuildRequires:  yast2-storage
+BuildRequires:  yast2-testsuite
+Requires:       yast2
+Requires:       yast2-bootloader >= 3.1.35
+Requires:       yast2-ruby-bindings >= 1.0.0
+Requires:       yast2-storage
 Recommends:     makedumpfile
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %ifarch aarch64
 Recommends:     kdump
 %else
 Requires:       kdump
 %endif
 
-# Wizard::SetDesktopTitleAndIcon
-BuildRequires:	yast2 >= 2.21.22
-BuildRequires: yast2-packager >= 2.17.24
-
-Requires:       yast2-ruby-bindings >= 1.0.0
-
-Summary:	Configuration of kdump
-
 %description
 Configuration of kdump
 
+%package devel-doc
+Summary:        Development documentation for yast2-kdump
+
+%description devel-doc
+Development documentation for yast2-kdump including generated code documentation
+
 %prep
-%setup -n %{name}-%{version}
+%setup -q
 
 %build
 %yast_build
@@ -69,4 +76,10 @@ Configuration of kdump
 %{yast_desktopdir}/kdump.desktop
 %{yast_schemadir}/autoyast/rnc/kdump.rnc
 %{yast_scrconfdir}/*.scr
+%doc %{yast_docdir}/COPYING
+
+%files devel-doc
+%defattr(-,root,root)
 %doc %{yast_docdir}
+%exclude %doc %{yast_docdir}/COPYING
+
