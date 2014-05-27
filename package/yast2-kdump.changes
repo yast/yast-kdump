@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue May 27 07:32:37 UTC 2014 - jreidinger@suse.com
+
+- Do not force yast2-kdump on target system to allow yastless
+  installation
+- 3.1.13
+
+-------------------------------------------------------------------
 Wed May 14 12:39:20 UTC 2014 - jreidinger@suse.com
 
 - fix setting kdump parameters for xen (bnc#869608)
