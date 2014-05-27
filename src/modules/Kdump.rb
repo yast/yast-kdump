@@ -737,17 +737,11 @@ module Yast
     #
 
     def AddPackages
-      if Mode.installation
-        @kdump_packages = Builtins.add(@kdump_packages, "kexec-tools")
-        @kdump_packages = Builtins.add(@kdump_packages, "yast2-kdump")
-        if Arch.ppc64
-          @kdump_packages = Builtins.add(@kdump_packages, "kernel-kdump")
-        else
-          @kdump_packages = Builtins.add(@kdump_packages, "kdump")
-        end
-      end
+      return unless Mode.installation
 
-      nil
+      @kdump_packages << "kexec-tools"
+      @kdump_packages << "yast2-kdump"
+      @kdump_packages << Arch.ppc64 ? "kernel-kdump" : "kdump"
     end
 
     # Propose global variables once...
@@ -777,18 +771,16 @@ module Yast
     # if yes add necessary packages for installation
     def CheckPackages
       # remove duplicates
-      @kdump_packages = Builtins.toset(@kdump_packages)
+      @kdump_packages.uniq!
       if !@add_crashkernel_param
         Builtins.y2milestone(
           "deselect packages for installation: %1",
           @kdump_packages
         )
-        pkg_deselect = false
-        Builtins.foreach(@kdump_packages) do |p|
+        @kdump_packages.each do |p|
           PackagesProposal.RemoveResolvables("yast2-kdump", :package, [p])
-          pkg_deselect = true
         end
-        if pkg_deselect
+        if !@kdump_packages.empty?
           Builtins.y2milestone(
             "Deselected kdump packages for installation: %1",
             @kdump_packages
@@ -799,12 +791,10 @@ module Yast
           "select packages for installation: %1",
           @kdump_packages
         )
-        pkg_added = false
-        Builtins.foreach(@kdump_packages) do |p|
+        @kdump_packages.each do |p|
           PackagesProposal.AddResolvables("yast2-kdump", :package, [p])
-          pkg_added = true
         end
-        if pkg_added
+        if !@kdump_packages.empty?
           Builtins.y2milestone(
             "Selected kdump packages for installation: %1",
             @kdump_packages
