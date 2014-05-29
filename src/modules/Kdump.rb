@@ -740,7 +740,7 @@ module Yast
       return unless Mode.installation
 
       @kdump_packages << "kexec-tools"
-      @kdump_packages << Arch.ppc64 ? "kernel-kdump" : "kdump"
+      @kdump_packages << (Arch.ppc64 ? "kernel-kdump" : "kdump")
     end
 
     # Propose global variables once...
