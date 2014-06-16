@@ -175,8 +175,8 @@ module Yast
         "KDUMP_KEEP_OLD_DUMPS"     => "5",
         "KDUMP_FREE_DISK_SIZE"     => "64",
         "KDUMP_VERBOSE"            => "3",
-        "KDUMP_DUMPLEVEL"          => "0",
-        "KDUMP_DUMPFORMAT"         => "compressed", #or "ELF"
+        "KDUMP_DUMPLEVEL"          => "31",
+        "KDUMP_DUMPFORMAT"         => "lzo",
         "KDUMP_SMTP_SERVER"        => "",
         "KDUMP_SMTP_USER"          => "",
         "KDUMP_SMTP_PASSWORD"      => "",
