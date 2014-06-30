@@ -61,18 +61,13 @@ module Yast
       UI.PollInput == :abort
     end
 
-    # Read settings dialog
-    # @return `abort if aborted and `next otherwise
-    def ReadDialog
+    # @return true if necessary packages are installed
+    def InstallPackages
       kexec_installed = false
       kdump_installed = false
       kexec_available = false
       kdump_available = false
       package_list = []
-
-      Wizard.RestoreHelp(Ops.get_string(@HELPS, "read", ""))
-      # Kdump::AbortFunction = PollAbort;
-      return :abort if !Confirm.MustBeRoot
 
       # checking of installation packages
       kexec_installed = true if Package.Installed("kexec-tools")
@@ -92,7 +87,7 @@ module Yast
           Builtins.y2error(
             "[kdump] (ReadDialog ()) Packages for kexec-tools is not available."
           )
-          return :abort
+          return false
         end
 
         if !kdump_installed && !kdump_available
@@ -101,7 +96,7 @@ module Yast
             "[kdump] (ReadDialog ()) Packages for %1 is not available.",
             kdump
           )
-          return :abort
+          return false
         end
 
         #add packages for installation
@@ -115,9 +110,20 @@ module Yast
             "[kdump] Installation of package list %1 failed or aborted",
             package_list
           )
-          return :abort
+          return false
         end
       end
+
+      true
+    end
+
+    # Read settings dialog
+    # @return `abort if aborted and `next otherwise
+    def ReadDialog
+      Wizard.RestoreHelp(Ops.get_string(@HELPS, "read", ""))
+      # Kdump::AbortFunction = PollAbort;
+      return :abort if !Confirm.MustBeRoot
+      InstallPackages() or return :abort
 
       ret = Kdump.Read
       ret ? :next : :abort
