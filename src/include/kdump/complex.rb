@@ -77,17 +77,8 @@ module Yast
       # checking of installation packages
       kexec_installed = true if Package.Installed("kexec-tools")
 
-      kdump = ""
-
-      # only ppc64 includes package kernel-kdump
-      # others include kdump and kexec-tools depend on it
-
-      if Arch.ppc64
-        kdump = "kernel-kdump"
-      else
-        kdump = "kdump"
-      end
-
+      # kexec-tools depends on it.
+      kdump = "kdump"
       kdump_installed = true if Package.Installed(kdump)
 
       #checking if packages are available
@@ -142,8 +133,6 @@ module Yast
           return :abort
         end
       end
-
-
 
       ret = Kdump.Read
       ret ? :next : :abort

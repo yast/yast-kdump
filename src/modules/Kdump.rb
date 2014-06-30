@@ -520,7 +520,7 @@ module Yast
     end
 
     # Write kdump boot argument crashkernel
-    # set kernel-kdump start at boot
+    # set kdump start at boot
     #
     #  @return [Boolean] successfull
     def WriteKdumpBootParameter
@@ -562,7 +562,7 @@ module Yast
           return result
         end
 
-        # start kernel-kdump at boot
+        # start kdump at boot
         Service.Enable(KDUMP_SERVICE_NAME)
 
         Service.Restart(KDUMP_SERVICE_NAME) if Service.Status(KDUMP_SERVICE_NAME) == 0
@@ -740,7 +740,7 @@ module Yast
       return unless Mode.installation
 
       @kdump_packages << "kexec-tools"
-      @kdump_packages << (Arch.ppc64 ? "kernel-kdump" : "kdump")
+      @kdump_packages << "kdump"
     end
 
     # Propose global variables once...
