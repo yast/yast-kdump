@@ -63,55 +63,15 @@ module Yast
 
     # @return true if necessary packages are installed
     def InstallPackages
-      kexec_installed = false
-      kdump_installed = false
-      kexec_available = false
-      kdump_available = false
-      package_list = []
-
-      # checking of installation packages
-      kexec_installed = true if Package.Installed("kexec-tools")
-
-      # kexec-tools depends on it.
-      kdump = "kdump"
-      kdump_installed = true if Package.Installed(kdump)
-
-      #checking if packages are available
-      if !kexec_installed || !kdump_installed
-        kexec_available = Package.Available("kexec-tools") if !kexec_installed
-
-        kdump_available = Package.Available(kdump) if !kdump_installed
-
-        if !kexec_installed && !kexec_available
-          Report.Error(_("Package for kexec-tools is not available."))
-          Builtins.y2error(
-            "[kdump] (ReadDialog ()) Packages for kexec-tools is not available."
-          )
-          return false
-        end
-
-        if !kdump_installed && !kdump_available
-          Report.Error(_("Package for kdump is not available."))
-          Builtins.y2error(
-            "[kdump] (ReadDialog ()) Packages for %1 is not available.",
-            kdump
-          )
-          return false
-        end
-
-        #add packages for installation
-        package_list << "kexec-tools" if !kexec_installed
-        package_list << kdump         if !kdump_installed
-
-        #install packages
-        if !PackageSystem.CheckAndInstallPackages(package_list)
-          Report.Error(Message.CannotContinueWithoutPackagesInstalled)
-          Builtins.y2error(
+      #install packages
+      package_list = KdumpClass::KDUMP_PACKAGES
+      if !PackageSystem.CheckAndInstallPackages(package_list)
+        Report.Error(Message.CannotContinueWithoutPackagesInstalled)
+        Builtins.y2error(
             "[kdump] Installation of package list %1 failed or aborted",
             package_list
           )
-          return false
-        end
+        return false
       end
 
       true

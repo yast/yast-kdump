@@ -36,6 +36,7 @@ module Yast
 
     FADUMP_KEY = "KDUMP_FADUMP"
     KDUMP_SERVICE_NAME = "kdump"
+    KDUMP_PACKAGES = ["kexec-tools", "kdump"]
 
     def main
       textdomain "kdump"
@@ -739,8 +740,7 @@ module Yast
     def AddPackages
       return unless Mode.installation
 
-      @kdump_packages << "kexec-tools"
-      @kdump_packages << "kdump"
+      @kdump_packages.concat KDUMP_PACKAGES
     end
 
     # Propose global variables once...
