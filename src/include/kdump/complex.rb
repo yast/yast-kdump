@@ -39,7 +39,7 @@ module Yast
       Yast.import "Kdump"
       Yast.import "Package"
       Yast.import "Arch"
-      Yast.import "CommandLine"
+      Yast.import "Report"
       Yast.import "Mode"
       Yast.import "Message"
       Yast.import "PackageSystem"
@@ -88,11 +88,7 @@ module Yast
         kdump_available = Package.Available(kdump) if !kdump_installed
 
         if !kexec_installed && !kexec_available
-          if !Mode.commandline
-            Popup.Error(_("Package for kexec-tools is not available."))
-          else
-            CommandLine.Error(_("Package for kexec-tools is not available."))
-          end
+          Report.Error(_("Package for kexec-tools is not available."))
           Builtins.y2error(
             "[kdump] (ReadDialog ()) Packages for kexec-tools is not available."
           )
@@ -100,11 +96,7 @@ module Yast
         end
 
         if !kdump_installed && !kdump_available
-          if !Mode.commandline
-            Popup.Error(_("Package for kdump is not available."))
-          else
-            CommandLine.Error(_("Package for kdump is not available."))
-          end
+          Report.Error(_("Package for kdump is not available."))
           Builtins.y2error(
             "[kdump] (ReadDialog ()) Packages for %1 is not available.",
             kdump
@@ -121,11 +113,7 @@ module Yast
 
         #install packages
         if !PackageSystem.CheckAndInstallPackages(package_list)
-          if !Mode.commandline
-            Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
-          else
-            CommandLine.Error(Message.CannotContinueWithoutPackagesInstalled)
-          end
+          Report.Error(Message.CannotContinueWithoutPackagesInstalled)
           Builtins.y2error(
             "[kdump] Installation of package list %1 failed or aborted",
             package_list
