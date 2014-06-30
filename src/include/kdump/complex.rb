@@ -105,11 +105,8 @@ module Yast
         end
 
         #add packages for installation
-        if !kexec_installed
-          package_list = Builtins.add(package_list, "kexec-tools")
-        end
-
-        package_list = Builtins.add(package_list, kdump) if !kdump_installed
+        package_list << "kexec-tools" if !kexec_installed
+        package_list << kdump         if !kdump_installed
 
         #install packages
         if !PackageSystem.CheckAndInstallPackages(package_list)
