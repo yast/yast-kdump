@@ -39,7 +39,7 @@ module Yast
       Yast.import "Kdump"
       Yast.import "Package"
       Yast.import "Arch"
-      Yast.import "CommandLine"
+      Yast.import "Report"
       Yast.import "Mode"
       Yast.import "Message"
       Yast.import "PackageSystem"
@@ -61,89 +61,29 @@ module Yast
       UI.PollInput == :abort
     end
 
-    # Read settings dialog
-    # @return `abort if aborted and `next otherwise
-    def ReadDialog
-      kexec_installed = false
-      kdump_installed = false
-      kexec_available = false
-      kdump_available = false
-      package_list = []
-
-      Wizard.RestoreHelp(Ops.get_string(@HELPS, "read", ""))
-      # Kdump::AbortFunction = PollAbort;
-      return :abort if !Confirm.MustBeRoot
-
-      # checking of installation packages
-      kexec_installed = true if Package.Installed("kexec-tools")
-
-      kdump = ""
-
-      # only ppc64 includes package kernel-kdump
-      # others include kdump and kexec-tools depend on it
-
-      if Arch.ppc64
-        kdump = "kernel-kdump"
-      else
-        kdump = "kdump"
-      end
-
-      kdump_installed = true if Package.Installed(kdump)
-
-      #checking if packages are available
-      if !kexec_installed || !kdump_installed
-        kexec_available = Package.Available("kexec-tools") if !kexec_installed
-
-        kdump_available = Package.Available(kdump) if !kdump_installed
-
-        if !kexec_installed && !kexec_available
-          if !Mode.commandline
-            Popup.Error(_("Package for kexec-tools is not available."))
-          else
-            CommandLine.Error(_("Package for kexec-tools is not available."))
-          end
-          Builtins.y2error(
-            "[kdump] (ReadDialog ()) Packages for kexec-tools is not available."
-          )
-          return :abort
-        end
-
-        if !kdump_installed && !kdump_available
-          if !Mode.commandline
-            Popup.Error(_("Package for kdump is not available."))
-          else
-            CommandLine.Error(_("Package for kdump is not available."))
-          end
-          Builtins.y2error(
-            "[kdump] (ReadDialog ()) Packages for %1 is not available.",
-            kdump
-          )
-          return :abort
-        end
-
-        #add packages for installation
-        if !kexec_installed
-          package_list = Builtins.add(package_list, "kexec-tools")
-        end
-
-        package_list = Builtins.add(package_list, kdump) if !kdump_installed
-
-        #install packages
-        if !PackageSystem.CheckAndInstallPackages(package_list)
-          if !Mode.commandline
-            Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
-          else
-            CommandLine.Error(Message.CannotContinueWithoutPackagesInstalled)
-          end
-          Builtins.y2error(
+    # @return true if necessary packages are installed
+    def InstallPackages
+      #install packages
+      package_list = KdumpClass::KDUMP_PACKAGES
+      if !PackageSystem.CheckAndInstallPackages(package_list)
+        Report.Error(Message.CannotContinueWithoutPackagesInstalled)
+        Builtins.y2error(
             "[kdump] Installation of package list %1 failed or aborted",
             package_list
           )
-          return :abort
-        end
+        return false
       end
 
+      true
+    end
 
+    # Read settings dialog
+    # @return `abort if aborted and `next otherwise
+    def ReadDialog
+      Wizard.RestoreHelp(Ops.get_string(@HELPS, "read", ""))
+      # Kdump::AbortFunction = PollAbort;
+      return :abort if !Confirm.MustBeRoot
+      InstallPackages() or return :abort
 
       ret = Kdump.Read
       ret ? :next : :abort
