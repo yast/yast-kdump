@@ -339,6 +339,10 @@ module Yast
     def ReadKdumpKernelParam
       result = Bootloader.kernel_param(:common, "crashkernel")
       result = Bootloader.kernel_param(:xen_guest, "crashkernel") if result == :missing
+      # result could be [String,:missing,:present]
+      # String   - the value
+      # :missing - crashkernel is missed
+      # :present - crashkernel is defined but no value is available
 
       #Popup::Message(result);
       if result == :missing
@@ -351,7 +355,7 @@ module Yast
 
       @crashkernel_param_value = result
       if result != :missing && result != :present
-        # Read value if it is not missed or just present only
+        # Read the current value only if crashkernel parameter is set.
         # (bnc#887901)
         @allocated_memory = getAllocatedMemory(@crashkernel_param_value)
       end

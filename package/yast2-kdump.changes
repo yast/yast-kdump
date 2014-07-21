@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
 Mon Jul 21 17:21:06 CEST 2014 - schubi@suse.de
 
-- Reading crashkernel_param_value correctly. (bnc#887901)
+- Reading crashkernel parameter value only if it's set a non-empty.
+  (bnc#887901)
 - 3.1.17
 
 -------------------------------------------------------------------
