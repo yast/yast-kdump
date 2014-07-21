@@ -350,7 +350,9 @@ module Yast
       end
 
       @crashkernel_param_value = result
-      if result != :missing
+      if result != :missing && result != :present
+        # Read value if it is not missed or just present only
+        # (bnc#887901)
         @allocated_memory = getAllocatedMemory(@crashkernel_param_value)
       end
 
