@@ -754,11 +754,15 @@ module Yast
 
     def ProposeGlobalVars
       if !@propose_called
-        # propose disable kdump if PC has less than 1024MB RAM
-        if Ops.less_than(@total_memory, 1024)
-          @add_crashkernel_param = false
-        else
-          @add_crashkernel_param = true
+        # Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
+        # (bnc#890719)
+        unless Mode.autoinst
+          # propose disable kdump if PC has less than 1024MB RAM
+          if Ops.less_than(@total_memory, 1024)
+            @add_crashkernel_param = false
+          else
+            @add_crashkernel_param = true
+          end
         end
 
         @crashkernel_param = false
