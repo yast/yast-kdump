@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug  7 14:44:03 CEST 2014 - schubi@suse.de
+
+- Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
+  and will not be overwritten by proposal. (bnc#884997)
+- 3.1.18
+
+-------------------------------------------------------------------
 Mon Jul 21 17:21:06 CEST 2014 - schubi@suse.de
 
 - Reading crashkernel parameter value only if it's set a non-empty.
