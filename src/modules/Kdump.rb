@@ -749,6 +749,16 @@ module Yast
       @kdump_packages.concat KDUMP_PACKAGES
     end
 
+    def ProposeCrashkernelParam
+      ReadAvailableMemory()
+      # propose disable kdump if PC has less than 1024MB RAM
+      if @total_memory < 1024
+        false
+      else
+        true
+      end
+    end
+
     # Propose global variables once...
     # after that remember user settings
 
@@ -756,14 +766,7 @@ module Yast
       if !@propose_called
         # Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
         # (bnc#890719)
-        unless Mode.autoinst
-          # propose disable kdump if PC has less than 1024MB RAM
-          if Ops.less_than(@total_memory, 1024)
-            @add_crashkernel_param = false
-          else
-            @add_crashkernel_param = true
-          end
-        end
+        @add_crashkernel_param = ProposeCrashkernelParam() unless Mode.autoinst
 
         @crashkernel_param = false
         # added defualt settings
@@ -918,11 +921,11 @@ module Yast
       settings = deep_copy(settings)
       Builtins.y2milestone("Importing settings for kdump")
       @crashkernel_param_value = Ops.get_string(settings, "crash_kernel", "")
-      @add_crashkernel_param = Ops.get_boolean(
-        settings,
-        "add_crash_kernel",
-        false
-      )
+      if settings.has_key?("add_crash_kernel")
+        @add_crashkernel_param = settings["add_crash_kernel"]
+      else
+        @add_crashkernel_param = ProposeCrashkernelParam()
+      end
       result = true
       my_import_map = Ops.get_map(settings, "general", {})
       Builtins.foreach(Map.Keys(@DEFAULT_CONFIG)) do |key|
