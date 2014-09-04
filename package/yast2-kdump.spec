@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.18
+Version:        3.1.19
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0
@@ -25,7 +25,7 @@ Group:          System/YaST
 Url:            https://github.com/yast/yast-kdump
 Source0:        %{name}-%{version}.tar.bz2
 BuildRequires:  perl-XML-Writer
-BuildRequires:  rubygem-rspec
+BuildRequires:  rubygem(rspec)
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2
 # Wizard::SetDesktopTitleAndIcon
