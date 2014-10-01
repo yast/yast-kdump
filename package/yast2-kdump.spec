@@ -26,6 +26,7 @@ Url:            https://github.com/yast/yast-kdump
 Source0:        %{name}-%{version}.tar.bz2
 BuildRequires:  perl-XML-Writer
 BuildRequires:  rubygem(rspec)
+BuildRequires:  rubygem(yast-rake)
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2
 # Wizard::SetDesktopTitleAndIcon
@@ -59,11 +60,13 @@ Development documentation for yast2-kdump including generated code documentation
 %prep
 %setup -q
 
+%check
+rake test:unit
+
 %build
-%yast_build
 
 %install
-%yast_install
+rake install DESTDIR="%{buildroot}"
 
 
 %files
