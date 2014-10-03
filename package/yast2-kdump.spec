@@ -32,7 +32,7 @@ BuildRequires:  yast2
 # Wizard::SetDesktopTitleAndIcon
 BuildRequires:  yast2 >= 2.21.22
 BuildRequires:  yast2-bootloader
-BuildRequires:  yast2-devtools >= 3.1.10
+BuildRequires:  yast2-buildtools >= 3.1.10
 BuildRequires:  yast2-packager >= 2.17.24
 BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
