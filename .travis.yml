@@ -5,10 +5,8 @@ before_install:
     # disable rvm, use system Ruby
     - rvm reset
     - wget https://raw.githubusercontent.com/yast/yast-devtools/master/travis-tools/travis_setup.sh
-    - sh ./travis_setup.sh -p "yast2-devtools yast2-testsuite yast2 yast2-packager yast2-storage yast2-bootloader" -g rspec:2.14.1
+    - sh ./travis_setup.sh -p "yast2-devtools yast2 yast2-packager yast2-storage yast2-bootloader" -g "rspec:2.14.1 yast-rake rake"
 script:
-    - make -f Makefile.cvs
-    - make
-    - sudo make install
-    - make check
+    - rake test:unit
+    - sudo rake install
 
