@@ -5,7 +5,6 @@ Categories=Settings;System;Qt;X-SuSE-YaST;X-SuSE-YaST-System;
 
 X-KDE-ModuleType=Library
 X-KDE-HasReadOnlyMode=true
-X-KDE-Library=yast2
 X-SuSE-YaST-Call=kdump
 
 X-SuSE-YaST-Group=System
