@@ -26,12 +26,13 @@ Url:            https://github.com/yast/yast-kdump
 Source0:        %{name}-%{version}.tar.bz2
 BuildRequires:  perl-XML-Writer
 BuildRequires:  rubygem(rspec)
+BuildRequires:  rubygem(yast-rake)
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2
 # Wizard::SetDesktopTitleAndIcon
 BuildRequires:  yast2 >= 2.21.22
 BuildRequires:  yast2-bootloader
-BuildRequires:  yast2-devtools >= 3.1.10
+BuildRequires:  yast2-buildtools >= 3.1.10
 BuildRequires:  yast2-packager >= 2.17.24
 BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
@@ -50,20 +51,16 @@ Requires:       kdump
 %description
 Configuration of kdump
 
-%package devel-doc
-Summary:        Development documentation for yast2-kdump
-
-%description devel-doc
-Development documentation for yast2-kdump including generated code documentation
-
 %prep
 %setup -q
 
+%check
+rake test:unit
+
 %build
-%yast_build
 
 %install
-%yast_install
+rake install DESTDIR="%{buildroot}"
 
 
 %files
@@ -77,9 +74,4 @@ Development documentation for yast2-kdump including generated code documentation
 %{yast_schemadir}/autoyast/rnc/kdump.rnc
 %{yast_scrconfdir}/*.scr
 %doc %{yast_docdir}/COPYING
-
-%files devel-doc
-%defattr(-,root,root)
-%doc %{yast_docdir}
-%exclude %doc %{yast_docdir}/COPYING
-
+%doc %{yast_docdir}/CONTRIBUTING.md
