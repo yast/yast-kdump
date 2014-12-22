@@ -73,5 +73,4 @@ rake install DESTDIR="%{buildroot}"
 %{yast_desktopdir}/kdump.desktop
 %{yast_schemadir}/autoyast/rnc/kdump.rnc
 %{yast_scrconfdir}/*.scr
-%doc %{yast_docdir}/COPYING
-%doc %{yast_docdir}/CONTRIBUTING.md
+%doc %{yast_docdir}
