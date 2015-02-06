@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.20
+Version:        3.1.21
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0
