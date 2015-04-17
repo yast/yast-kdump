@@ -220,7 +220,7 @@ module Yast
           "items"             => [
             ["local_filesystem", _("Local Directory")],
             ["ftp", _("FTP")],
-            ["ssh", _("SSH (scp)")],
+            ["ssh", _("SSH")],
             ["nfs", _("NFS")],
             ["cifs", _("CIFS (SMB)")]
           ],

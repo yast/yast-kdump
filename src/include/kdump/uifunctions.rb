@@ -140,7 +140,7 @@ module Yast
 
       @ssh = VBox(
         Frame(
-          _("SSH (scp)"),
+          _("SSH"),
           HBox(
             HSpacing(1),
             VBox(
