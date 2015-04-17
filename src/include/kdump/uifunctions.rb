@@ -140,7 +140,7 @@ module Yast
 
       @ssh = VBox(
         Frame(
-          _("SSH"),
+          _("SSH / SFTP"),
           HBox(
             HSpacing(1),
             VBox(
@@ -290,9 +290,7 @@ module Yast
             "dir",
             Builtins.substring(parse_target, pos)
           )
-        elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "ftp" ||
-            Ops.get(@KDUMP_SAVE_TARGET, "target") == "cifs" ||
-            Ops.get(@KDUMP_SAVE_TARGET, "target") == "ssh"
+        elsif ["ftp", "cifs", "ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
           pos = Builtins.search(parse_target, "@")
 
           if pos != nil
@@ -320,8 +318,7 @@ module Yast
             parse_target = Builtins.substring(parse_target, Ops.add(pos, 1))
           end
           # only ftp & ssh
-          if Ops.get(@KDUMP_SAVE_TARGET, "target") == "ftp" ||
-              Ops.get(@KDUMP_SAVE_TARGET, "target") == "ssh"
+          if ["ftp", "ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
             pos1 = Builtins.search(parse_target, ":")
             pos = Builtins.search(parse_target, "/")
 
@@ -449,8 +446,8 @@ module Yast
         end 
 
         # ssh
-      elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "ssh"
-        result = "ssh://"
+      elsif ["ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
+        result = @KDUMP_SAVE_TARGET["target"] + "://"
 
         if Ops.get(@KDUMP_SAVE_TARGET, "user_name") != "" &&
             Ops.get(@KDUMP_SAVE_TARGET, "password") == ""
@@ -570,10 +567,9 @@ module Yast
           Ops.get(@KDUMP_SAVE_TARGET, "server")
         )
         UI.ChangeWidget(Id("dir"), :Value, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
-      elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "ssh"
+      elsif ["ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
         UI.ReplaceWidget(Id("Targets"), @ssh)
-        #UI::ChangeWidget(`id ("ssh"), `Value, true);
-        UI.ChangeWidget(Id("TargetKdump"), :Value, "ssh")
+        UI.ChangeWidget(Id("TargetKdump"), :Value, @KDUMP_SAVE_TARGET["target"])
         if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
           UI.ChangeWidget(
             Id("port"),
@@ -688,7 +684,7 @@ module Yast
             return false
           end
         end
-      elsif radiobut == "ssh" || radiobut == "nfs"
+      elsif ["ssh", "sftp", "nfs"].include?(radiobut)
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))
 
         if value == nil || value == ""
@@ -825,7 +821,7 @@ module Yast
             Ops.get(@KDUMP_SAVE_TARGET, "password")
           )
         end
-      elsif radiobut == "ssh"
+      elsif ["ssh", "sftp"].include?(radiobut)
         UI.ReplaceWidget(Id("Targets"), @ssh)
 
         if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
@@ -946,8 +942,8 @@ module Yast
         else
           Ops.set(@KDUMP_SAVE_TARGET, "dir", "")
         end
-      elsif radiobut == "ssh"
-        Ops.set(@KDUMP_SAVE_TARGET, "target", "ssh")
+      elsif ["ssh", "sftp"].include?(radiobut)
+        @KDUMP_SAVE_TARGET["target"] = radiobut
 
         #server
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))

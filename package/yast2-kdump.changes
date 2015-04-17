@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon May 25 21:31:15 UTC 2015 - ptesarik@suse.cz
+
+- Add 'sftp' dump target, which is distinct from 'ssh' in kdump
+  version 0.8.12 or newer (bsc#868704).
+
+-------------------------------------------------------------------
 Mon May 25 20:23:55 UTC 2015 - ptesarik@suse.cz
 
 - Don't mention 'scp' in the SSH dump target, as the SCP protocol

@@ -221,6 +221,7 @@ module Yast
             ["local_filesystem", _("Local Directory")],
             ["ftp", _("FTP")],
             ["ssh", _("SSH")],
+            ["sftp", _("SFTP")],
             ["nfs", _("NFS")],
             ["cifs", _("CIFS (SMB)")]
           ],
