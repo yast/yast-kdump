@@ -1177,6 +1177,18 @@ define void AddPackages()
     }
 }
 
+
+define boolean ProposeCrashkernelParam()
+{
+    ReadAvailableMemory();
+    # propose disable kdump if PC has less than 1024MB RAM
+    if (total_memory < 1024)
+        return false;
+    else
+        return true;
+}
+
+
 /**
  * Propose global variables once...
  * after that remember user settings
@@ -1186,15 +1198,14 @@ define void ProposeGlobalVars()
 {
     if (!propose_called)
     {
-       // propose disable kdump if PC has less than 1024MB RAM
-       if (total_memory < 1024)  
-	  add_crashkernel_param = false;
-       else
-	  add_crashkernel_param = true;
+         # Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
+         # (bnc#930950)
+         if (!Mode::autoinst())
+             add_crashkernel_param = ProposeCrashkernelParam();
 
-       crashkernel_param = false;
-       // added defualt settings
-       KDUMP_SETTINGS = DEFAULT_CONFIG;
+         crashkernel_param = false;
+         // added defualt settings
+         KDUMP_SETTINGS = DEFAULT_CONFIG;
     }
     propose_called = true;
 }
@@ -1301,7 +1312,7 @@ global define boolean Import (map settings)
 {
     y2milestone("Importing settings for kdump");
     crashkernel_param_value = settings["crash_kernel"]:"";
-    add_crashkernel_param = settings["add_crash_kernel"]:false;
+    add_crashkernel_param = settings["add_crash_kernel"]:ProposeCrashkernelParam();
     boolean result = true;
     map <string, string > my_import_map = settings["general"]:$[];
     foreach (any key, Map::Keys(DEFAULT_CONFIG), 
