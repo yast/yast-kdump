@@ -768,8 +768,8 @@ module Yast
       event_name = Ops.get(event, "ID")
       #StoreTargetKdump ( key, event);
       StoreTargetKdumpHandle(@type)
-      radiobutton = Builtins.tostring(UI.QueryWidget(Id("TargetKdump"), :Value))
-      @type = radiobutton
+      radiobut = Builtins.tostring(UI.QueryWidget(Id("TargetKdump"), :Value))
+      @type = radiobut
 
       if event_name == "anonymous"
         value = Convert.to_boolean(UI.QueryWidget(Id("anonymous"), :Value))
@@ -784,7 +784,7 @@ module Yast
           UI.ChangeWidget(Id("user_name"), :Enabled, true)
           UI.ChangeWidget(Id("password"), :Enabled, true)
         end
-      elsif radiobutton == "local_filesystem"
+      elsif radiobut == "local_filesystem"
         UI.ReplaceWidget(Id("Targets"), @local_filesystem)
         @set_network = false
         UI.ChangeWidget(Id("dir"), :Value, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
@@ -795,7 +795,7 @@ module Yast
           )
           UI.ChangeWidget(Id("dir"), :Value, dir)
         end
-      elsif radiobutton == "ftp"
+      elsif radiobut == "ftp"
         UI.ReplaceWidget(Id("Targets"), @ftp)
 
         if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
@@ -825,7 +825,7 @@ module Yast
             Ops.get(@KDUMP_SAVE_TARGET, "password")
           )
         end
-      elsif radiobutton == "ssh"
+      elsif radiobut == "ssh"
         UI.ReplaceWidget(Id("Targets"), @ssh)
 
         if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
@@ -838,7 +838,7 @@ module Yast
         Builtins.foreach(["server", "user_name", "dir", "password"]) do |key2|
           UI.ChangeWidget(Id(key2), :Value, Ops.get(@KDUMP_SAVE_TARGET, key2))
         end
-      elsif radiobutton == "nfs"
+      elsif radiobut == "nfs"
         UI.ReplaceWidget(Id("Targets"), @nfs)
         UI.ChangeWidget(
           Id("server"),
@@ -846,7 +846,7 @@ module Yast
           Ops.get(@KDUMP_SAVE_TARGET, "server")
         )
         UI.ChangeWidget(Id("dir"), :Value, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
-      elsif radiobutton == "cifs"
+      elsif radiobut == "cifs"
         UI.ReplaceWidget(Id("Targets"), @cifs)
         Builtins.foreach(["server", "dir", "share", "user_name", "password"]) do |key2|
           UI.ChangeWidget(Id(key2), :Value, Ops.get(@KDUMP_SAVE_TARGET, key2))
