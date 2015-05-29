@@ -106,6 +106,11 @@ module Yast
               "    <i>User Name</i> for SSH connection.  \n" +
               "    <i>Password</i> for SSH connection.<br></p>\n"
           ) +
+          _(
+            "<p>The choice between SSH and SFTP depends\n" +
+            "on details of server configuration. SLE servers support both\n" +
+            "by default.</p>"
+          ) +
           # Dump Format - RadioButtons  6/7
           _(
             "<p><b>NFS</b> - Save kdump image on NFS.\n" +
