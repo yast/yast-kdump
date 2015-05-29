@@ -12,4 +12,13 @@ if ENV["COVERAGE"]
   Dir["#{src_location}/{include,modules}/**/*.rb"].each do |f|
     require_relative f
   end
+
+  # use coveralls for on-line code coverage reporting at Travis CI
+  if ENV["TRAVIS"]
+    require "coveralls"
+    SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+      SimpleCov::Formatter::HTMLFormatter,
+      Coveralls::SimpleCov::Formatter
+    ]
+  end
 end
