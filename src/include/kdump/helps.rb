@@ -68,18 +68,18 @@ module Yast
             "    <i>Compressed Format</i> - Compress dump data by each page with gzip.<br>\n" +
             "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>"
         ),
-        # Dump Format - RadioButtons  1/6
+        # Dump Format - RadioButtons  1/7
         "TargetKdump"            => _(
           "<p><b>Saving Target for Kdump Image</b><br>\n    The target for saving kdump images. Select type of target for saving dumps.<br></p>"
         ) +
-          # Dump Format - RadioButtons  2/6
+          # Dump Format - RadioButtons  2/7
           _(
             "<p><b>Local Filestem</b> - Save kdump image in the local filesystem.\n" +
               "    <i>Directory for Saving Dumps</i> - The path for saving kdump images.\n" +
               "    Selecting directory for saving kdump images via dialog by pressing <i>Browse</i>\n" +
               "    <br></p>"
           ) +
-          # Dump Format - RadioButtons  3/6
+          # Dump Format - RadioButtons  3/7
           _(
             "<p><b>FTP</b> - Save kdump image via FTP.\n" +
               "    <i>Server Name</i> - The name of ftp server.\n" +
@@ -88,22 +88,36 @@ module Yast
               "    <i>Enable Anonymous FTP</i> enables anonymous connection to server.\n" +
               "    <i>User Name</i> for ftp connection. <i>Password</i> for ftp connection.<br></p>"
           ) +
-          # Dump Format - RadioButtons  4/6
+          # Dump Format - RadioButtons  4/7
           _(
-            "<p><b>SSH</b> - Save kdump image via SSH.\n" +
+            "<p><b>SSH</b> - Save kdump image via SSH and 'dd' on target machine.\n" +
               "    <i>Server Name</i> - The name of server.\n" +
               "    <i>Port</i> - The port number for connection.\n" +
               "    <i>Directory on Server</i> - The path for saving kdump images.\n" +
               "    <i>User Name</i> for SSH connection.  \n" +
               "    <i>Password</i> for SSH connection.<br></p>\n"
           ) +
-          # Dump Format - RadioButtons  5/6
+          # Dump Format - RadioButtons  5/7
+          _(
+            "<p><b>SFTP</b> - Save kdump image via SFTP.\n" +
+              "    <i>Server Name</i> - The name of server.\n" +
+              "    <i>Port</i> - The port number for connection.\n" +
+              "    <i>Directory on Server</i> - The path for saving kdump images.\n" +
+              "    <i>User Name</i> for SSH connection.  \n" +
+              "    <i>Password</i> for SSH connection.<br></p>\n"
+          ) +
+          _(
+            "<p>The choice between SSH and SFTP depends\n" +
+            "on details of server configuration. SLE servers support both\n" +
+            "by default.</p>"
+          ) +
+          # Dump Format - RadioButtons  6/7
           _(
             "<p><b>NFS</b> - Save kdump image on NFS.\n" +
               "    <i>Server Name</i> - The name of nfs server.\n" +
               "    <i>Directory on Server</i> - The path for saving kdump images.<br></p>"
           ) +
-          # Dump Format - RadioButtons  6/6
+          # Dump Format - RadioButtons  7/7
           _(
             "<p><b>CIFS</b> - Save kdump image via CIFS.\n" +
               "    <i>Server Name</i> - The name of server.\n" +

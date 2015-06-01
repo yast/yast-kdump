@@ -106,6 +106,7 @@ module Yast
               "dumptarget taget=file dir=/var/log/dump",
               "dumptarget taget=ftp server=name_server port=21 dir=/var/log/dump user=user_name pass=path_to_file_with_password",
               "dumptarget taget=ssh server=name_server port=22 dir=/var/log/dump user=user_name",
+              "dumptarget taget=sftp server=name_server port=22 dir=/var/log/dump user=user_name",
               "dumptarget taget=nfs server=name_server dir=/var/log/dump",
               "dumptarget taget=cifs server=name_server share=share_name dir=/var/log/dump user=user_name pass=path_to_file_with_password"
             ]
@@ -252,7 +253,7 @@ module Yast
             "type" => "string",
             # TRANSLATORS: CommandLine help
             "help" => _(
-              "Dump target includes type of target from: file (local filesystem), ftp, ssh, nfs, cifs"
+              "Dump target includes type of target from: file (local filesystem), ftp, ssh, sftp, nfs, cifs"
             )
           },
           "server"      => {
@@ -509,8 +510,8 @@ module Yast
             )
           end 
 
-          #ssh connection
-        elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "ssh"
+          #ssh/sftp connection
+        elsif ["ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
           #TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
@@ -901,8 +902,8 @@ module Yast
               return false if password == nil || password == ""
               Ops.set(@KDUMP_SAVE_TARGET, "password", password)
             end
-          when "ssh"
-            Ops.set(@KDUMP_SAVE_TARGET, "target", "ssh")
+          when "ssh", "sftp"
+            @KDUMP_SAVE_TARGET["target"] = target
 
             if Ops.get(options, "server") != nil
               Ops.set(
