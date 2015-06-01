@@ -25,11 +25,11 @@ describe Yast::Kdump do
 
       context "when the proposal tool is not implemented yet" do
         before(:each) do
-          Yast::SCR.stub(:Execute).
-            with(Yast::Path.new(".target.bash"), /^cp/).and_return(0)
-          Yast::SCR.stub(:Execute).
-            with(Yast::Path.new(".target.bash_output"), /^kdumptool/).
-            and_return({"exit" => 1, "stdout" => "", "stderr" => "not there" })
+          allow(Yast::SCR).to receive(:Execute)
+            .with(Yast::Path.new(".target.bash"), /^cp/).and_return(0)
+          expect(Yast::SCR).to receive(:Execute)
+            .with(Yast::Path.new(".target.bash_output"), /^kdumptool/)
+            .and_return({"exit" => 1, "stdout" => "", "stderr" => "not there" })
         end
 
         it "proposes a positive integer" do
