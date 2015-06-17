@@ -40,6 +40,8 @@ Requires:       yast2
 Requires:       yast2-bootloader >= 3.1.35
 Requires:       yast2-ruby-bindings >= 1.0.0
 Requires:       yast2-storage
+# SpaceCalculation.GetPartitionInfo
+Requires:       yast2-packager
 Recommends:     makedumpfile
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %ifarch aarch64

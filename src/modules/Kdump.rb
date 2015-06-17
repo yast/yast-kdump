@@ -38,6 +38,10 @@ module Yast
     KDUMP_SERVICE_NAME = "kdump"
     KDUMP_PACKAGES = ["kexec-tools", "kdump"]
 
+    # Space on disk reserved for dump additionally to memory size
+    # @see FATE #317488
+    RESERVED_DISK_SPACE_BUFFER = 4 * 1024**3
+
     def main
       textdomain "kdump"
 
@@ -46,7 +50,6 @@ module Yast
       Yast.import "Summary"
       Yast.import "Message"
       Yast.import "BootCommon"
-      #import "Storage";
       Yast.import "Map"
       Yast.import "Bootloader"
       Yast.import "Service"
@@ -58,6 +61,7 @@ module Yast
       Yast.import "PackagesProposal"
       Yast.import "FileUtils"
       Yast.import "Directory"
+      Yast.import "String"
 
       # Data was modified?
       @modified = false
@@ -65,8 +69,6 @@ module Yast
       # kdump config file
 
       @kdump_file = "/etc/sysconfig/kdump"
-
-
 
       @proposal_valid = false
 
@@ -111,13 +113,11 @@ module Yast
       # string
       @kernel_version = ""
 
-
       # Position actual boot section in BootCommon::sections list
       # it is relevant only if XEN boot section is used
       #
       # integer
       @section_pos = -1
-
 
       # Boolean option indicates kernel parameter
       # "crashkernel"
@@ -137,7 +137,6 @@ module Yast
       # boolean true if kernel parameter will be add
       @add_crashkernel_param = false
 
-
       # String option for alocate of memory for boot param
       # "crashkernel"
       #
@@ -150,7 +149,6 @@ module Yast
       # boolean true if import was called with data
 
       @import_called = false
-
 
       # Write only, used during autoinstallation.
       # Don't run services and SuSEconfig, it's all done at one place.
@@ -206,7 +204,6 @@ module Yast
       Builtins.y2debug("modified=%1", @modified)
       @modified
     end
-
 
     # Set data was modified
     def SetModified
@@ -281,7 +278,6 @@ module Yast
         return false
       end
     end
-
 
     # get allocated memory from value of crashkernel option
     # there can be several ranges -> take the first range
@@ -440,6 +436,11 @@ module Yast
       true
     end
 
+    # Returns total size of physical memory in MiB
+    def total_memory
+      ReadAvailableMemory() if @total_memory.zero?
+      @total_memory
+    end
 
     def log_settings_censoring_passwords(message)
       debug_KDUMP_SETTINGS = deep_copy(@KDUMP_SETTINGS)
@@ -752,7 +753,7 @@ module Yast
     def ProposeCrashkernelParam
       ReadAvailableMemory()
       # propose disable kdump if PC has less than 1024MB RAM
-      if @total_memory < 1024
+      if total_memory < 1024
         false
       else
         true
@@ -880,6 +881,100 @@ module Yast
       deep_copy(result)
     end
 
+    # Returns available space for Kernel dump according to KDUMP_SAVEDIR option
+    # only local space is evaluated (starts with file://)
+    #
+    # @return [Integer] free space in bytes or nil if filesystem is not local or no
+    #                   packages proposal is made yet
+    def free_space_for_dump
+      kdump_savedir = @KDUMP_SETTINGS.fetch("KDUMP_SAVEDIR", "file:///var/log/dump")
+      log.info "Using savedir #{kdump_savedir}"
+
+      if kdump_savedir.start_with?("/")
+        log.warn "Using old format"
+      elsif kdump_savedir.start_with?("file://")
+        kdump_savedir.sub!(/file:\/\//, "")
+      else
+        log.info "KDUMP_SAVEDIR #{kdump_savedir.inspect} is not local"
+        return nil
+      end
+
+      # unified format of directory
+      kdump_savedir = File.join("/", kdump_savedir)
+
+      partitions_info = SpaceCalculation.GetPartitionInfo()
+      if partitions_info.empty?
+        log.warn "No partitions info available"
+        return nil
+      end
+
+      log.info "Disk usage: #{partitions_info}"
+      # Create a hash of partitions and their free space { partition => free_space, ... }
+      # "name" usually does not start with "/", but does so for root filesystem
+      # File.join ensures that paths do not contain dulplicit "/" characters
+      partitions_info = partitions_info.map do |partition|
+        { File.join("/", partition["name"]) => partition["free"] }
+      end.inject(:merge)
+
+      # All partitions matching KDUMP_SAVEDIR
+      matching_partitions = partitions_info.select do |partition, space|
+        kdump_savedir.start_with?(File.join("/", partition))
+      end
+
+      # The longest match
+      partition = matching_partitions.keys.sort_by{|partiton| partiton.length}.last
+      free_space = matching_partitions[partition]
+
+      if free_space.nil? || !free_space.is_a?(::Integer)
+        log.warn "Available space for partition #{partition} not provided (#{free_space.inspect})"
+        return nil
+      end
+
+      log.info "Available space for dump: #{matching_partitions[partition]}"
+      # packager counts in kB, we need bytes
+      free_space * 1024
+    end
+
+    # Returns disk space requested for kernel dump (as defined in FATE#317488)
+    #
+    # @return [Integer] bytes
+    def space_requested_for_dump
+      # Total memory is in MB, converting to bytes
+      total_memory * 1024**2 + RESERVED_DISK_SPACE_BUFFER
+    end
+
+    # Returns installation proposal warning as part of the MakeProposal map result
+    # includes 'warning' and 'warning_level' keys
+    #
+    # @param returns [Hash] with warnings
+    def proposal_warnig
+      return {} unless @add_crashkernel_param
+
+      free_space = free_space_for_dump
+      requested_space = space_requested_for_dump
+
+      log.info "Free: #{free_space}, requested: #{requested_space}"
+
+      warning = {}
+
+      if !free_space.nil? && free_space < requested_space
+        warning = {
+          "warning_level" => :warning,
+          # TRANSLATORS: warning message in installation proposal,
+          # do not translate %{requested} and %{available} - they are replaced with actual sizes later,
+          # use non-breaking HTML space between 'X:' and '%{x}'
+          "warning"       => "<ul><li>" + _(
+            "Warning: There might be not enough free space for dump, " +
+            "requested:&nbsp;%{requested}, available:&nbsp;%{available}") % {
+              requested: String.FormatSizeWithPrecision(requested_space, 2, true),
+              available: String.FormatSizeWithPrecision(free_space, 2, true)
+            } + "</li></ul>"
+        }
+      end
+
+      warning
+    end
+
     # bnc# 480466 - fix problem with validation autoyast profil
     # Function filters keys for autoyast profil
     #
@@ -989,7 +1084,7 @@ module Yast
     publish :variable => :available_partitions, :type => "list <string>"
     publish :variable => :propose_called, :type => "boolean"
     publish :variable => :uknown_fs_partitions, :type => "list <string>"
-    publish :variable => :total_memory, :type => "integer"
+    publish :function => :total_memory, :type => "integer ()"
     publish :variable => :crashkernel_list_ranges, :type => "boolean"
     publish :variable => :kdump_packages, :type => "list <string>"
     publish :variable => :crashkernel_param, :type => "boolean"

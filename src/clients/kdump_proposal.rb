@@ -41,7 +41,24 @@ module Yast
 
       if @func == "MakeProposal"
         Kdump.Propose
-        @ret = { "raw_proposal" => Kdump.Summary }
+
+        @ret = {
+          "raw_proposal" => Kdump.Summary,
+          # FATE#317488 When expectation at the end of proposal does not match
+          # the value, this proposal will be called again
+          "trigger"      => {
+            "expect"     => "
+              Yast.import \"Kdump\"
+              Yast::Kdump.free_space_for_dump
+            ",
+            "value"      => Yast::Kdump.free_space_for_dump
+          }
+        }
+
+        warning = Kdump.proposal_warnig
+        unless warning.empty?
+          @ret.merge!(warning)
+        end
       elsif @func == "AskUser"
         @has_next = Ops.get_boolean(@param, "has_next", false)
         @settings = Kdump.Export
