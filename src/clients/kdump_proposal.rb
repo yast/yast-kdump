@@ -47,18 +47,12 @@ module Yast
           # FATE#317488 When expectation at the end of proposal does not match
           # the value, this proposal will be called again
           "trigger"      => {
-            "expect"     => "
-              Yast.import \"Kdump\"
-              Yast::Kdump.free_space_for_dump
-            ",
-            "value"      => Yast::Kdump.free_space_for_dump
+            "expect"     => Yast::FunRef.new(Yast::Kdump.method(:free_space_for_dump_b), "integer ()"),
+            "value"      => Yast::Kdump.free_space_for_dump_b
           }
         }
 
-        warning = Kdump.proposal_warnig
-        unless warning.empty?
-          @ret.merge!(warning)
-        end
+        @ret.merge!(Kdump.proposal_warning)
       elsif @func == "AskUser"
         @has_next = Ops.get_boolean(@param, "has_next", false)
         @settings = Kdump.Export

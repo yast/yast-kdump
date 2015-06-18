@@ -38,9 +38,9 @@ module Yast
     KDUMP_SERVICE_NAME = "kdump"
     KDUMP_PACKAGES = ["kexec-tools", "kdump"]
 
-    # Space on disk reserved for dump additionally to memory size
+    # Space on disk reserved for dump additionally to memory size in bytes
     # @see FATE #317488
-    RESERVED_DISK_SPACE_BUFFER = 4 * 1024**3
+    RESERVED_DISK_SPACE_BUFFER_B = 4 * 1024**3
 
     def main
       textdomain "kdump"
@@ -881,12 +881,12 @@ module Yast
       deep_copy(result)
     end
 
-    # Returns available space for Kernel dump according to KDUMP_SAVEDIR option
+    # Returns available space (in bytes) for Kernel dump according to KDUMP_SAVEDIR option
     # only local space is evaluated (starts with file://)
     #
     # @return [Integer] free space in bytes or nil if filesystem is not local or no
     #                   packages proposal is made yet
-    def free_space_for_dump
+    def free_space_for_dump_b
       kdump_savedir = @KDUMP_SETTINGS.fetch("KDUMP_SAVEDIR", "file:///var/log/dump")
       log.info "Using savedir #{kdump_savedir}"
 
@@ -930,48 +930,65 @@ module Yast
         return nil
       end
 
-      log.info "Available space for dump: #{matching_partitions[partition]}"
       # packager counts in kB, we need bytes
-      free_space * 1024
+      free_space *= 1024
+      log.info "Available space for dump: #{free_space} bytes"
+
+      free_space
     end
 
-    # Returns disk space requested for kernel dump (as defined in FATE#317488)
+    # Returns disk space in bytes requested for kernel dump (as defined in FATE#317488)
     #
     # @return [Integer] bytes
-    def space_requested_for_dump
+    def space_requested_for_dump_b
       # Total memory is in MB, converting to bytes
-      total_memory * 1024**2 + RESERVED_DISK_SPACE_BUFFER
+      total_memory * 1024**2 + RESERVED_DISK_SPACE_BUFFER_B
     end
 
     # Returns installation proposal warning as part of the MakeProposal map result
     # includes 'warning' and 'warning_level' keys
     #
     # @param returns [Hash] with warnings
-    def proposal_warnig
+    def proposal_warning
       return {} unless @add_crashkernel_param
 
-      free_space = free_space_for_dump
-      requested_space = space_requested_for_dump
+      free_space = free_space_for_dump_b
+      requested_space = space_requested_for_dump_b
 
       log.info "Free: #{free_space}, requested: #{requested_space}"
+      return {} if free_space.nil? || requested_space.nil?
 
       warning = {}
 
-      if !free_space.nil? && free_space < requested_space
+      # Smaller differences are not possible to show with quite small precision
+      # in human-readable size formatting
+      if (requested_space * 0.99) < free_space && free_space < requested_space
         warning = {
           "warning_level" => :warning,
           # TRANSLATORS: warning message in installation proposal,
-          # do not translate %{requested} and %{available} - they are replaced with actual sizes later,
-          # use non-breaking HTML space between 'X:' and '%{x}'
+          # do not translate %{requested} and %{missing} - they are replaced with actual sizes later
           "warning"       => "<ul><li>" + _(
-            "Warning: There might be not enough free space for dump, " +
-            "requested:&nbsp;%{requested}, available:&nbsp;%{available}") % {
-              requested: String.FormatSizeWithPrecision(requested_space, 2, true),
+            "Warning! There might not be enough free space. " +
+            "%{required} required, but additional %{missing} free are missing.") % {
+            required: String.FormatSizeWithPrecision(requested_space, 2, true),
+            missing: String.FormatSizeWithPrecision((requested_space - free_space), 2, true)
+          } + "</li></ul>"
+        }
+      elsif free_space < requested_space
+        warning = {
+          "warning_level" => :warning,
+          # TRANSLATORS: warning message in installation proposal,
+          # do not translate %{requested} and %{available} - they are replaced with actual sizes later
+          "warning"       => "<ul><li>" + _(
+            "Warning! There might not be enough free space. " +
+            "%{required} required, but only %{available} are available.") % {
+              required: String.FormatSizeWithPrecision(requested_space, 2, true),
               available: String.FormatSizeWithPrecision(free_space, 2, true)
             } + "</li></ul>"
         }
       end
 
+      log.warn warning["warning"] if warning["warning"]
       warning
     end
 
