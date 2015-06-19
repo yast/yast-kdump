@@ -47,7 +47,10 @@ module Yast
           # FATE#317488 When expectation at the end of proposal does not match
           # the value, this proposal will be called again
           "trigger"      => {
-            "expect"     => Yast::FunRef.new(Yast::Kdump.method(:free_space_for_dump_b), "integer ()"),
+            "expect"     => {
+              "class"  => "Yast::Kdump",
+              "method" => "free_space_for_dump_b",
+            },
             "value"      => Yast::Kdump.free_space_for_dump_b
           }
         }

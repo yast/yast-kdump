@@ -900,7 +900,7 @@ module Yast
       end
 
       # unified format of directory
-      kdump_savedir = File.join("/", kdump_savedir)
+      kdump_savedir = format_dirname(kdump_savedir)
 
       partitions_info = SpaceCalculation.GetPartitionInfo()
       if partitions_info.empty?
@@ -913,12 +913,12 @@ module Yast
       # "name" usually does not start with "/", but does so for root filesystem
       # File.join ensures that paths do not contain dulplicit "/" characters
       partitions_info = partitions_info.map do |partition|
-        { File.join("/", partition["name"]) => partition["free"] }
+        { format_dirname(partition["name"]) => partition["free"] }
       end.inject(:merge)
 
       # All partitions matching KDUMP_SAVEDIR
-      matching_partitions = partitions_info.select do |partition, space|
-        kdump_savedir.start_with?(File.join("/", partition))
+      matching_partitions = partitions_info.select do |partition, _space|
+        kdump_savedir.start_with?(partition)
       end
 
       # The longest match
@@ -932,7 +932,7 @@ module Yast
 
       # packager counts in kB, we need bytes
       free_space *= 1024
-      log.info "Available space for dump: #{free_space} bytes"
+      log.info "Available space for dump: #{free_space} bytes in #{partition} directory"
 
       free_space
     end
@@ -1092,6 +1092,16 @@ module Yast
     # @return [Boolean] whether changed
     def using_fadump_changed?
       @initial_kdump_settings[FADUMP_KEY] != @KDUMP_SETTINGS[FADUMP_KEY]
+    end
+
+private
+
+    # Returns unified directory name with leading and ending "/"
+    # for exact matching
+    def format_dirname(dirname)
+      dirname = deep_copy(dirname)
+      dirname = "/" << dirname << "/"
+      dirname.gsub(/\/+/, "/")
     end
 
     publish :function => :GetModified, :type => "boolean ()"

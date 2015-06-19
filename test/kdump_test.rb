@@ -41,14 +41,25 @@ describe Yast::Kdump do
     end
   end
 
-  let(:partition_info) {[
-     {"free"=>389318, "name"=>"/", "used"=>1487222},
-     {"free"=>1974697, "name"=>"usr", "used"=>4227733},
-     {"free"=>2974697, "name"=>"/var", "used"=>4227733},
-     # this is the matching partition entry
-     {"free"=>8974697, "name"=>"var/crash", "used"=>16},
-     {"free"=>397697, "name"=>"var/crash/not-this", "used"=>455}
-  ]}
+  let(:partition_info) do
+    [
+      {"free"=>389318, "name"=>"/", "used"=>1487222},
+      {"free"=>1974697, "name"=>"usr", "used"=>4227733},
+      {"free"=>2974697, "name"=>"/var", "used"=>4227733},
+      # this is the matching partition entry
+      {"free"=>8974697, "name"=>"var/crash", "used"=>16},
+      {"free"=>397697, "name"=>"var/crash/not-this", "used"=>455}
+    ]
+  end
+
+  let(:not_exactly_matching_partition_info) do
+    [
+      {"free"=>8888888, "name"=>"/"},
+      {"free" => 1, "name" => "var/some"},
+      {"free"=>5555555, "name"=>"somewhere/d"},
+      {"free"=>6666666, "name"=>"somewhere/deep"}
+    ]
+  end
 
   describe "#free_space_for_dump_b" do
     before do
@@ -89,6 +100,18 @@ describe Yast::Kdump do
         expect(Yast::Kdump.free_space_for_dump_b).to eq(nil)
       end
     end
+
+    context "when partition info does not exactly match directory for dump" do
+      it "returns space on disk (in mountpoint above) in bytes available for kernel dump" do
+        Yast::Kdump.KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "file:///var/crash"
+        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return(not_exactly_matching_partition_info)
+        expect(Yast::Kdump.free_space_for_dump_b).to eq(8888888 * 1024)
+
+        Yast::Kdump.KDUMP_SETTINGS["KDUMP_SAVEDIR"] = "file:///somewhere/deep/in/filesystem/"
+        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return(not_exactly_matching_partition_info)
+        expect(Yast::Kdump.free_space_for_dump_b).to eq(6666666 * 1024)
+      end
+    end
   end
 
   # in MB!
@@ -127,7 +150,7 @@ describe Yast::Kdump do
       end
     end
 
-    context "when free space is nearly big as reqeuested, but still smaller" do
+    context "when free space is nearly as big as reqeuested, but still smaller" do
       it "returns hash with warning and warning_level keys" do
         allow(Yast::Kdump).to receive(:free_space_for_dump_b).and_return(Yast::Kdump.space_requested_for_dump_b - 30 * 1024**2)
 
