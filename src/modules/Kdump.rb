@@ -1099,9 +1099,7 @@ private
     # Returns unified directory name with leading and ending "/"
     # for exact matching
     def format_dirname(dirname)
-      dirname = deep_copy(dirname)
-      dirname = "/" << dirname << "/"
-      dirname.gsub(/\/+/, "/")
+      "/#{dirname}/".gsub(/\/+/, "/")
     end
 
     publish :function => :GetModified, :type => "boolean ()"
