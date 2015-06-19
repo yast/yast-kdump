@@ -960,21 +960,7 @@ module Yast
 
       warning = {}
 
-      # Smaller differences are not possible to show with quite small precision
-      # in human-readable size formatting
-      if (requested_space * 0.99) < free_space && free_space < requested_space
-        warning = {
-          "warning_level" => :warning,
-          # TRANSLATORS: warning message in installation proposal,
-          # do not translate %{requested} and %{missing} - they are replaced with actual sizes later
-          "warning"       => "<ul><li>" + _(
-            "Warning! There might not be enough free space. " +
-            "%{required} required, but additional %{missing} free are missing.") % {
-            required: String.FormatSizeWithPrecision(requested_space, 2, true),
-            missing: String.FormatSizeWithPrecision((requested_space - free_space), 2, true)
-          } + "</li></ul>"
-        }
-      elsif free_space < requested_space
+      if free_space < requested_space
         warning = {
           "warning_level" => :warning,
           # TRANSLATORS: warning message in installation proposal,

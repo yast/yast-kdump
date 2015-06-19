@@ -150,16 +150,6 @@ describe Yast::Kdump do
       end
     end
 
-    context "when free space is nearly as big as reqeuested, but still smaller" do
-      it "returns hash with warning and warning_level keys" do
-        allow(Yast::Kdump).to receive(:free_space_for_dump_b).and_return(Yast::Kdump.space_requested_for_dump_b - 30 * 1024**2)
-
-        warning = Yast::Kdump.proposal_warning
-        expect(warning["warning"]).to match(/There might not be enough free space.*additional.*are missing/)
-        expect(warning["warning_level"]).not_to eq(nil)
-      end
-    end
-
     context "when free space is bigger or equal to requested size" do
       it "returns empty hash" do
         allow(Yast::Kdump).to receive(:free_space_for_dump_b).and_return(120 * 1024**3)
