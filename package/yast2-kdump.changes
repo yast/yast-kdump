@@ -2,7 +2,7 @@
 Wed Jun 17 10:26:31 CEST 2015 - locilka@suse.com
 
 - Warn user in installation proposal if space available on disk
-  is smaller than RAM size + 4 GB (FATE #317488)
+  is smaller than RAM size + 4 GB (FATE#317488)
 - 3.1.23
 
 -------------------------------------------------------------------
