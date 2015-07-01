@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.23
+Version:        3.1.24
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0
@@ -44,7 +44,7 @@ Requires:       yast2-storage
 Requires:       yast2-packager
 Recommends:     makedumpfile
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-%ifarch aarch64
+%ifarch ppc
 Recommends:     kdump
 %else
 Requires:       kdump

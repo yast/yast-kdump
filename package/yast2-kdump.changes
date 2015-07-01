@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jul 1 15:26:31 CEST 2015 - dvaleev@suse.com
+
+- Require kdump on aarch64 but recommend on ppc32 this time.
+  kdump made available on aarch64. This time it is ppc32's turn
+
+- 3.1.24
+-------------------------------------------------------------------
 Wed Jun 17 10:26:31 CEST 2015 - locilka@suse.com
 
 - Warn user in installation proposal if space available on disk
