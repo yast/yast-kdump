@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jul  9 16:22:52 UTC 2015 - dmueller@suse.com
+
+- kdump was available but makedumpfile is not on aarch64, so we
+  need to go back to a recommends for aarch64
+
+-------------------------------------------------------------------
 Wed Jul 1 15:26:31 CEST 2015 - dvaleev@suse.com
 
 - Require kdump on aarch64 but recommend on ppc32 this time.

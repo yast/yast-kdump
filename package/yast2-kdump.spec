@@ -44,7 +44,7 @@ Requires:       yast2-storage
 Requires:       yast2-packager
 Recommends:     makedumpfile
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-%ifarch ppc
+%ifarch ppc aarch64
 Recommends:     kdump
 %else
 Requires:       kdump
