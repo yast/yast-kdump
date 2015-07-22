@@ -263,12 +263,16 @@ module Yast
       if target != ""
         pos = Builtins.search(parse_target, "/")
         pos1 = -1
-        Ops.set(
-          @KDUMP_SAVE_TARGET,
-          "target",
-          Builtins.substring(parse_target, 0, Ops.subtract(pos, 1))
-        )
-        parse_target = Builtins.substring(parse_target, Ops.add(pos, 2))
+        if pos.zero? # Support for the old '/var/crash' style
+          Ops.set(@KDUMP_SAVE_TARGET, "target", "file")
+        else
+          Ops.set(
+            @KDUMP_SAVE_TARGET,
+            "target",
+            Builtins.substring(parse_target, 0, Ops.subtract(pos, 1))
+          )
+          parse_target = Builtins.substring(parse_target, Ops.add(pos, 2))
+        end
 
         # file
         if Ops.get(@KDUMP_SAVE_TARGET, "target") == "file"
