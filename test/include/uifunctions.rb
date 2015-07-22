@@ -49,7 +49,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "/var/crash" }
 
       it "sets KDUMP_SAVE_TARGET as 'file' with path '/var/crash'" do
-        expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
+        expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target("dir" => "/var/crash", "target" => "file"))
       end
     end
@@ -58,7 +58,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "file:///var/crash" }
 
       it "sets KDUMP_SAVE_TARGET as 'file' with path '/var/crash'" do
-        expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
+        expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target("dir" => "/var/crash", "target" => "file"))
       end
     end
@@ -67,7 +67,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "ftp://user:pass@ftp.suse.com/pub" }
 
       it "sets KDUMP_SAVE_TARGET as 'ftp' with server, user_name, password and dir" do
-        expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
+        expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
           "target" => "ftp", "user_name" => "user", "password" => "pass",
           "server" => "ftp.suse.com", "dir" => "/pub"))
@@ -78,7 +78,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "nfs://nfs.suse.cz/exports" }
 
       it "sets KDUMP_SAVE_TARGET as 'nfs' with server and dir" do
-        expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
+        expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
           "target" => "nfs", "server" => "nfs.suse.cz", "dir" => "/exports"))
       end
@@ -88,7 +88,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "ssh://user:pass@people.suse.cz:9000/home/user/kdump" }
 
       it "sets KDUMP_SAVE_TARGET as 'ssh' with server, port, user_name, password and dir" do
-        expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
+        expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
           "target" => "ssh", "user_name" => "user", "password" => "pass",
           "server" => "people.suse.cz", "dir" => "/home/user/kdump", "port" => "9000"))
@@ -99,7 +99,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "sftp://user:pass@people.suse.cz:9000/home/user/kdump" }
 
       it "sets KDUMP_SAVE_TARGET 'sftp' with server, port, user_name, password and dir" do
-        expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
+        expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
           "target" => "sftp", "user_name" => "user", "password" => "pass",
           "server" => "people.suse.cz", "dir" => "/home/user/kdump", "port" => "9000"))
@@ -110,7 +110,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "cifs://user:pass@people.suse.cz/homes/user/kdump" }
 
       it "sets KDUMP_SAVE_TARGET 'cifs' with server, user_name, password, share and dir" do
-        expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
+        expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
           "target" => "cifs", "user_name" => "user", "password" => "pass",
           "server" => "people.suse.cz", "dir" => "/user/kdump", "share" => "homes"
@@ -122,7 +122,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       let(:target) { "" }
 
       it "returns false" do
-       expect(subject.SetUpKDUMP_SAVE_TARGET(target)).to eq(false)
+       expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(false)
       end
     end
 
