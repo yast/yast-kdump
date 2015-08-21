@@ -3,9 +3,17 @@
 require_relative "./test_helper"
 
 Yast.import "Kdump"
+Yast.import "Mode"
+Yast.import "Bootloader"
+Yast.import "Service"
+Yast.import "Popup"
 Yast.import "SpaceCalculation"
 
 describe Yast::Kdump do
+  before do
+    Yast::Kdump.reset
+  end
+
   # allocated_memory is a string   in megabytes
   # total_memory     is an integer in megabytes
   describe "#ProposeAllocatedMemory" do
@@ -156,6 +164,292 @@ describe Yast::Kdump do
 
         warning = Yast::Kdump.proposal_warning
         expect(warning).to eq({})
+      end
+    end
+  end
+
+  describe ".ReadKdumpKernelParam" do
+    before do
+      allow(Yast::Bootloader).to receive(:kernel_param).and_return kernel_param
+      Yast::Kdump.ReadKdumpKernelParam
+    end
+
+    let(:is_crashkernel_set) { Yast::Kdump.crashkernel_param }
+    let(:crashkernel_needed) { Yast::Kdump.add_crashkernel_param }
+    let(:several_ranges) { Yast::Kdump.crashkernel_list_ranges }
+    let(:allocated_mem) { Yast::Kdump.allocated_memory }
+
+    context "when the param is not present" do
+      let(:kernel_param) { :missing }
+
+      it "reports param as not found" do
+        expect(is_crashkernel_set).to eq false
+      end
+
+      it "does not find several ranges" do
+        expect(several_ranges).to eq false
+      end
+
+      it "does not schedule writing on the param" do
+        expect(crashkernel_needed).to eq false
+      end
+    end
+
+    context "when the param is set to true" do
+      let(:kernel_param) { :present }
+
+      it "reports presence of the param" do
+        expect(is_crashkernel_set).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(crashkernel_needed).to eq true
+      end
+
+      it "does not find several ranges" do
+        expect(several_ranges).to eq false
+      end
+    end
+
+    context "when the param is a number" do
+      let(:kernel_param) { "32M" }
+
+      it "reports presence of the param" do
+        expect(is_crashkernel_set).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(crashkernel_needed).to eq true
+      end
+
+      it "does not find several ranges" do
+        expect(several_ranges).to eq false
+      end
+
+      it "correctly reads the size" do
+        expect(allocated_mem).to eq "32"
+      end
+    end
+
+    context "when the param is a range" do
+      let(:kernel_param) { "64M-:32M" }
+
+      it "reports presence of the param" do
+        expect(is_crashkernel_set).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(crashkernel_needed).to eq true
+      end
+
+      it "does not find several ranges" do
+        expect(several_ranges).to eq false
+      end
+
+      it "correctly reads the size" do
+        expect(allocated_mem).to eq "32"
+      end
+    end
+
+    context "when the param includes several ranges" do
+      let(:kernel_param) { "-200M:32M,200M-:64M" }
+
+      it "reports presence of the param" do
+        expect(is_crashkernel_set).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(crashkernel_needed).to eq true
+      end
+
+      it "finds several ranges" do
+        expect(several_ranges).to eq true
+      end
+
+      it "correctly reads the size of the last range" do
+        expect(allocated_mem).to eq "32"
+      end
+    end
+  end
+
+  describe ".WriteKdumpBootParameter" do
+    context "during autoinstallation" do
+      before do
+        allow(Yast::Mode).to receive(:autoinst).and_return true
+        allow(Yast::Mode).to receive(:update).and_return false
+        allow(Yast::Mode).to receive(:normal).and_return false
+        Yast::Kdump.Import(profile)
+      end
+
+      context "if kdump is requested and a value for crashkernel is supplied" do
+        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "the_value"} }
+
+        it "writes the crashkernel value to the bootloader and enables the service" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, {"crashkernel" => "the_value"})
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable)
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
+      context "if kdump is requested but no value for crashkernel is supplied" do
+        let(:profile) { {"add_crash_kernel" => true} }
+
+        it "writes an empty crashkernel in the bootloader and enables the service" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, {"crashkernel" => ""})
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable)
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
+      context "if kdump is explicitly disabled" do
+        let(:profile) { {"add_crash_kernel" => false, "crash_kernel" => "does_not_matter"} }
+
+        it "disables the service not touching bootloader" do
+          allow(Yast::Service).to receive(:Status).and_return -1
+
+          expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
+          expect(Yast::Bootloader).to_not receive(:Write)
+          expect(Yast::Service).to receive(:Disable)
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+    end
+
+    context "during autoupdate of a system with kdump" do
+      before do
+        allow(Yast::Mode).to receive(:autoinst).and_return true
+        allow(Yast::Mode).to receive(:update).and_return false
+        allow(Yast::Mode).to receive(:normal).and_return false
+        allow(Yast::Bootloader).to receive(:kernel_param).and_return "old_value"
+        Yast::Kdump.ReadKdumpKernelParam
+        Yast::Kdump.Import(profile)
+      end
+
+      context "if kdump is requested and a value for crashkernel is supplied" do
+        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "new_value"} }
+
+        it "writes the new value to the bootloader and enables the service" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, {"crashkernel" => "new_value"})
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable)
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
+      context "if kdump is requested but no value for crashkernel is supplied" do
+        let(:profile) { {"add_crash_kernel" => true} }
+
+        it "enables the service but does not touch bootloader" do
+          expect(Yast::Service).to receive(:Enable)
+          expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
+          expect(Yast::Bootloader).to_not receive(:Write)
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
+      context "if kdump is explicitly disabled" do
+        let(:profile) { {"add_crash_kernel" => false, "crash_kernel" => "does_not_matter"} }
+
+        it "disables the service and removes the old bootloader param" do
+          allow(Yast::Service).to receive(:Status).and_return -1
+
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, {"crashkernel" => :missing})
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Disable)
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+    end
+
+    context "in normal mode" do
+      before do
+        allow(Yast::Mode).to receive(:autoinst).and_return false
+        allow(Yast::Mode).to receive(:update).and_return false
+        allow(Yast::Mode).to receive(:normal).and_return true
+        allow(Yast::Popup).to receive(:Message)
+
+        allow(Yast::Bootloader).to receive(:kernel_param).and_return kernel_param
+        Yast::Kdump.ReadKdumpKernelParam
+      end
+
+      context "crashkernel is already configured in the bootloader" do
+        let(:kernel_param) { "128M-:64M" }
+
+        it "updates crashkernel and enables service if crashkernel is changed" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, {"crashkernel" => "256M-:128M"})
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable)
+
+          Yast::Kdump.allocated_memory = "128"
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+
+        it "enables the service but does not update crashkernel if it's not needed" do
+          expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
+          expect(Yast::Bootloader).to_not receive(:Write)
+          expect(Yast::Service).to receive(:Enable)
+
+          Yast::Kdump.allocated_memory = "64"
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+
+        it "disables the service and removes crashkernel if kdump was disabled" do
+          allow(Yast::Service).to receive(:Status).and_return -1
+
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, {"crashkernel" => :missing})
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Disable)
+
+          Yast::Kdump.add_crashkernel_param = false
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
+      context "crashkernel is currently not configured in the bootloader" do
+        let (:kernel_param) { :missing }
+
+        it "writes chrashkernel and enables the service if kdump was enabled" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, {"crashkernel" => "128M-:64M"})
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable)
+
+          Yast::Kdump.allocated_memory = "64"
+          Yast::Kdump.add_crashkernel_param = true
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+
+        it "disables the server not touching bootloader if kdump was not enabled" do
+          allow(Yast::Service).to receive(:Status).and_return 0
+
+          expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
+          expect(Yast::Bootloader).to_not receive(:Write)
+          expect(Yast::Service).to receive(:Disable)
+          expect(Yast::Service).to receive(:Stop)
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
       end
     end
   end
