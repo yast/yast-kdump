@@ -63,6 +63,10 @@ module Yast
       Yast.import "Directory"
       Yast.import "String"
 
+      reset
+    end
+
+    def reset
       # Data was modified?
       @modified = false
 
