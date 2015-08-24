@@ -98,11 +98,11 @@ module Yast
       @total_memory = 0
 
       # Boolean option indicates that "crashkernel" includes
-      #  several ranges
+      # several values for the same kind of memory (low, high)
+      # or several ranges in one of the values
       #
-      # boolean true if there are several ranges (>1)
+      # boolean true if there are several ranges (>1) or overriden values
       @crashkernel_list_ranges = false
-
 
       #  list of packages for installation
       @kdump_packages = []
@@ -129,11 +129,13 @@ module Yast
       # boolean true if kernel parameter is set
       @crashkernel_param = false
 
-      # String option indicates value of kernel parameter
+      # Array (or String) with the values of the kernel parameter
       # "crashkernel"
+      # It can also contain :missing or :present.
+      # See Yast::Bootloader.kernel_param for details about those special values
       #
-      # string value of kernel parameter
-      @crashkernel_param_value = ""
+      # array values of kernel parameter
+      @crashkernel_param_values = []
 
       # Boolean option indicates add kernel param
       # "crashkernel"
@@ -141,11 +143,11 @@ module Yast
       # boolean true if kernel parameter will be add
       @add_crashkernel_param = false
 
-      # String option for alocate of memory for boot param
+      # Set of values (high and low) for allocation of memory for boot param
       # "crashkernel"
       #
-      # string value number of alocate memory
-      @allocated_memory = "0"
+      # hash with up to two keys (:low and :high) and string values
+      @allocated_memory = {}
 
       # Boolean option indicates that Import()
       # was called and data was proposed
@@ -283,68 +285,19 @@ module Yast
       end
     end
 
-    # get allocated memory from value of crashkernel option
-    # there can be several ranges -> take the first range
-    #  @param string 64M@16M or 128M-:64M@16M [(reserved_memory*2)-:reserved_memory]
-    #  @return [String] value of allocated memory (64M)
-
-    def getAllocatedMemory(crash_value)
-      result = ""
-      allocated = ""
-      range = ""
-      if Builtins.search(crash_value, ",") != nil
-        ranges = Builtins.splitstring(crash_value, ",")
-        @crashkernel_list_ranges = true
-        range = Ops.get(ranges, 0, "")
-      else
-        range = crash_value
-      end
-      Builtins.y2milestone("The 1st range from crashkernel is %1", range)
-      position = Builtins.search(range, ":")
-
-      if position != nil
-        allocated = Builtins.substring(range, Ops.add(position, 1))
-      else
-        allocated = range
-      end
-
-      result = Builtins.substring(allocated, 0, Builtins.search(allocated, "M"))
-
-      Builtins.y2milestone("Allocated memory is %1", result)
-      result
-    end
-
-    # Build crashkernel value from allocated memory
-    #
-    #  @return [String] value of crashkernel
-
-    def BuildCrashkernelValue
-      # If user didn't modify or select return old value.
-      return @crashkernel_param_value if @crashkernel_list_ranges
-
-      crash_value = @allocated_memory + "M"
-      reserved_memory = (@allocated_memory.to_i * 2).to_s
-      crash_value = reserved_memory + "M-:" + crash_value
-
-      log.info "built crashkernel value is #{crash_value}"
-
-      crash_value
-    end
-
     # Read current kdump configuration
     #
     # read kernel parameter "crashkernel"
     #  @return [Boolean] successfull
-
     def ReadKdumpKernelParam
       result = Bootloader.kernel_param(:common, "crashkernel")
       result = Bootloader.kernel_param(:xen_guest, "crashkernel") if result == :missing
-      # result could be [String,:missing,:present]
-      # String   - the value
+      # result could be [String,Array,:missing,:present]
+      # String   - the value of the only occurrence
+      # Array    - the values of the multiple occurrences
       # :missing - crashkernel is missed
       # :present - crashkernel is defined but no value is available
 
-      #Popup::Message(result);
       if result == :missing
         @crashkernel_param = false
         @add_crashkernel_param = false
@@ -353,11 +306,14 @@ module Yast
         @add_crashkernel_param = true
       end
 
-      @crashkernel_param_value = result
-      if result != :missing && result != :present
+      if result == :missing || result == :present
+        @crashkernel_param_values = result
+      else
+        # Let's make sure it's an array
+        @crashkernel_param_values = Array(result)
         # Read the current value only if crashkernel parameter is set.
         # (bnc#887901)
-        @allocated_memory = getAllocatedMemory(@crashkernel_param_value)
+        @allocated_memory = get_allocated_memory(@crashkernel_param_values)
       end
 
       true
@@ -378,22 +334,25 @@ module Yast
 
     PROPOSE_ALLOCATED_MEMORY_MB_COMMAND = "kdumptool --configfile #{TEMPORARY_CONFIG_FILE} calibrate"
     # if the command fails
-    PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK = "128"
+    PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK = {low: "128"}
 
     # Propose reserved/allocated memory
-    # Store the result as a string! to @allocated_memory
+    # Store the result as a hash to @allocated_memory
     # @return [Boolean] true, always successful
     def ProposeAllocatedMemory
       # only propose once
-      return true if @allocated_memory != "0"
+      return true unless @allocated_memory.empty?
 
       write_temporary_config_file
       out = SCR.Execute(path(".target.bash_output"), PROPOSE_ALLOCATED_MEMORY_MB_COMMAND)
-      @allocated_memory = out["stdout"].chomp
-      if out["exit"] != 0 or @allocated_memory.empty?
+      # TODO - FIXME: let's assume kdumptool returns low memory for now
+      output = out["stdout"].chomp
+      if out["exit"] != 0 or output.empty?
         # stderr has been already logged
         Builtins.y2error("failed to propose allocated memory")
         @allocated_memory = PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK
+      else
+        @allocated_memory = {low: output}
       end
       Builtins.y2milestone(
         "[kdump] allocated memory if not set in \"crashkernel\" param: %1",
@@ -536,51 +495,45 @@ module Yast
     #
     #  @return [Boolean] successfull
     def WriteKdumpBootParameter
-      result = true
       old_progress = false
 
+      # If we need to add crashkernel param
       if @add_crashkernel_param
-        crash_value = ""
-        crash_value = BuildCrashkernelValue() if !(Mode.autoinst || Mode.autoupgrade)
+        if Mode.autoinst || Mode.autoupgrade
+          # Use the value(s) read by import
+          crash_values = @crashkernel_param_values
+          # Always write the value
+          skip_crash_values = false
+        else
+          # Calculate the param values based on @allocated_memory
+          crash_values = crash_kernel_values
+          remove_offsets!(crash_value) if Mode.update
+          # Skip writing of param if it's already set to the desired values
+          skip_crash_values = @crashkernel_param && @crashkernel_param_values == crash_values
+        end
 
-        if !@crashkernel_param || crash_value != @crashkernel_param_value
-          if Mode.autoinst || Mode.autoupgrade
-            crash_value = @crashkernel_param_value
-          elsif Mode.update
-            if Builtins.search(crash_value, "@") != nil
-              tmp_crash_value = Builtins.splitstring(crash_value, "@")
-              crash_value = Ops.get(tmp_crash_value, 0, "")
-              Builtins.y2milestone(
-                "Delete offset crashkernel value: %1",
-                crash_value
-              )
-            end
-          end
-
-          Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => crash_value)
+        if skip_crash_values
+          # start kdump at boot
+          Service.Enable(KDUMP_SERVICE_NAME)
+          Service.Restart(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
+        else
+          Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => crash_values)
           old_progress = Progress.set(false)
           Bootloader.Write
           Progress.set(old_progress)
-          # Popup::Message(crash_value);
           Builtins.y2milestone(
-            "[kdump] (WriteKdumpBootParameter) adding chrashkernel option with value : %1",
-            crash_value
+            "[kdump] (WriteKdumpBootParameter) adding chrashkernel options with values: %1",
+            crash_values
           )
           if Mode.normal
             Popup.Message(_("To apply changes a reboot is necessary."))
           end
-
           Service.Enable(KDUMP_SERVICE_NAME)
-          return result
         end
-
-        # start kdump at boot
-        Service.Enable(KDUMP_SERVICE_NAME)
-
-        Service.Restart(KDUMP_SERVICE_NAME) if Service.Status(KDUMP_SERVICE_NAME) == 0
       else
+        # If we don't need the param but it is there
         if @crashkernel_param
-          #delete crashkernel paramter from bootloader
+          #delete crashkernel parameter from bootloader
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => :missing)
           old_progress = Progress.set(false)
           Bootloader.Write
@@ -590,13 +543,11 @@ module Yast
           end
         end
         Service.Disable(KDUMP_SERVICE_NAME)
-        Service.Stop(KDUMP_SERVICE_NAME) if Service.Status(KDUMP_SERVICE_NAME) == 0
-        return result
+        Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
       end
+
       true
     end
-
-
 
     # Read all kdump settings
     # @return true on success
@@ -841,7 +792,7 @@ module Yast
       nil
     end
 
-    # Create a textual summary and a list of unconfigured cards
+    # Create a textual summary
     # @return summary of the current configuration
     def Summary
       result = []
@@ -856,8 +807,8 @@ module Yast
         result = Builtins.add(
           result,
           Builtins.sformat(
-            _("Value of crashkernel option: %1"),
-            BuildCrashkernelValue()
+            _("Values of crashkernel option: %1"),
+            crash_kernel_values.join(" ")
           )
         )
         result = Builtins.add(
@@ -1006,8 +957,10 @@ module Yast
     # Export kdump settings to a map
     # @return kdump settings
     def Export
+      crash_kernel = crash_kernel_values
+      crash_kernel = crash_kernel[0] if crash_kernel.size == 1
       out = {
-        "crash_kernel"     => BuildCrashkernelValue(),
+        "crash_kernel"     => crash_kernel,
         "add_crash_kernel" => @add_crashkernel_param,
         "general"          => filterExport(@KDUMP_SETTINGS)
       }
@@ -1022,7 +975,8 @@ module Yast
     def Import(settings)
       settings = deep_copy(settings)
       Builtins.y2milestone("Importing settings for kdump")
-      @crashkernel_param_value = Ops.get_string(settings, "crash_kernel", "")
+      # Make sure it's an array
+      @crashkernel_param_values = Array(settings.fetch("crash_kernel", ""))
       if settings.has_key?("add_crash_kernel")
         @add_crashkernel_param = settings["add_crash_kernel"]
       else
@@ -1084,14 +1038,6 @@ module Yast
       @initial_kdump_settings[FADUMP_KEY] != @KDUMP_SETTINGS[FADUMP_KEY]
     end
 
-private
-
-    # Returns unified directory name with leading and ending "/"
-    # for exact matching
-    def format_dirname(dirname)
-      "/#{dirname}/".gsub(/\/+/, "/")
-    end
-
     publish :function => :GetModified, :type => "boolean ()"
     publish :function => :SetModified, :type => "void ()"
     publish :variable => :modified, :type => "boolean"
@@ -1104,7 +1050,7 @@ private
     publish :variable => :kdump_packages, :type => "list <string>"
     publish :variable => :crashkernel_param, :type => "boolean"
     publish :variable => :add_crashkernel_param, :type => "boolean"
-    publish :variable => :allocated_memory, :type => "string"
+    publish :variable => :allocated_memory, :type => "map"
     publish :variable => :import_called, :type => "boolean"
     publish :variable => :write_only, :type => "boolean"
     publish :variable => :AbortFunction, :type => "boolean ()"
@@ -1119,6 +1065,110 @@ private
     publish :function => :Summary, :type => "list <string> ()"
     publish :function => :Export, :type => "map ()"
     publish :function => :Import, :type => "boolean (map)"
+
+    # Offer this to ensure backward compatibility
+    def allocated_memory=(memory)
+      if memory.is_a?(::String)
+        if memory.empty?
+          @allocated_memory = {}
+        else
+          @allocated_memory = {low: memory}
+        end
+      else
+        @allocated_memory = memory
+      end
+    end
+
+  private
+
+    # Returns unified directory name with leading and ending "/"
+    # for exact matching
+    def format_dirname(dirname)
+      "/#{dirname}/".gsub(/\/+/, "/")
+    end
+
+    # get allocated memory from the set of values of the crashkernel option
+    #
+    # each value can be a set of ranges (first range will be taken) or a
+    # concrete value for high or low memory
+    # syntax for ranges: 64M@16M or 128M-:64M@16M [(reserved_memory*2)-:reserved_memory]
+    # syntax for concrete value: 64M or 64M,high or 64M,low
+    #
+    #  @param crash_values [Array<string>] list of values
+    #  @return [Hash] values of allocated memory ({low: "64", high: "16"})
+    def get_allocated_memory(crash_values)
+      result = {}
+      crash_values.each do |crash_value|
+        pieces = crash_value.split(",")
+
+        if pieces.last =~ /^(low|high)$/i
+          key = pieces.last.downcase.to_sym
+          @crashkernel_list_ranges ||= (pieces.size > 2)
+        else
+          key = :low
+          @crashkernel_list_ranges ||= (pieces.size > 1)
+        end
+        # Skip everything but the first occurrence
+        if result[key]
+          @crashkernel_list_ranges = true
+          next
+        end
+
+        range = pieces.first
+        Builtins.y2milestone("The 1st range from crashkernel is %1", range)
+        value = range.split(":").last.split("M").first
+        result[key] = value
+      end
+      Builtins.y2milestone("Allocated memory is %1", result)
+      result
+    end
+
+    # Build crashkernel values from allocated memory
+    #
+    # @return [Array<String>] list of values of crashkernel
+    def crash_kernel_values
+      # If the current values include "nasty" things and the user has not
+      # overriden the value of @crashkernel_list_ranges to autorize the
+      # modification, return the old values (ensuring the Array format)
+      return Array(@crashkernel_param_values) if @crashkernel_list_ranges
+
+      result = []
+      high = @allocated_memory[:high]
+      if high && high.to_i != 0
+        result << high + "M,high"
+      end
+      low = @allocated_memory[:low]
+      if low && low.to_i != 0
+        # Add the ',low' suffix only there is a ',high' one
+        if result.empty?
+          result << "#{low}M"
+        else
+          result << "#{low}M,low"
+        end
+      end
+      log.info "built crashkernel values are #{result}"
+
+      result
+    end
+
+    # Removes offsets from all the crashkernel values
+    #
+    # Beware: not functional, it modifies the passed argument
+    #
+    # @param values [Array,Symbol] list of values or one of the special values
+    #       returned by Bootloader.kernel_param
+    def remove_offsets!(values)
+      # It could also be :missing or :present
+      if values.is_a?(Array)
+        crash_values.map! do |value|
+          pieces = value.split("@")
+          if pieces.size > 1
+            Builtins.y2milestone("Delete offset crashkernel value: %1", value)
+          end
+          pieces.first
+        end
+      end
+    end
   end
 
   Kdump = KdumpClass.new

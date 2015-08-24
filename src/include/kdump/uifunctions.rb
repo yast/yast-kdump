@@ -1377,7 +1377,7 @@ module Yast
         UI.ChangeWidget(
           Id("allocated_memory"),
           :Value,
-          Builtins.tointeger(Kdump.allocated_memory)
+          Builtins.tointeger(Kdump.allocated_memory[:low])
         )
         UI.ChangeWidget(
           Id("usable_memory"),
@@ -1436,7 +1436,7 @@ module Yast
       event = deep_copy(event)
       if Kdump.crashkernel_list_ranges && Mode.normal
         Kdump.crashkernel_list_ranges = !Popup.YesNo(
-          _("Kernel option includes several ranges. Rewrite it?")
+          _("Kernel option includes several ranges or redundant values. Rewrite it?")
         )
       end
 
@@ -1447,7 +1447,7 @@ module Yast
 
     def StoreKdumpMemory(key, event)
       event = deep_copy(event)
-      Kdump.allocated_memory = Builtins.tostring(
+      Kdump.allocated_memory[:low] = Builtins.tostring(
         UI.QueryWidget(Id("allocated_memory"), :Value)
       )
 
