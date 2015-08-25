@@ -72,34 +72,7 @@ module Yast
         },
         "KdumpMemory"            => {
           "widget"            => :custom,
-          "custom_widget"     => HSquash(
-            VBox(
-              Left(
-                HBox(
-                  Left(Label(_("Total System Memory [MB]:"))),
-                  Left(Label(Id("total_memory"), "0123456789")),
-                  HStretch()
-                )
-              ),
-              Left(
-                HBox(
-                  Left(Label(_("Usable Memory [MB]:"))),
-                  Left(Label(Id("usable_memory"), "0123456789")),
-                  HStretch()
-                )
-              ),
-              Left(
-                IntField(
-                  Id("allocated_memory"),
-                  Opt(:notify),
-                  _("Kdump Memor&y [MB]"),
-                  32,
-                  1048576,
-                  128
-                )
-              )
-            )
-          ),
+          "custom_widget"     => HSquash(kdump_memory_widget),
           "init"              => fun_ref(
             method(:InitKdumpMemory),
             "void (string)"
@@ -539,6 +512,53 @@ module Yast
           ]
         }
       }
+    end
+
+    def kdump_memory_widget
+      if Kdump.high_memory_supported?
+        low_label = _("Kdump &Low Memory [MB]")
+      else
+        low_label = _("Kdump Memor&y [MB]")
+      end
+      widgets = [
+        Left(
+          HBox(
+            Left(Label(_("Total System Memory [MB]:"))),
+            Left(Label(Id("total_memory"), "0123456789")),
+            HStretch()
+          )
+        ),
+        Left(
+          HBox(
+            Left(Label(_("Usable Memory [MB]:"))),
+            Left(Label(Id("usable_memory"), "0123456789")),
+            HStretch()
+          )
+        ),
+        Left(
+          IntField(
+            Id("allocated_low_memory"),
+            Opt(:notify),
+            low_label,
+            0,
+            1048576,
+            128
+          )
+        )
+      ]
+      if Kdump.high_memory_supported?
+        widgets << Left(
+          IntField(
+            Id("allocated_high_memory"),
+            Opt(:notify),
+            _("Kdump &High Memory [MB]"),
+            0,
+            1048576,
+            128
+          )
+        )
+      end
+      VBox(*widgets)
     end
 
     def DisBackButton(key)

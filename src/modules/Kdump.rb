@@ -1038,6 +1038,14 @@ module Yast
       @initial_kdump_settings[FADUMP_KEY] != @KDUMP_SETTINGS[FADUMP_KEY]
     end
 
+    # Returns whether usage of high memory in the crashkernel bootloader param
+    # is supported by the current system
+    #
+    # @return [Boolean] is supported
+    def high_memory_supported?
+      Arch.i386 || Arch.x86_64
+    end
+
     publish :function => :GetModified, :type => "boolean ()"
     publish :function => :SetModified, :type => "void ()"
     publish :variable => :modified, :type => "boolean"
