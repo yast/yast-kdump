@@ -154,7 +154,7 @@ module Yast
 
       @import_called = false
 
-      # Write only, used during autoinstallation.
+      # Write only, used during autoinstallation/autoupgrade.
       # Don't run services and SuSEconfig, it's all done at one place.
       @write_only = false
 
@@ -666,7 +666,7 @@ module Yast
 
     def Update
       Builtins.y2milestone("Update kdump settings")
-      ReadKdumpKernelParam()
+      ReadKdumpKernelParam() unless Mode.autoupgrade
       WriteKdumpBootParameter()
       true
     end

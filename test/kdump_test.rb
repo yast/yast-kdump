@@ -470,4 +470,30 @@ describe Yast::Kdump do
       end
     end
   end
+
+  describe ".Update" do
+    before do
+      Yast::Mode.SetMode(mode)
+    end
+
+    context "in update mode" do
+      let(:mode) { "update" }
+
+      it "reads kernel param, update kdump boot parameter and returns true" do
+        expect(Yast::Kdump).to receive(:ReadKdumpKernelParam)
+        expect(Yast::Kdump).to receive(:WriteKdumpBootParameter)
+        expect(Yast::Kdump.Update).to eq(true)
+      end
+    end
+
+    context "in update mode" do
+      let(:mode) { "autoupgrade" }
+
+      it "does not reads kernel param but update kdump boot parameter and returns true" do
+        expect(Yast::Kdump).to_not receive(:ReadKdumpKernelParam)
+        expect(Yast::Kdump).to receive(:WriteKdumpBootParameter)
+        expect(Yast::Kdump.Update).to eq(true)
+      end
+    end
+  end
 end
