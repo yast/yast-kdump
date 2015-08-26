@@ -49,7 +49,7 @@ module Yast
         }
       elsif @func == "Write"
         # propose settings for kdump if autoyast doesn't include settings for yast2-kdump
-        Kdump.Propose if !Kdump.import_called && Mode.autoinst
+        Kdump.Propose if !Kdump.import_called && (Mode.autoinst || Mode.autoupgrade)
         if Mode.update
           Kdump.Update
         else
