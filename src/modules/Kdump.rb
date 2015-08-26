@@ -541,12 +541,12 @@ module Yast
 
       if @add_crashkernel_param
         crash_value = ""
-        crash_value = BuildCrashkernelValue() if !Mode.autoinst
+        crash_value = BuildCrashkernelValue() if !(Mode.autoinst || Mode.autoupgrade)
 
         if !@crashkernel_param || crash_value != @crashkernel_param_value
-          crash_value = @crashkernel_param_value if Mode.autoinst
-
-          if Mode.update
+          if Mode.autoinst || Mode.autoupgrade
+            crash_value = @crashkernel_param_value
+          elsif Mode.update
             if Builtins.search(crash_value, "@") != nil
               tmp_crash_value = Builtins.splitstring(crash_value, "@")
               crash_value = Ops.get(tmp_crash_value, 0, "")
