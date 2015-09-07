@@ -10,7 +10,8 @@ module Yast
     MIN_LOW_DEFAULT = 72
     MB_SIZE = 1048576
 
-    KDUMPTOOL_CMD = "kdumptool --configfile '%s' calibrate"
+    KDUMPTOOL_CMD = "kdumptool %s calibrate"
+    KDUMPTOOL_ARG = "--configfile '%s'"
     KEYS_MAP = {
       "MinLow" => :min_low,
       "MaxLow" => :max_low,
@@ -18,7 +19,7 @@ module Yast
       "MaxHigh" => :max_high
     }
 
-    def initialize(configfile)
+    def initialize(configfile = nil)
       @configfile = configfile
       setup
     end
@@ -126,7 +127,12 @@ module Yast
     #
     # @return [String] kdumptool command line
     def kdumptool_cmd
-      KDUMPTOOL_CMD % @configfile
+      if @configfile
+        args = KDUMPTOOL_ARG % @configfile
+      else
+        args = ""
+      end
+      KDUMPTOOL_CMD % args
     end
 
     # Checks whether the machine is expected to support high memory

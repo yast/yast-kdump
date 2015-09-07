@@ -336,9 +336,12 @@ module Yast
     #
     # @return [Yast::KdumpCalibrator] Calibrator instance
     def calibrator
-      @calibrator ||= begin
-          write_temporary_config_file
-          @calibrator = Yast::KdumpCalibrator.new(TEMPORARY_CONFIG_FILE)
+      return @calibrator unless @calibrator.nil?
+      if Mode.normal
+        @calibrator = Yast::KdumpCalibrator.new
+      else
+        write_temporary_config_file
+        @calibrator = Yast::KdumpCalibrator.new(TEMPORARY_CONFIG_FILE)
       end
     end
 
@@ -527,7 +530,7 @@ module Yast
           # Progress stage 3/4
           _("Reading kernel boot options..."),
           # Progress stage 4/4
-          _("Reading available memory...")
+          _("Calculating memory limits...")
         ],
         [
           # Progress step 1/4
@@ -535,7 +538,7 @@ module Yast
           # Progress step 2/4
           _("Reading partitions of disks..."),
           # Progress finished 3/4
-          _("Reading available memory..."),
+          _("Reading available memory and calibrating usage..."),
           # Progress finished 4/4
           Message.Finished
         ],
@@ -561,6 +564,7 @@ module Yast
       # read another database
       return false if Abort()
       Progress.NextStep
+      ProposeAllocatedMemory()
       # Error message
       Report.Error(_("Cannot read available memory.")) if total_memory.zero?
 
