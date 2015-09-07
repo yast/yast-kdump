@@ -1391,17 +1391,6 @@ module Yast
       UI.ChangeWidget(Id("usable_memory"), :Value, value.to_s)
     end
 
-    # Fixes invalid distributions of memory by adjusting all the fields to sizes
-    # that fit into the total amount
-    def adjust_allocated_memory
-      high = [Kdump.total_memory, allocated_high_memory].min
-      if Kdump.high_memory_supported?
-        UI.ChangeWidget(Id("allocated_high_memory"), :Value, high)
-      end
-      UI.ChangeWidget(Id("allocated_low_memory"), :Value, Kdump.total_memory - high)
-      UI.ChangeWidget(Id("usable_memory"), :Value, "0")
-    end
-
     # Function initializes option
     # "KdumpMemory"
     def InitKdumpMemory(key)
@@ -1442,11 +1431,7 @@ module Yast
       event = deep_copy(event)
       ret = Ops.get(event, "ID")
       if ["allocated_low_memory", "allocated_high_memory"].include?(ret)
-        if allocated_memory > Kdump.total_memory
-          adjust_allocated_memory
-        else
-          update_usable_memory
-        end
+        update_usable_memory
       end
 
       nil
