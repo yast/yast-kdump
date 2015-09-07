@@ -23,6 +23,7 @@ describe Yast::Kdump do
       before(:each) do
         Yast::Kdump.allocated_memory = {low: "42", high: "666"}
       end
+
       it "proposes the current value" do
         Yast::Kdump.ProposeAllocatedMemory
         expect(proposed_memory).to eq(low: "42", high: "666")
@@ -34,21 +35,12 @@ describe Yast::Kdump do
         Yast::Kdump.allocated_memory = {}
       end
 
-      context "when the proposal tool is not implemented yet" do
-        #before(:each) do
-          #allow(Yast::SCR).to receive(:Execute)
-          #  .with(Yast::Path.new(".target.bash"), /^cp/).and_return(0)
-          #expect(Yast::SCR).to receive(:Execute)
-          #  .with(Yast::Path.new(".target.bash_output"), /^kdumptool/)
-          #  .and_return({"exit" => 1, "stdout" => "", "stderr" => "not there" })
-        #end
+      it "proposes the minimum values suggested by the calibrator" do
+        allow(Yast::Kdump.calibrator).to receive(:min_low).and_return 11
+        allow(Yast::Kdump.calibrator).to receive(:min_high).and_return 22
 
-        #it "proposes a positive integer" do
-        #  pending
-          #Yast::Kdump.ProposeAllocatedMemory
-          #expect(proposed_memory[:high]).to be_nil
-          #expect(proposed_memory[:low].to_i).to be > 0
-        #end
+        Yast::Kdump.ProposeAllocatedMemory
+        expect(proposed_memory).to eq(low: "11", high: "22")
       end
     end
   end

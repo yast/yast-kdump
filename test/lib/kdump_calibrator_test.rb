@@ -7,7 +7,8 @@ Yast.import "Arch"
 
 describe Yast::KdumpCalibrator do
   subject { described_class.new(configfile) }
-  KDUMPTOOL_OK = { "exit" => 0, "stdout" => "MinLow: 72\nMaxLow: 896\nMinHigh: 1024\nMaxHigh: 4096\n" }
+  KDUMPTOOL_OK = { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 1024\nMaxHigh: 4096\n" }
+  KDUMPTOOL_OLD = { "exit" => 0, "stdout" => "64\n" }
   KDUMPTOOL_ERROR = { "exit" => 1, "stdout" => "" }
 
   let(:configfile) { "/var/lib/YaST2/kdump.conf" }
@@ -20,7 +21,7 @@ describe Yast::KdumpCalibrator do
       .with(Yast::Path.new(".target.bash_output"), anything).and_return(kdumptool_output)
   end
 
-  describe "total_memory" do
+  describe "#total_memory" do
     it "returns total memory as reported by SCR" do
       allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
         .and_return([
@@ -35,7 +36,15 @@ describe Yast::KdumpCalibrator do
   describe "#min_low" do
     context "when kdumptool succeeds" do
       it "returns the value found by kdumptool" do
-        expect(subject.min_low).to eq(72)
+        expect(subject.min_low).to eq(32)
+      end
+    end
+
+    context "when kdumptool uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
+
+      it "returns the value found by kdumptool" do
+        expect(subject.min_low).to eq(64)
       end
     end
 
@@ -51,18 +60,18 @@ describe Yast::KdumpCalibrator do
   context "#max_low" do
     context "when kdumptool succeeds" do
       it "returns the value found in kdumptool" do
-        expect(subject.min_low).to eq(72)
+        expect(subject.max_low).to eq(712)
       end
     end
 
-    context "when kdumptool does not succeed" do
-      let(:kdumptool_output) { KDUMPTOOL_ERROR }
+    context "when kdumptool fails or uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
 
       before do
         allow(subject).to receive(:total_memory).and_return(total_memory)
       end
 
-      context "when available memory is more than 896" do
+      context "when high memory is supported" do
         let(:total_memory) { 4096 }
 
         it "returns 896" do
@@ -70,17 +79,17 @@ describe Yast::KdumpCalibrator do
         end
       end
 
-      context "when available memory is less than 896" do
-        let(:total_memory) { 784 }
+      context "when high memory is not supported" do
+        let(:total_memory) { 4096 }
+        let(:x86_64) { false }
 
-        it "returns system memory" do # all system memory?
+        it "returns system memory" do
           expect(subject.max_low).to eq(total_memory)
         end
       end
 
-      context "when high memory is not supported" do
-        let(:total_memory) { 1024 }
-        let(:x86_64) { false }
+      context "when high memory is supported but the available memory is small" do
+        let(:total_memory) { 784 }
 
         it "returns system memory" do
           expect(subject.max_low).to eq(total_memory)
@@ -98,16 +107,16 @@ describe Yast::KdumpCalibrator do
       end
     end
 
-    context "when kdumptool fails" do
-      let(:kdumptool_output) { KDUMPTOOL_ERROR }
+    context "when kdumptool uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
 
       it "returns 0" do
         expect(subject.min_high).to eq(0)
       end
     end
 
-    context "when high memory is not supported" do
-      let(:x86_64) { false }
+    context "when kdumptool fails" do
+      let(:kdumptool_output) { KDUMPTOOL_ERROR }
 
       it "returns 0" do
         expect(subject.min_high).to eq(0)
@@ -116,8 +125,6 @@ describe Yast::KdumpCalibrator do
   end
 
   describe "#max_high" do
-    let(:x86_64) { true }
-
     context "when kdumptool succeeds" do
       it "returns the value found by kdumptool" do
         expect(subject.max_high).to eq(4096)
@@ -127,32 +134,102 @@ describe Yast::KdumpCalibrator do
     context "when kdumptool fails" do
       let(:kdumptool_output) { KDUMPTOOL_ERROR }
 
-      it "returns total_memory - 896" do
-        expect(subject.max_high).to eq(0)
+      context "when high memory is supported" do
+        let(:x86_64) { true }
+
+        it "returns total_memory - 896" do
+          allow(subject).to receive(:total_memory).and_return(4096)
+
+          expect(subject.max_high).to eq(3200)
+        end
+      end
+
+      context "when high memory is not supported" do
+        let(:x86_64) { false }
+
+        it "returns 0" do
+          expect(subject.max_high).to eq(0)
+        end
       end
     end
 
-    context "when high memory is not supported" do
-      let(:x86_64) { false }
+    context "when kdumptool uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
 
-      it "returns 0" do
-        expect(subject.max_high).to eq(0)
+      context "when high memory is supported" do
+        let(:x86_64) { true }
+
+        it "returns total_memory - 896" do
+          allow(subject).to receive(:total_memory).and_return(4096)
+
+          expect(subject.max_high).to eq(3200)
+        end
+      end
+
+      context "when high memory is not supported" do
+        let(:x86_64) { false }
+
+        it "returns 0" do
+          expect(subject.max_high).to eq(0)
+        end
       end
     end
   end
 
   describe "#high_memory_supported?" do
-    context "when architecture is x86_64" do
-      it "returns true" do
-        expect(subject.high_memory_supported?).to eq(true)
+    subject(:supported) { described_class.new(configfile).high_memory_supported? }
+
+    context "when kdumptool succeeds" do
+      context "if kdumptool allows high memory" do
+        it "returns true" do
+          expect(supported).to eq(true)
+        end
+      end
+
+      context "if kdumptool returns 0 for high memory" do
+        let(:kdumptool_output) do
+          { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 0\nMaxHigh: 0\n" }
+        end
+
+        it "returns false" do
+          expect(supported).to eq(false)
+        end
       end
     end
 
-    context "when architecture is not x86_64" do
-      let(:x86_64) { false }
+    context "when kdumptool fails" do
+      let(:kdumptool_output) { KDUMPTOOL_ERROR }
 
-      it "returns false" do
-        expect(subject.high_memory_supported?).to eq(false)
+      context "when architecture is x86_64" do
+        it "returns true" do
+          expect(supported).to eq(true)
+        end
+      end
+
+      context "when architecture is not x86_64" do
+        let(:x86_64) { false }
+
+        it "returns false" do
+          expect(supported).to eq(false)
+        end
+      end
+    end
+
+    context "when kdumptool uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
+
+      context "when architecture is x86_64" do
+        it "returns true" do
+          expect(supported).to eq(true)
+        end
+      end
+
+      context "when architecture is not x86_64" do
+        let(:x86_64) { false }
+
+        it "returns false" do
+          expect(supported).to eq(false)
+        end
       end
     end
   end

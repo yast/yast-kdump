@@ -10,7 +10,7 @@ module Yast
     MIN_LOW_DEFAULT = 72
     MB_SIZE = 1048576
 
-    KDUMPTOOL_CMD = "kdumptool --configfile '%1' calibrate"
+    KDUMPTOOL_CMD = "kdumptool --configfile '%s' calibrate"
     KEYS_MAP = {
       "MinLow" => :min_low,
       "MaxLow" => :max_low,
@@ -27,7 +27,7 @@ module Yast
     #
     # @return [Boolean] true if it's available; 'false' otherwise.
     def high_memory_supported?
-      Arch.x86_64
+      !max_high.zero?
     end
 
     # Determines what's the recommended minimum quantity of low memory
@@ -45,12 +45,10 @@ module Yast
     #
     # @return [Fixnum] Memory size (in MB)
     def max_low
-      @max_low ||= high_memory_supported? ? [LOW_MEM, total_memory].min : total_memory
+      @max_low ||= propose_high_memory? ? [LOW_MEM, total_memory].min : total_memory
     end
 
-    # Determines what's the recommended maximum quantity of high memory
-    #
-    # If high memory is not supported, this is 0.
+    # Determines what's the recommended minimum quantity of high memory
     #
     # @return [Fixnum] Memory size (in MB)
     def min_high
@@ -64,7 +62,7 @@ module Yast
     # @return [Fixnum] Memory size (in MB)
     def max_high
       @max_high ||=
-        if high_memory_supported?
+        if propose_high_memory?
           (total_memory - LOW_MEM) > 0 ? total_memory - LOW_MEM : 0
         else
           0
@@ -89,7 +87,7 @@ module Yast
       { min_low: min_low, max_low: max_low, min_high: min_high, max_high: max_high }
     end
 
-    private
+  private
 
     # Set up memory values relying on kdumptool
     #
@@ -100,10 +98,8 @@ module Yast
         proposal = parse(out["stdout"])
         @min_low = proposal[:min_low]
         @max_low = proposal[:max_low]
-        if high_memory_supported?
-          @min_high = proposal[:min_high]
-          @max_high = proposal[:max_high]
-        end
+        @min_high = proposal[:min_high]
+        @max_high = proposal[:max_high]
       else
         log.warn("kdumptool could not be executed: #{out["stderr"]}")
       end
@@ -111,13 +107,13 @@ module Yast
 
     # Parses kdumptool output
     #
-    # It supports new and old memories of kdumptool.
+    # It supports new and old output formats of kdumptool.
     #
     # @return [Hash] Hash containing minimum and maximum low/high memory limits
     def parse(output)
       lines = output.split("\n")
       if lines.size == 1 # Old kdumptool version
-        { min_low: value.to_i }
+        { min_low: lines.first.to_i }
       else
         lines.each_with_object({}) do |line, prop|
           key, value = line.split(":").map(&:strip)
@@ -130,7 +126,16 @@ module Yast
     #
     # @return [String] kdumptool command line
     def kdumptool_cmd
-      Builtins.sformat(KDUMPTOOL_CMD, @configfile)
+      KDUMPTOOL_CMD % @configfile
+    end
+
+    # Checks whether the machine is expected to support high memory
+    #
+    # This method is only used in case the call to kdumptool failed
+    #
+    # @return [Boolean] true if a positive value for max_high is expected
+    def propose_high_memory?
+      Arch.x86_64
     end
   end
 end
