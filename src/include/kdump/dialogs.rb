@@ -540,9 +540,9 @@ module Yast
             Id("allocated_low_memory"),
             Opt(:notify),
             low_label,
-            0,
-            1048576,
-            128
+            Kdump.memory_limits[:min_low].to_i,
+            Kdump.memory_limits[:max_low].to_i,
+            0
           )
         )
       ]
@@ -552,9 +552,9 @@ module Yast
             Id("allocated_high_memory"),
             Opt(:notify),
             _("Kdump &High Memory [MB]"),
-            0,
-            1048576,
-            128
+            Kdump.memory_limits[:min_high].to_i,
+            Kdump.memory_limits[:max_high].to_i,
+            0
           )
         )
       end

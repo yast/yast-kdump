@@ -69,6 +69,8 @@ rake install DESTDIR="%{buildroot}"
 %defattr(-,root,root)
 %dir %{yast_yncludedir}/kdump
 %{yast_yncludedir}/kdump/*
+%dir %{yast_libdir}/kdump
+%{yast_libdir}/kdump/*
 %{yast_clientdir}/kdump.rb
 %{yast_clientdir}/kdump_*.rb
 %{yast_moduledir}/Kdump.*

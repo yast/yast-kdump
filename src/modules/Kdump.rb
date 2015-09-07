@@ -29,6 +29,7 @@
 # Representation of the configuration of kdump.
 # Input and output routines.
 require "yast"
+require "kdump/kdump_calibrator"
 
 module Yast
   class KdumpClass < Module
@@ -37,6 +38,8 @@ module Yast
     FADUMP_KEY = "KDUMP_FADUMP"
     KDUMP_SERVICE_NAME = "kdump"
     KDUMP_PACKAGES = ["kexec-tools", "kdump"]
+    TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig"
+    TEMPORARY_CONFIG_PATH = Path.new(".temporary.sysconfig.kdump")
 
     # Space on disk reserved for dump additionally to memory size in bytes
     # @see FATE #317488
@@ -319,9 +322,6 @@ module Yast
       true
     end
 
-    TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig"
-    TEMPORARY_CONFIG_PATH = Path.new(".temporary.sysconfig.kdump")
-
     def write_temporary_config_file
       SCR.RegisterAgent(TEMPORARY_CONFIG_PATH,
                         term(:ag_ini,
@@ -332,9 +332,19 @@ module Yast
       SCR.UnregisterAgent(TEMPORARY_CONFIG_PATH)
     end
 
-    PROPOSE_ALLOCATED_MEMORY_MB_COMMAND = "kdumptool --configfile #{TEMPORARY_CONFIG_FILE} calibrate"
-    # if the command fails
-    PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK = {low: "128"}
+    # Return the Kdump calibrator instance
+    #
+    # @return [Yast::KdumpCalibrator] Calibrator instance
+    def calibrator
+      @calibrator ||= begin
+          write_temporary_config_file
+          @calibrator = Yast::KdumpCalibrator.new(TEMPORARY_CONFIG_FILE)
+      end
+    end
+
+    def memory_limits
+      calibrator.memory_limits
+    end
 
     # Propose reserved/allocated memory
     # Store the result as a hash to @allocated_memory
@@ -343,17 +353,7 @@ module Yast
       # only propose once
       return true unless @allocated_memory.empty?
 
-      write_temporary_config_file
-      out = SCR.Execute(path(".target.bash_output"), PROPOSE_ALLOCATED_MEMORY_MB_COMMAND)
-      # TODO - FIXME: let's assume kdumptool returns low memory for now
-      output = out["stdout"].chomp
-      if out["exit"] != 0 or output.empty?
-        # stderr has been already logged
-        Builtins.y2error("failed to propose allocated memory")
-        @allocated_memory = PROPOSE_ALLOCATED_MEMORY_MB_FALLBACK
-      else
-        @allocated_memory = {low: output}
-      end
+      @allocated_memory = { low: calibrator.min_low.to_s, high: calibrator.min_high.to_s }
       Builtins.y2milestone(
         "[kdump] allocated memory if not set in \"crashkernel\" param: %1",
         @allocated_memory
@@ -361,48 +361,9 @@ module Yast
       true
     end
 
-    # Read available memory
-    #
-    #
-    #  @return [Boolean] successfull
-
-    def ReadAvailableMemory
-      output = Convert.convert(
-        SCR.Read(path(".probe.memory")),
-        :from => "any",
-        :to   => "list <map>"
-      )
-      Builtins.y2milestone(
-        "[kdump] (ReadAvailableMemory) SCR::Read(.probe.memory): %1",
-        output
-      )
-
-      resor = {}
-      temp = Builtins.maplist(output) { |mem| Ops.get(mem, "resource") }
-      #y2milestone("[kdump] (ReadAvailableMemory) temp: %1", temp);
-      resor = Builtins.tomap(Ops.get(temp, 0))
-
-      output = Convert.convert(
-        Ops.get(resor, "phys_mem"),
-        :from => "any",
-        :to   => "list <map>"
-      )
-      temp = Builtins.maplist(output) { |mem| Ops.get(mem, "range") }
-      #list <any> range = maplist(map resor["phys_mem"]:nil);
-
-      #resor = (map)range;
-      @total_memory = Ops.divide(Builtins.tointeger(Ops.get(temp, 0)), 1048576)
-      Builtins.y2milestone(
-        "[kdump] (ReadAvailableMemory) total phys. memory [MB]: %1",
-        Builtins.tostring(@total_memory)
-      )
-      true
-    end
-
     # Returns total size of physical memory in MiB
     def total_memory
-      ReadAvailableMemory() if @total_memory.zero?
-      @total_memory
+      @calibrator.total_memory
     end
 
     def log_settings_censoring_passwords(message)
@@ -601,7 +562,7 @@ module Yast
       return false if Abort()
       Progress.NextStep
       # Error message
-      Report.Error(_("Cannot read available memory.")) if !ReadAvailableMemory()
+      Report.Error(_("Cannot read available memory.")) if total_memory.zero?
 
       return false if Abort()
       # Progress finished
@@ -1043,7 +1004,7 @@ module Yast
     #
     # @return [Boolean] is supported
     def high_memory_supported?
-      Arch.i386 || Arch.x86_64
+      calibrator.high_memory_supported?
     end
 
     publish :function => :GetModified, :type => "boolean ()"
@@ -1059,6 +1020,7 @@ module Yast
     publish :variable => :crashkernel_param, :type => "boolean"
     publish :variable => :add_crashkernel_param, :type => "boolean"
     publish :variable => :allocated_memory, :type => "map"
+    publish :function => :memory_limits, :type => "map ()"
     publish :variable => :import_called, :type => "boolean"
     publish :variable => :write_only, :type => "boolean"
     publish :variable => :AbortFunction, :type => "boolean ()"
