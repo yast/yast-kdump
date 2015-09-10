@@ -671,7 +671,6 @@ module Yast
     end
 
     def ProposeCrashkernelParam
-      ReadAvailableMemory()
       # propose disable kdump if PC has less than 1024MB RAM
       if total_memory < 1024
         false
@@ -742,8 +741,6 @@ module Yast
     #
     def Propose
       Builtins.y2milestone("Proposing new settings of kdump")
-      # read available memory
-      ReadAvailableMemory()
       # set default values for global variables
       ProposeGlobalVars()
       ProposeAllocatedMemory()
