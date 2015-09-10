@@ -39,6 +39,10 @@ module Yast
 
       Yast.include include_target, "kdump/helps.rb"
       Yast.include include_target, "kdump/uifunctions.rb"
+    end
+
+    def wid_handling
+      return @wid_handling if @wid_handling
 
       @wid_handling = {
         "DisBackButton"          => {
@@ -389,6 +393,10 @@ module Yast
           "help"    => HelpKdump("NumberDumps")
         }
       }
+    end
+
+    def tabs
+      return @tabs if @tabs
 
       @tabs = {
         "start_up"           => {
@@ -588,8 +596,8 @@ module Yast
           #return CWMTab::CreateWidget($[
           "ids_order"      => sim_dialogs,
           "initial_screen" => "start_up",
-          "screens"        => @tabs,
-          "widget_descr"   => @wid_handling,
+          "screens"        => tabs,
+          "widget_descr"   => wid_handling,
           "back_button"    => "",
           "abort_button"   => Label.CancelButton,
           "next_button"    => Label.OKButton

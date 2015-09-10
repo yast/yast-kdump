@@ -21,7 +21,7 @@ module Yast
 
     def initialize(configfile = nil)
       @configfile = configfile
-      setup
+      @kdumptool_executed = false
     end
 
     # Determines whether high memory support is available
@@ -37,6 +37,7 @@ module Yast
     #
     # @return [Fixnum] Memory size (in MB)
     def min_low
+      run_kdumptool unless @kdumptool_executed
       @min_low ||= MIN_LOW_DEFAULT
     end
 
@@ -46,6 +47,7 @@ module Yast
     #
     # @return [Fixnum] Memory size (in MB)
     def max_low
+      run_kdumptool unless @kdumptool_executed
       @max_low ||= propose_high_memory? ? [LOW_MEM, total_memory].min : total_memory
     end
 
@@ -53,6 +55,7 @@ module Yast
     #
     # @return [Fixnum] Memory size (in MB)
     def min_high
+      run_kdumptool unless @kdumptool_executed
       @min_high ||= 0
     end
 
@@ -62,6 +65,7 @@ module Yast
     #
     # @return [Fixnum] Memory size (in MB)
     def max_high
+      run_kdumptool unless @kdumptool_executed
       @max_high ||=
         if propose_high_memory?
           (total_memory - LOW_MEM) > 0 ? total_memory - LOW_MEM : 0
@@ -74,9 +78,11 @@ module Yast
     #
     # @return [Fixnum] Memory size (in MB)
     def total_memory
+      return @total_memory if @total_memory
+
       probe = SCR.Read(Yast::Path.new(".probe.memory"))
       resource = probe.first["resource"]
-      resource["phys_mem"][0]["range"] / MB_SIZE
+      @total_memory = resource["phys_mem"][0]["range"] / MB_SIZE
     end
 
     # Builds a hash containing memory limits
@@ -93,7 +99,7 @@ module Yast
     # Set up memory values relying on kdumptool
     #
     # @see parse
-    def setup
+    def run_kdumptool
       out = Yast::SCR.Execute(Yast::Path.new(".target.bash_output"), kdumptool_cmd)
       if out["exit"].zero?
         proposal = parse(out["stdout"])
@@ -104,6 +110,7 @@ module Yast
       else
         log.warn("kdumptool could not be executed: #{out["stderr"]}")
       end
+      @kdump_executed = true
     end
 
     # Parses kdumptool output

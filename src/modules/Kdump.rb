@@ -366,7 +366,7 @@ module Yast
 
     # Returns total size of physical memory in MiB
     def total_memory
-      @calibrator.total_memory
+      calibrator.total_memory
     end
 
     def log_settings_censoring_passwords(message)
@@ -684,13 +684,14 @@ module Yast
 
     def ProposeGlobalVars
       if !@propose_called
+        # added default settings
+        @KDUMP_SETTINGS = deep_copy(@DEFAULT_CONFIG)
+
         # Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
         # (bnc#890719)
         @add_crashkernel_param = ProposeCrashkernelParam() unless Mode.autoinst
 
         @crashkernel_param = false
-        # added defualt settings
-        @KDUMP_SETTINGS = deep_copy(@DEFAULT_CONFIG)
       end
       @propose_called = true
 
@@ -743,11 +744,10 @@ module Yast
       Builtins.y2milestone("Proposing new settings of kdump")
       # set default values for global variables
       ProposeGlobalVars()
+      # check available memory and execute the calibrator
       ProposeAllocatedMemory()
-
       # add packages for installation
       AddPackages()
-
       # select packages for installation
       CheckPackages()
 
@@ -769,7 +769,7 @@ module Yast
         result = Builtins.add(
           result,
           Builtins.sformat(
-            _("Values of crashkernel option: %1"),
+            _("Value(s) of crashkernel option: %1"),
             crash_kernel_values.join(" ")
           )
         )
@@ -937,6 +937,13 @@ module Yast
     def Import(settings)
       settings = deep_copy(settings)
       Builtins.y2milestone("Importing settings for kdump")
+
+      my_import_map = Ops.get_map(settings, "general", {})
+      @DEFAULT_CONFIG.each_pair do |key, def_value|
+        value = my_import_map[key]
+        @KDUMP_SETTINGS[key] = value.nil? ? def_value : value
+      end
+
       # Make sure it's an array
       @crashkernel_param_values = Array(settings.fetch("crash_kernel", ""))
       if settings.has_key?("add_crash_kernel")
@@ -944,22 +951,14 @@ module Yast
       else
         @add_crashkernel_param = ProposeCrashkernelParam()
       end
-      result = true
-      my_import_map = Ops.get_map(settings, "general", {})
-      Builtins.foreach(Map.Keys(@DEFAULT_CONFIG)) do |key|
-        str_key = Builtins.tostring(key)
-        val = Ops.get(my_import_map, str_key)
-        Ops.set(@KDUMP_SETTINGS, str_key, val) if val != nil
-        if val == nil
-          Ops.set(@KDUMP_SETTINGS, str_key, Ops.get(@DEFAULT_CONFIG, str_key))
-        end
-      end
+
       if Builtins.haskey(settings, "crash_kernel") ||
           Builtins.haskey(settings, "add_crash_kernel") ||
           Ops.greater_than(Builtins.size(my_import_map), 0)
         @import_called = true
       end
-      result
+
+      true
     end
 
     # Returns whether FADump (Firmware assisted dump) is supported
