@@ -7,7 +7,10 @@ Yast.import "Arch"
 
 describe Yast::KdumpCalibrator do
   subject { described_class.new(configfile) }
-  KDUMPTOOL_OK = { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 1024\nMaxHigh: 4096\n" }
+  KDUMPTOOL_OK = {
+    "exit" => 0,
+    "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 1024\nMaxHigh: 4096\nTotal: 16465714\n"
+  }
   KDUMPTOOL_OLD = { "exit" => 0, "stdout" => "64\n" }
   KDUMPTOOL_ERROR = { "exit" => 1, "stdout" => "" }
 
@@ -22,14 +25,24 @@ describe Yast::KdumpCalibrator do
   end
 
   describe "#total_memory" do
-    it "returns total memory as reported by SCR" do
-      allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
-        .and_return([
-          {"class_id" => 257, "model" => "Main Memory",
-           "resource" => { "mem" => [{ "active" => true, "length" => 4294967296, "start"=>0 } ],
-                           "phys_mem" => [{ "range" => 4294967296 }]}, "sub_class_id"=>2 }])
+    context "when kdumptool succeeds" do
+      it "returns the value found in kdumptool" do
+        expect(subject.total_memory).to eq(16079)
+      end
+    end
 
-      expect(subject.total_memory).to eq(4096)
+    context "when kdumptool fails or uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
+
+      it "returns total memory as reported by SCR" do
+        allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
+          .and_return([
+            {"class_id" => 257, "model" => "Main Memory",
+             "resource" => { "mem" => [{ "active" => true, "length" => 4294967296, "start"=>0 } ],
+                             "phys_mem" => [{ "range" => 4294967296 }]}, "sub_class_id"=>2 }])
+
+        expect(subject.total_memory).to eq(4096)
+      end
     end
   end
 
@@ -188,7 +201,7 @@ describe Yast::KdumpCalibrator do
 
       context "if kdumptool returns 0 for high memory" do
         let(:kdumptool_output) do
-          { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 0\nMaxHigh: 0\n" }
+          { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 0\nMaxHigh: 0\nTotal: 2097152" }
         end
 
         it "returns false" do

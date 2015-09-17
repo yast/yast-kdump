@@ -9,14 +9,17 @@ module Yast
     LOW_MEM = 896
     MIN_LOW_DEFAULT = 72
     MB_SIZE = 1048576
+    KB_SIZE = 1024
 
     KDUMPTOOL_CMD = "kdumptool %s calibrate"
     KDUMPTOOL_ARG = "--configfile '%s'"
     KEYS_MAP = {
-      "MinLow" => :min_low,
-      "MaxLow" => :max_low,
+      "MinLow"  => :min_low,
+      "MaxLow"  => :max_low,
       "MinHigh" => :min_high,
-      "MaxHigh" => :max_high
+      "MaxHigh" => :max_high,
+      "Total"   => :total_memory
+
     }
 
     def initialize(configfile = nil)
@@ -78,8 +81,12 @@ module Yast
     #
     # @return [Fixnum] Memory size (in MB)
     def total_memory
+      run_kdumptool unless @kdumptool_executed
       return @total_memory if @total_memory
 
+      # Calculating the total memory in a system with kdump enabled is tricky.
+      # As a best effort if kdumptool is not available, let's use the physical
+      # memory reported by the kernel.
       probe = SCR.Read(Yast::Path.new(".probe.memory"))
       resource = probe.first["resource"]
       @total_memory = resource["phys_mem"][0]["range"] / MB_SIZE
@@ -103,10 +110,11 @@ module Yast
       out = Yast::SCR.Execute(Yast::Path.new(".target.bash_output"), kdumptool_cmd)
       if out["exit"].zero?
         proposal = parse(out["stdout"])
-        @min_low = proposal[:min_low]
-        @max_low = proposal[:max_low]
-        @min_high = proposal[:min_high]
-        @max_high = proposal[:max_high]
+        # Populate @min_low, @max_low, @total_memory, etc.
+        proposal.each_pair do |var_name, var_value|
+          instance_variable_set("@#{var_name}", var_value)
+        end
+        @total_memory /= KB_SIZE if @total_memory
       else
         log.warn("kdumptool could not be executed: #{out["stderr"]}")
       end
