@@ -37,8 +37,8 @@ BuildRequires:  yast2-packager >= 2.17.24
 BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
 Requires:       yast2
-# Kernel parameters with multiple values
-Requires:       yast2-bootloader >= 3.1.144
+# Kernel parameters with multiple values and bug#945479 fixed
+Requires:       yast2-bootloader >= 3.1.148
 Requires:       yast2-ruby-bindings >= 1.0.0
 Requires:       yast2-storage
 # SpaceCalculation.GetPartitionInfo
