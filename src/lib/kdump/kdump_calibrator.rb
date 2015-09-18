@@ -1,5 +1,5 @@
 module Yast
-  # This class tries to calibrate Kdump minimum and maximum values
+  # This class tries to calibrate Kdump minimum, maximum and recommended values
   #
   # It relies on kdumptool but, if the tool is not available or does not work
   # as expected, tries to set up reasonable memory values on its own.
@@ -8,13 +8,15 @@ module Yast
 
     LOW_MEM = 896
     MIN_LOW_DEFAULT = 72
-    MB_SIZE = 1048576
+    MiB_SIZE = 1048576
 
     KDUMPTOOL_CMD = "kdumptool %s calibrate"
     KDUMPTOOL_ARG = "--configfile '%s'"
     KEYS_MAP = {
+      "Low"     => :default_low,
       "MinLow"  => :min_low,
       "MaxLow"  => :max_low,
+      "High"    => :default_high,
       "MinHigh" => :min_high,
       "MaxHigh" => :max_high,
       "Total"   => :total_memory
@@ -32,11 +34,21 @@ module Yast
       !max_high.zero?
     end
 
-    # Determines what's the recommended minimum quantity of low memory
+    # Determines what's the recommended quantity of low memory
     #
-    # If high memory is not supported, this is the minimum recommended memory.
+    # If high memory is not supported, this is the total recommended memory.
     #
-    # @return [Fixnum] Memory size (in MB)
+    # @return [Fixnum] Memory size (in MiB)
+    def default_low
+      run_kdumptool unless @kdumptool_executed
+      @default_low ||= min_low
+    end
+
+    # Determines what's the minimum quantity of low memory
+    #
+    # If high memory is not supported, this is the minimum kdump memory.
+    #
+    # @return [Fixnum] Memory size (in MiB)
     def min_low
       run_kdumptool unless @kdumptool_executed
       @min_low ||= MIN_LOW_DEFAULT
@@ -46,15 +58,23 @@ module Yast
     #
     # If high memory is not supported, this is the maximum recommended memory.
     #
-    # @return [Fixnum] Memory size (in MB)
+    # @return [Fixnum] Memory size (in MiB)
     def max_low
       run_kdumptool unless @kdumptool_executed
       @max_low ||= propose_high_memory? ? [LOW_MEM, total_memory].min : total_memory
     end
 
-    # Determines what's the recommended minimum quantity of high memory
+    # Determines what's the recommended quantity of high memory
     #
-    # @return [Fixnum] Memory size (in MB)
+    # @return [Fixnum] Memory size (in MiB)
+    def default_high
+      run_kdumptool unless @kdumptool_executed
+      @default_high ||= min_high
+    end
+
+    # Determines what's the minimum quantity of high memory
+    #
+    # @return [Fixnum] Memory size (in MiB)
     def min_high
       run_kdumptool unless @kdumptool_executed
       @min_high ||= 0
@@ -64,7 +84,7 @@ module Yast
     #
     # If high memory is not supported, this is 0.
     #
-    # @return [Fixnum] Memory size (in MB)
+    # @return [Fixnum] Memory size (in MiB)
     def max_high
       run_kdumptool unless @kdumptool_executed
       @max_high ||=
@@ -77,7 +97,7 @@ module Yast
 
     # System available memory
     #
-    # @return [Fixnum] Memory size (in MB)
+    # @return [Fixnum] Memory size (in MiB)
     def total_memory
       run_kdumptool unless @kdumptool_executed
       return @total_memory if @total_memory
@@ -87,7 +107,7 @@ module Yast
       # memory reported by the kernel.
       probe = SCR.Read(Yast::Path.new(".probe.memory"))
       resource = probe.first["resource"]
-      @total_memory = resource["phys_mem"][0]["range"] / MB_SIZE
+      @total_memory = resource["phys_mem"][0]["range"] / MiB_SIZE
     end
 
     # Builds a hash containing memory limits
@@ -126,7 +146,8 @@ module Yast
     def parse(output)
       lines = output.split("\n")
       if lines.size == 1 # Old kdumptool version
-        { min_low: lines.first.to_i }
+        low = lines.first.to_i
+        { min_low: low, default_low: low }
       else
         lines.each_with_object({}) do |line, prop|
           key, value = line.split(":").map(&:strip)

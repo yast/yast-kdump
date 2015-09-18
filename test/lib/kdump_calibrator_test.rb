@@ -9,7 +9,8 @@ describe Yast::KdumpCalibrator do
   subject { described_class.new(configfile) }
   KDUMPTOOL_OK = {
     "exit" => 0,
-    "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 1024\nMaxHigh: 4096\nTotal: 16079\n"
+    "stdout" => "Low: 108\nMinLow: 32\nMaxLow: 712\n"\
+                "High: 2048\nMinHigh: 1024\nMaxHigh: 4096\nTotal: 16079\n"
   }
   KDUMPTOOL_OLD = { "exit" => 0, "stdout" => "64\n" }
   KDUMPTOOL_ERROR = { "exit" => 1, "stdout" => "" }
@@ -69,6 +70,29 @@ describe Yast::KdumpCalibrator do
     end
   end
 
+  describe "#default_low" do
+    context "when kdumptool succeeds" do
+      it "returns the value found by kdumptool" do
+        expect(subject.default_low).to eq(108)
+      end
+    end
+
+    context "when kdumptool uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
+
+      it "returns the value found by kdumptool" do
+        expect(subject.default_low).to eq(64)
+      end
+    end
+
+    context "when kdumptool does not succeed" do
+      let(:kdumptool_output) { KDUMPTOOL_ERROR }
+
+      it "returns the fallback minimal margin" do
+        expect(subject.default_low).to eq(72)
+      end
+    end
+  end
   context "#max_low" do
     context "when kdumptool succeeds" do
       it "returns the value found in kdumptool" do
@@ -132,6 +156,32 @@ describe Yast::KdumpCalibrator do
 
       it "returns 0" do
         expect(subject.min_high).to eq(0)
+      end
+    end
+  end
+
+  describe "#default_high" do
+    let(:x86_64) { true }
+
+    context "when kdumptool succeeds" do
+      it "returns the value found by kdumptool" do
+        expect(subject.default_high).to eq(2048)
+      end
+    end
+
+    context "when kdumptool uses the old format" do
+      let(:kdumptool_output) { KDUMPTOOL_OLD }
+
+      it "returns 0 (the minimum fallback)" do
+        expect(subject.default_high).to eq(0)
+      end
+    end
+
+    context "when kdumptool fails" do
+      let(:kdumptool_output) { KDUMPTOOL_ERROR }
+
+      it "returns 0 (the minimum fallback)" do
+        expect(subject.default_high).to eq(0)
       end
     end
   end
@@ -200,7 +250,11 @@ describe Yast::KdumpCalibrator do
 
       context "if kdumptool returns 0 for high memory" do
         let(:kdumptool_output) do
-          { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 0\nMaxHigh: 0\nTotal: 2048" }
+          {
+            "exit" => 0,
+            "stdout" => "Low: 108\nMinLow: 32\nMaxLow: 712\n"\
+                        "High:0\nMinHigh: 0\nMaxHigh: 0\nTotal: 2048"
+          }
         end
 
         it "returns false" do

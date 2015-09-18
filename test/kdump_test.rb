@@ -35,9 +35,9 @@ describe Yast::Kdump do
         Yast::Kdump.allocated_memory = {}
       end
 
-      it "proposes the minimum values suggested by the calibrator" do
-        allow(Yast::Kdump.calibrator).to receive(:min_low).and_return 11
-        allow(Yast::Kdump.calibrator).to receive(:min_high).and_return 22
+      it "proposes the default values suggested by the calibrator" do
+        allow(Yast::Kdump.calibrator).to receive(:default_low).and_return 11
+        allow(Yast::Kdump.calibrator).to receive(:default_high).and_return 22
 
         Yast::Kdump.ProposeAllocatedMemory
         expect(proposed_memory).to eq(low: "11", high: "22")
