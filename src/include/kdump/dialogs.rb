@@ -526,22 +526,22 @@ module Yast
       min = Kdump.memory_limits[:min_low].to_i
       max = Kdump.memory_limits[:max_low].to_i
       if Kdump.high_memory_supported?
-        low_label = _("Kdump &Low Memory [MB]")
+        low_label = _("Kdump &Low Memory [MiB]")
       else
-        low_label = _("Kdump Memor&y [MB]")
+        low_label = _("Kdump Memor&y [MiB]")
       end
       low_label += " (#{min} - #{max})"
       widgets = [
         Left(
           HBox(
-            Left(Label(_("Total System Memory [MB]:"))),
+            Left(Label(_("Total System Memory [MiB]:"))),
             Left(Label(Id("total_memory"), "0123456789")),
             HStretch()
           )
         ),
         Left(
           HBox(
-            Left(Label(_("Usable Memory [MB]:"))),
+            Left(Label(_("Usable Memory [MiB]:"))),
             Left(Label(Id("usable_memory"), "0123456789")),
             HStretch()
           )
@@ -564,7 +564,7 @@ module Yast
           IntField(
             Id("allocated_high_memory"),
             Opt(:notify),
-            _("Kdump &High Memory [MB]") + " (#{min} - #{max})",
+            _("Kdump &High Memory [MiB]") + " (#{min} - #{max})",
             min,
             max,
             0
