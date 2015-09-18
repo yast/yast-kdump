@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Sep  7 17:59:40 UTC 2015 - ancor@suse.com
+
+- Added support for allocating low and high memory in systems
+  supporting the feature (bnc#882082)
+- Fixed behavior during autoupgrade
+- 3.1.26
+
+-------------------------------------------------------------------
 Tue Jul 21 15:34:11 UTC 2015 - igonzalezsosa@suse.com
 
 - Fix initialization of target value in the UI (bsc#935756).

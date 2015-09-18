@@ -740,14 +740,17 @@ module Yast
       if Ops.get(options, "enable") != nil &&
           Ops.get(options, "alloc_mem") != nil
         Kdump.add_crashkernel_param = true
-        Kdump.allocated_memory = Builtins.tostring(Ops.get(options, "alloc_mem"))
+        Kdump.allocated_memory = { low: options["alloc_mem"].to_s }
         #TRANSLATORS: CommandLine printed text
         if Kdump.crashkernel_list_ranges
           CommandLine.Print(
             _(
-              "Kernel option \"crashkernel\" includes ranges. They will be rewritten."
+              "Kernel option \"crashkernel\" includes ranges and/or redundant values.\n"\
+              "It will be rewritten."
             )
           )
+          # Force value to false, so it's actually rewritten
+          Kdump.crashkernel_list_ranges = false
         end
         CommandLine.Print(_("To apply changes a reboot is necessary."))
         return true

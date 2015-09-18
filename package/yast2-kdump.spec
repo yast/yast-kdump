@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.25
+Version:        3.1.26
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0
@@ -37,7 +37,8 @@ BuildRequires:  yast2-packager >= 2.17.24
 BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
 Requires:       yast2
-Requires:       yast2-bootloader >= 3.1.35
+# Kernel parameters with multiple values and bug#945479 fixed
+Requires:       yast2-bootloader >= 3.1.148
 Requires:       yast2-ruby-bindings >= 1.0.0
 Requires:       yast2-storage
 # SpaceCalculation.GetPartitionInfo
@@ -69,6 +70,8 @@ rake install DESTDIR="%{buildroot}"
 %defattr(-,root,root)
 %dir %{yast_yncludedir}/kdump
 %{yast_yncludedir}/kdump/*
+%dir %{yast_libdir}/kdump
+%{yast_libdir}/kdump/*
 %{yast_clientdir}/kdump.rb
 %{yast_clientdir}/kdump_*.rb
 %{yast_moduledir}/Kdump.*

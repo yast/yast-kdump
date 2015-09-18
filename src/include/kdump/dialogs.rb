@@ -39,6 +39,10 @@ module Yast
 
       Yast.include include_target, "kdump/helps.rb"
       Yast.include include_target, "kdump/uifunctions.rb"
+    end
+
+    def wid_handling
+      return @wid_handling if @wid_handling
 
       @wid_handling = {
         "DisBackButton"          => {
@@ -72,34 +76,7 @@ module Yast
         },
         "KdumpMemory"            => {
           "widget"            => :custom,
-          "custom_widget"     => HSquash(
-            VBox(
-              Left(
-                HBox(
-                  Left(Label(_("Total System Memory [MB]:"))),
-                  Left(Label(Id("total_memory"), "0123456789")),
-                  HStretch()
-                )
-              ),
-              Left(
-                HBox(
-                  Left(Label(_("Usable Memory [MB]:"))),
-                  Left(Label(Id("usable_memory"), "0123456789")),
-                  HStretch()
-                )
-              ),
-              Left(
-                IntField(
-                  Id("allocated_memory"),
-                  Opt(:notify),
-                  _("Kdump Memor&y [MB]"),
-                  32,
-                  1048576,
-                  128
-                )
-              )
-            )
-          ),
+          "custom_widget"     => HSquash(kdump_memory_widget),
           "init"              => fun_ref(
             method(:InitKdumpMemory),
             "void (string)"
@@ -416,6 +393,10 @@ module Yast
           "help"    => HelpKdump("NumberDumps")
         }
       }
+    end
+
+    def tabs
+      return @tabs if @tabs
 
       @tabs = {
         "start_up"           => {
@@ -541,6 +522,58 @@ module Yast
       }
     end
 
+    def kdump_memory_widget
+      min = Kdump.memory_limits[:min_low].to_i
+      max = Kdump.memory_limits[:max_low].to_i
+      if Kdump.high_memory_supported?
+        low_label = _("Kdump &Low Memory [MiB]")
+      else
+        low_label = _("Kdump Memor&y [MiB]")
+      end
+      low_label += " (#{min} - #{max})"
+      widgets = [
+        Left(
+          HBox(
+            Left(Label(_("Total System Memory [MiB]:"))),
+            Left(Label(Id("total_memory"), "0123456789")),
+            HStretch()
+          )
+        ),
+        Left(
+          HBox(
+            Left(Label(_("Usable Memory [MiB]:"))),
+            Left(Label(Id("usable_memory"), "0123456789")),
+            HStretch()
+          )
+        ),
+        Left(
+          IntField(
+            Id("allocated_low_memory"),
+            Opt(:notify),
+            low_label,
+            min,
+            max,
+            0
+          )
+        )
+      ]
+      if Kdump.high_memory_supported?
+        min = Kdump.memory_limits[:min_high].to_i
+        max = Kdump.memory_limits[:max_high].to_i
+        widgets << Left(
+          IntField(
+            Id("allocated_high_memory"),
+            Opt(:notify),
+            _("Kdump &High Memory [MiB]") + " (#{min} - #{max})",
+            min,
+            max,
+            0
+          )
+        )
+      end
+      VBox(*widgets)
+    end
+
     def DisBackButton(key)
       Wizard.SetTitleIcon("yast-kdump")
       UI.ChangeWidget(Id(:back), :Enabled, false)
@@ -563,8 +596,8 @@ module Yast
           #return CWMTab::CreateWidget($[
           "ids_order"      => sim_dialogs,
           "initial_screen" => "start_up",
-          "screens"        => @tabs,
-          "widget_descr"   => @wid_handling,
+          "screens"        => tabs,
+          "widget_descr"   => wid_handling,
           "back_button"    => "",
           "abort_button"   => Label.CancelButton,
           "next_button"    => Label.OKButton

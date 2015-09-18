@@ -14,58 +14,54 @@ describe Yast::Kdump do
     Yast::Kdump.reset
   end
 
-  # allocated_memory is a string   in megabytes
+  # allocated_memory is a hash, values are strings in megabytes
   # total_memory     is an integer in megabytes
   describe "#ProposeAllocatedMemory" do
+    let(:proposed_memory) { Yast::Kdump.allocated_memory }
+
     context "when already proposed" do
       before(:each) do
-        Yast::Kdump.allocated_memory = "42"
+        Yast::Kdump.allocated_memory = { low: "42", high: "666" }
       end
+
       it "proposes the current value" do
         Yast::Kdump.ProposeAllocatedMemory
-        expect(Yast::Kdump.allocated_memory).to eq "42"
+        expect(proposed_memory).to eq(low: "42", high: "666")
       end
     end
 
     context "when not yet proposed" do
       before(:each) do
-        Yast::Kdump.allocated_memory = "0"
+        Yast::Kdump.allocated_memory = {}
       end
 
-      context "when the proposal tool is not implemented yet" do
-        before(:each) do
-          allow(Yast::SCR).to receive(:Execute)
-            .with(Yast::Path.new(".target.bash"), /^cp/).and_return(0)
-          expect(Yast::SCR).to receive(:Execute)
-            .with(Yast::Path.new(".target.bash_output"), /^kdumptool/)
-            .and_return({"exit" => 1, "stdout" => "", "stderr" => "not there" })
-        end
+      it "proposes the minimum values suggested by the calibrator" do
+        allow(Yast::Kdump.calibrator).to receive(:min_low).and_return 11
+        allow(Yast::Kdump.calibrator).to receive(:min_high).and_return 22
 
-        it "proposes a positive integer" do
-          Yast::Kdump.ProposeAllocatedMemory
-          expect(Yast::Kdump.allocated_memory.to_i).to be > 0
-        end
+        Yast::Kdump.ProposeAllocatedMemory
+        expect(proposed_memory).to eq(low: "11", high: "22")
       end
     end
   end
 
   let(:partition_info) do
     [
-      {"free"=>389318, "name"=>"/", "used"=>1487222},
-      {"free"=>1974697, "name"=>"usr", "used"=>4227733},
-      {"free"=>2974697, "name"=>"/var", "used"=>4227733},
+      { "free" => 389318, "name" => "/", "used" => 1487222 },
+      { "free" => 1974697, "name" => "usr", "used" => 4227733 },
+      { "free" => 2974697, "name" => "/var", "used" => 4227733 },
       # this is the matching partition entry
-      {"free"=>8974697, "name"=>"var/crash", "used"=>16},
-      {"free"=>397697, "name"=>"var/crash/not-this", "used"=>455}
+      { "free" => 8974697, "name" => "var/crash", "used" => 16 },
+      { "free" => 397697, "name" => "var/crash/not-this", "used" => 455 }
     ]
   end
 
   let(:not_exactly_matching_partition_info) do
     [
-      {"free"=>8888888, "name"=>"/"},
-      {"free" => 1, "name" => "var/some"},
-      {"free"=>5555555, "name"=>"somewhere/d"},
-      {"free"=>6666666, "name"=>"somewhere/deep"}
+      { "free" => 8888888, "name" => "/" },
+      { "free" => 1, "name" => "var/some" },
+      { "free" => 5555555, "name" => "somewhere/d" },
+      { "free" => 6666666, "name" => "somewhere/deep" }
     ]
   end
 
@@ -101,10 +97,10 @@ describe Yast::Kdump do
 
     context "when partition does not provide free space information" do
       it "returns 'nil'" do
-        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{"free"=>nil, "name"=>"var/crash"}])
+        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{ "free" => nil, "name" => "var/crash" }])
         expect(Yast::Kdump.free_space_for_dump_b).to eq(nil)
 
-        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{"name"=>"var/crash"}])
+        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{ "name" => "var/crash" }])
         expect(Yast::Kdump.free_space_for_dump_b).to eq(nil)
       end
     end
@@ -222,7 +218,7 @@ describe Yast::Kdump do
       end
 
       it "correctly reads the size" do
-        expect(Yast::Kdump.allocated_memory).to eq "32"
+        expect(Yast::Kdump.allocated_memory).to eq(low: "32")
       end
     end
 
@@ -242,7 +238,7 @@ describe Yast::Kdump do
       end
 
       it "correctly reads the size" do
-        expect(Yast::Kdump.allocated_memory).to eq "32"
+        expect(Yast::Kdump.allocated_memory).to eq(low: "32")
       end
     end
 
@@ -262,7 +258,107 @@ describe Yast::Kdump do
       end
 
       it "correctly reads the size of the first range" do
-        expect(Yast::Kdump.allocated_memory).to eq "32"
+        expect(Yast::Kdump.allocated_memory).to eq(low: "32")
+      end
+    end
+
+    context "when the param includes numbers with high and low" do
+      let(:kernel_param) { ["64M,low", "128M,high"] }
+
+      it "reports presence of the param" do
+        expect(Yast::Kdump.crashkernel_param).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(Yast::Kdump.add_crashkernel_param).to eq true
+      end
+
+      it "does not find several ranges" do
+        expect(Yast::Kdump.crashkernel_list_ranges).to eq false
+      end
+
+      it "correctly reads both sizes" do
+        expect(Yast::Kdump.allocated_memory).to eq(low: "64", high: "128")
+      end
+    end
+
+    context "when the param is a number for high memory" do
+      let(:kernel_param) { "128M,high" }
+
+      it "reports presence of the param" do
+        expect(Yast::Kdump.crashkernel_param).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(Yast::Kdump.add_crashkernel_param).to eq true
+      end
+
+      it "does not find several ranges" do
+        expect(Yast::Kdump.crashkernel_list_ranges).to eq false
+      end
+
+      it "correctly reads the size" do
+        expect(Yast::Kdump.allocated_memory).to eq(high: "128")
+      end
+    end
+
+    context "when the param uses ranges for both high and low" do
+      let(:kernel_param) { ["-200M:32M,high", "64M-:16M"] }
+
+      it "reports presence of the param" do
+        expect(Yast::Kdump.crashkernel_param).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(Yast::Kdump.add_crashkernel_param).to eq true
+      end
+
+      it "does not find several ranges" do
+        expect(Yast::Kdump.crashkernel_list_ranges).to eq false
+      end
+
+      it "correctly reads the size" do
+        expect(Yast::Kdump.allocated_memory).to eq(high: "32", low: "16")
+      end
+    end
+
+    context "when the param uses complex ranges and types" do
+      let(:kernel_param) { ["-200M:32M,200M-:64M,low", "1024-:128M,high"] }
+
+      it "reports presence of the param" do
+        expect(Yast::Kdump.crashkernel_param).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(Yast::Kdump.add_crashkernel_param).to eq true
+      end
+
+      it "finds several ranges" do
+        expect(Yast::Kdump.crashkernel_list_ranges).to eq true
+      end
+
+      it "correctly reads the size" do
+        expect(Yast::Kdump.allocated_memory).to eq(high: "128", low: "32")
+      end
+    end
+
+    context "when some type of memory (high, low) has several values" do
+      let(:kernel_param) { ["64M", "128M,low"] }
+
+      it "reports presence of the param" do
+        expect(Yast::Kdump.crashkernel_param).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(Yast::Kdump.add_crashkernel_param).to eq true
+      end
+
+      it "finds several ranges" do
+        expect(Yast::Kdump.crashkernel_list_ranges).to eq true
+      end
+
+      it "correctly reads the first occurrence" do
+        expect(Yast::Kdump.allocated_memory).to eq(low: "64")
       end
     end
   end
@@ -275,12 +371,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested and a value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "the_value"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value" } }
 
         it "writes the crashkernel value to the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => "the_value"})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["the_value"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -289,12 +385,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but no value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true} }
+        let(:profile) { { "add_crash_kernel" => true } }
 
         it "writes an empty crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => ""})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => [""])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -303,10 +399,10 @@ describe Yast::Kdump do
       end
 
       context "if kdump is explicitly disabled" do
-        let(:profile) { {"add_crash_kernel" => false, "crash_kernel" => "does_not_matter"} }
+        let(:profile) { { "add_crash_kernel" => false, "crash_kernel" => "does_not_matter" } }
 
         it "disables the service not touching bootloader" do
-          allow(Yast::Service).to receive(:Status).with("kdump").and_return -1
+          allow(Yast::Service).to receive(:active?).with("kdump").and_return false
 
           expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
           expect(Yast::Bootloader).to_not receive(:Write)
@@ -317,12 +413,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump crashkernel contains an offset" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "72M@128"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128" } }
 
         it "writes the crashkernel value without removing the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => "72M@128"})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["72M@128"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -338,12 +434,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested and a value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "the_value"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value" } }
 
         it "writes the crashkernel value to the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => "the_value"})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["the_value"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -352,12 +448,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but no value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true} }
+        let(:profile) { { "add_crash_kernel" => true } }
 
         it "writes an empty crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => ""})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => [""])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -366,10 +462,10 @@ describe Yast::Kdump do
       end
 
       context "if kdump is explicitly disabled" do
-        let(:profile) { {"add_crash_kernel" => false, "crash_kernel" => "does_not_matter"} }
+        let(:profile) { { "add_crash_kernel" => false, "crash_kernel" => "does_not_matter" } }
 
         it "disables the service not touching bootloader" do
-          allow(Yast::Service).to receive(:Status).with("kdump").and_return -1
+          allow(Yast::Service).to receive(:Status).with("kdump").and_return(-1)
 
           expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
           expect(Yast::Bootloader).to_not receive(:Write)
@@ -380,12 +476,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump crashkernel contains an offset" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "72M@128"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128" } }
 
         it "writes the crashkernel value without removing the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => "72M@128"})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["72M@128"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -404,18 +500,16 @@ describe Yast::Kdump do
       end
 
       context "crashkernel is already configured in the bootloader" do
-        let(:kernel_param) { "128M-:64M" }
+        let(:kernel_param) { "64M" }
 
         it "updates crashkernel and enables service if crashkernel is changed" do
-          size = 128
-
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => "#{size*2}M-:#{size}M"})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["128M"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
-          Yast::Kdump.allocated_memory = size.to_s
+          Yast::Kdump.allocated_memory = { low: "128" }
           Yast::Kdump.WriteKdumpBootParameter
         end
 
@@ -424,16 +518,16 @@ describe Yast::Kdump do
           expect(Yast::Bootloader).to_not receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
-          Yast::Kdump.allocated_memory = "64"
+          Yast::Kdump.allocated_memory = { low: "64" }
           Yast::Kdump.WriteKdumpBootParameter
         end
 
         it "disables the service and removes crashkernel if kdump was disabled" do
-          allow(Yast::Service).to receive(:Status).and_return -1
+          allow(Yast::Service).to receive(:active?).with("kdump").and_return false
 
           expect(Yast::Bootloader)
-            .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => :missing})
+          .to receive(:modify_kernel_params)
+          .with(:common, :xen_guest, :recovery, "crashkernel" => :missing)
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Disable).with("kdump")
 
@@ -443,12 +537,12 @@ describe Yast::Kdump do
       end
 
       context "crashkernel is currently not configured in the bootloader" do
-        let (:kernel_param) { :missing }
+        let(:kernel_param) { :missing }
 
         it "writes chrashkernel and enables the service if kdump was enabled" do
           expect(Yast::Bootloader)
-            .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => "128M-:64M"})
+          .to receive(:modify_kernel_params)
+          .with(:common, :xen_guest, :recovery, "crashkernel" => ["64M"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -458,7 +552,7 @@ describe Yast::Kdump do
         end
 
         it "disables the service not touching bootloader if kdump was not enabled" do
-          allow(Yast::Service).to receive(:Status).and_return 0
+          allow(Yast::Service).to receive(:active?).with("kdump").and_return true
 
           expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
           expect(Yast::Bootloader).to_not receive(:Write)
@@ -494,6 +588,25 @@ describe Yast::Kdump do
         expect(Yast::Kdump).to receive(:WriteKdumpBootParameter)
         expect(Yast::Kdump.Update).to eq(true)
       end
+    end
+  end
+
+  describe ".allocated_memory=" do
+    subject(:memory) { Yast::Kdump.allocated_memory }
+
+    it "assigns the argument to :low if it's a string" do
+      Yast::Kdump.allocated_memory = "32"
+      expect(memory).to eq(low: "32")
+    end
+
+    it "empties the value if the argument is the empty string" do
+      Yast::Kdump.allocated_memory = ""
+      expect(memory).to eq({})
+    end
+
+    it "assigns the argument if it's a hash" do
+      Yast::Kdump.allocated_memory = { high: "64", low: "32" }
+      expect(memory).to eq(high: "64", low: "32")
     end
   end
 end

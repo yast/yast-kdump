@@ -1363,64 +1363,75 @@ module Yast
       nil
     end
 
+    # Value of the low memory in UI
+    # @return [Integer]
+    def allocated_low_memory
+      UI.QueryWidget(Id("allocated_low_memory"), :Value).to_i
+    end
+
+    # Value of the high memory in UI, 0 if not supported
+    # @return [Integer]
+    def allocated_high_memory
+      if Kdump.high_memory_supported?
+        UI.QueryWidget(Id("allocated_high_memory"), :Value).to_i
+      else
+        0
+      end
+    end
+
+    # Total allocated memory, according to UI
+    # @return [Integer]
+    def allocated_memory
+      allocated_low_memory + allocated_high_memory
+    end
+
+    # Updates the free memory displayed in the UI
+    def update_usable_memory
+      value = Kdump.total_memory - allocated_memory
+      UI.ChangeWidget(Id("usable_memory"), :Value, value.to_s)
+    end
+
     # Function initializes option
     # "KdumpMemory"
-
-
     def InitKdumpMemory(key)
-      if Ops.greater_than(Kdump.total_memory, 0)
+      if Kdump.total_memory > 0
         UI.ChangeWidget(
           Id("total_memory"),
           :Value,
           Builtins.tostring(Kdump.total_memory)
         )
         UI.ChangeWidget(
-          Id("allocated_memory"),
+          Id("allocated_low_memory"),
           :Value,
-          Builtins.tointeger(Kdump.allocated_memory)
+          Builtins.tointeger(Kdump.allocated_memory[:low])
         )
-        UI.ChangeWidget(
-          Id("usable_memory"),
-          :Value,
-          Builtins.tostring(
-            Ops.subtract(
-              Kdump.total_memory,
-              Convert.to_integer(UI.QueryWidget(Id("allocated_memory"), :Value))
-            )
+        if Kdump.high_memory_supported?
+          UI.ChangeWidget(
+            Id("allocated_high_memory"),
+            :Value,
+            Builtins.tointeger(Kdump.allocated_memory[:high])
           )
-        )
+        end
+        update_usable_memory
       else
         UI.ChangeWidget(Id("total_memory"), :Value, "0")
         UI.ChangeWidget(Id("usable_memory"), :Value, "0")
-        UI.ChangeWidget(Id("allocated_memory"), :Enabled, false)
+        UI.ChangeWidget(Id("allocated_low_memory"), :Enabled, false)
+        if Kdump.high_memory_supported?
+          UI.ChangeWidget(Id("allocated_high_memory"), :Enabled, false)
+        end
       end
 
       nil
     end
 
-    #  Hadle function for option
+    #  Handle function for option
     # "KdumpMemory"
-
     def HandleKdumpMemory(key, event)
       event = deep_copy(event)
       ret = Ops.get(event, "ID")
-      if ret == "allocated_memory"
-        value = Convert.to_integer(UI.QueryWidget(Id("allocated_memory"), :Value))
-        if Ops.greater_than(value, Kdump.total_memory)
-          UI.ChangeWidget(Id("allocated_memory"), :Value, Kdump.total_memory)
-          UI.ChangeWidget(Id("usable_memory"), :Value, "0")
-        else
-          UI.ChangeWidget(
-            Id("usable_memory"),
-            :Value,
-            Builtins.tostring(
-              Ops.subtract(
-                Kdump.total_memory,
-                Convert.to_integer(UI.QueryWidget(Id("allocated_memory"), :Value))
-              )
-            )
-          )
-        end
+      if ["allocated_low_memory", "allocated_high_memory"].include?(ret)
+        update_usable_memory
       end
 
       nil
@@ -1431,25 +1442,29 @@ module Yast
     # several ranges and ask user about rewritting
     #
     #"KdumpMemory"
-
     def ValidKdumpMemory(key, event)
       event = deep_copy(event)
       if Kdump.crashkernel_list_ranges && Mode.normal
         Kdump.crashkernel_list_ranges = !Popup.YesNo(
-          _("Kernel option includes several ranges. Rewrite it?")
+          _("Kernel option includes several ranges or redundant values. Rewrite it?")
         )
       end
 
       true
     end
+
     #  Store function for option
     # "KdumpMemory"
-
     def StoreKdumpMemory(key, event)
       event = deep_copy(event)
-      Kdump.allocated_memory = Builtins.tostring(
-        UI.QueryWidget(Id("allocated_memory"), :Value)
+      Kdump.allocated_memory[:low] = Builtins.tostring(
+        UI.QueryWidget(Id("allocated_low_memory"), :Value)
       )
+      if Kdump.high_memory_supported?
+        Kdump.allocated_memory[:high] = Builtins.tostring(
+          UI.QueryWidget(Id("allocated_high_memory"), :Value)
+        )
+      end
 
       nil
     end
