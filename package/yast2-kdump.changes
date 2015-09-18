@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep 18 11:15:18 UTC 2015 - ancor@suse.com
+
+- Use default values suggested by kdumptool, not only the maximum
+  and minimum ones (bnc#882082)
+- 3.1.27
+
+-------------------------------------------------------------------
 Mon Sep  7 17:59:40 UTC 2015 - ancor@suse.com
 
 - Added support for allocating low and high memory in systems

@@ -356,7 +356,7 @@ module Yast
       # only propose once
       return true unless @allocated_memory.empty?
 
-      @allocated_memory = { low: calibrator.min_low.to_s, high: calibrator.min_high.to_s }
+      @allocated_memory = { low: calibrator.default_low.to_s, high: calibrator.default_high.to_s }
       Builtins.y2milestone(
         "[kdump] allocated memory if not set in \"crashkernel\" param: %1",
         @allocated_memory
