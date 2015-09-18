@@ -22,6 +22,11 @@ describe Yast::KdumpCalibrator do
     allow(Yast::Arch).to receive(:x86_64).and_return(x86_64)
     allow(Yast::SCR).to receive(:Execute)
       .with(Yast::Path.new(".target.bash_output"), anything).and_return(kdumptool_output)
+    allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
+      .and_return([
+        {"class_id" => 257, "model" => "Main Memory",
+         "resource" => { "mem" => [{ "active" => true, "length" => 4294967296, "start" => 0 }],
+                         "phys_mem" => [{ "range" => 4294967296 }]}, "sub_class_id" => 2 }])
   end
 
   describe "#total_memory" do
@@ -35,12 +40,6 @@ describe Yast::KdumpCalibrator do
       let(:kdumptool_output) { KDUMPTOOL_OLD }
 
       it "returns total memory as reported by SCR" do
-        allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
-          .and_return([
-            {"class_id" => 257, "model" => "Main Memory",
-             "resource" => { "mem" => [{ "active" => true, "length" => 4294967296, "start" => 0 }],
-                             "phys_mem" => [{ "range" => 4294967296 }]}, "sub_class_id" => 2 }])
-
         expect(subject.total_memory).to eq(4096)
       end
     end
