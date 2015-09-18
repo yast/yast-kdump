@@ -62,7 +62,7 @@ describe "#using_fadump_changed?" do
 
     expect(Yast::Kdump).to receive(:fadump_supported?).and_return(true)
     original_value = Yast::Kdump.using_fadump?
-    Yast::Kdump.use_fadump(! original_value)
+    Yast::Kdump.use_fadump(!original_value)
 
     expect(Yast::Kdump.using_fadump_changed?).to eq(true)
   end

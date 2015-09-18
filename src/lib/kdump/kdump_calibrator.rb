@@ -18,7 +18,6 @@ module Yast
       "MinHigh" => :min_high,
       "MaxHigh" => :max_high,
       "Total"   => :total_memory
-
     }
 
     def initialize(configfile = nil)
@@ -131,7 +130,7 @@ module Yast
       else
         lines.each_with_object({}) do |line, prop|
           key, value = line.split(":").map(&:strip)
-          prop[KEYS_MAP[key]] = value.to_i if KEYS_MAP.has_key?(key)
+          prop[KEYS_MAP[key]] = value.to_i if KEYS_MAP.key?(key)
         end
       end
     end

@@ -21,7 +21,7 @@ describe Yast::Kdump do
 
     context "when already proposed" do
       before(:each) do
-        Yast::Kdump.allocated_memory = {low: "42", high: "666"}
+        Yast::Kdump.allocated_memory = { low: "42", high: "666" }
       end
 
       it "proposes the current value" do
@@ -47,21 +47,21 @@ describe Yast::Kdump do
 
   let(:partition_info) do
     [
-      {"free"=>389318, "name"=>"/", "used"=>1487222},
-      {"free"=>1974697, "name"=>"usr", "used"=>4227733},
-      {"free"=>2974697, "name"=>"/var", "used"=>4227733},
+      { "free" => 389318, "name" => "/", "used" => 1487222 },
+      { "free" => 1974697, "name" => "usr", "used" => 4227733 },
+      { "free" => 2974697, "name" => "/var", "used" => 4227733 },
       # this is the matching partition entry
-      {"free"=>8974697, "name"=>"var/crash", "used"=>16},
-      {"free"=>397697, "name"=>"var/crash/not-this", "used"=>455}
+      { "free" => 8974697, "name" => "var/crash", "used" => 16 },
+      { "free" => 397697, "name" => "var/crash/not-this", "used" => 455 }
     ]
   end
 
   let(:not_exactly_matching_partition_info) do
     [
-      {"free"=>8888888, "name"=>"/"},
-      {"free" => 1, "name" => "var/some"},
-      {"free"=>5555555, "name"=>"somewhere/d"},
-      {"free"=>6666666, "name"=>"somewhere/deep"}
+      { "free" => 8888888, "name" => "/" },
+      { "free" => 1, "name" => "var/some" },
+      { "free" => 5555555, "name" => "somewhere/d" },
+      { "free" => 6666666, "name" => "somewhere/deep" }
     ]
   end
 
@@ -97,10 +97,10 @@ describe Yast::Kdump do
 
     context "when partition does not provide free space information" do
       it "returns 'nil'" do
-        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{"free"=>nil, "name"=>"var/crash"}])
+        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{ "free" => nil, "name" => "var/crash" }])
         expect(Yast::Kdump.free_space_for_dump_b).to eq(nil)
 
-        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{"name"=>"var/crash"}])
+        allow(Yast::SpaceCalculation).to receive(:GetPartitionInfo).and_return([{ "name" => "var/crash" }])
         expect(Yast::Kdump.free_space_for_dump_b).to eq(nil)
       end
     end
@@ -371,12 +371,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested and a value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "the_value"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value" } }
 
         it "writes the crashkernel value to the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => ["the_value"]})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["the_value"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -385,12 +385,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but no value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true} }
+        let(:profile) { { "add_crash_kernel" => true } }
 
         it "writes an empty crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => [""]})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => [""])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -399,7 +399,7 @@ describe Yast::Kdump do
       end
 
       context "if kdump is explicitly disabled" do
-        let(:profile) { {"add_crash_kernel" => false, "crash_kernel" => "does_not_matter"} }
+        let(:profile) { { "add_crash_kernel" => false, "crash_kernel" => "does_not_matter" } }
 
         it "disables the service not touching bootloader" do
           allow(Yast::Service).to receive(:active?).with("kdump").and_return false
@@ -413,12 +413,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump crashkernel contains an offset" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "72M@128"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128" } }
 
         it "writes the crashkernel value without removing the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => ["72M@128"]})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["72M@128"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -434,12 +434,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested and a value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "the_value"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value" } }
 
         it "writes the crashkernel value to the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => ["the_value"]})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["the_value"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -448,12 +448,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but no value for crashkernel is supplied" do
-        let(:profile) { {"add_crash_kernel" => true} }
+        let(:profile) { { "add_crash_kernel" => true } }
 
         it "writes an empty crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => [""]})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => [""])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -462,10 +462,10 @@ describe Yast::Kdump do
       end
 
       context "if kdump is explicitly disabled" do
-        let(:profile) { {"add_crash_kernel" => false, "crash_kernel" => "does_not_matter"} }
+        let(:profile) { { "add_crash_kernel" => false, "crash_kernel" => "does_not_matter" } }
 
         it "disables the service not touching bootloader" do
-          allow(Yast::Service).to receive(:Status).with("kdump").and_return -1
+          allow(Yast::Service).to receive(:Status).with("kdump").and_return(-1)
 
           expect(Yast::Bootloader).to_not receive(:modify_kernel_params)
           expect(Yast::Bootloader).to_not receive(:Write)
@@ -476,12 +476,12 @@ describe Yast::Kdump do
       end
 
       context "if kdump crashkernel contains an offset" do
-        let(:profile) { {"add_crash_kernel" => true, "crash_kernel" => "72M@128"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128" } }
 
         it "writes the crashkernel value without removing the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => ["72M@128"]})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["72M@128"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -505,11 +505,11 @@ describe Yast::Kdump do
         it "updates crashkernel and enables service if crashkernel is changed" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :xen_guest, :recovery, {"crashkernel" => ["128M"]})
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["128M"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
-          Yast::Kdump.allocated_memory = {low: "128"}
+          Yast::Kdump.allocated_memory = { low: "128" }
           Yast::Kdump.WriteKdumpBootParameter
         end
 
@@ -518,7 +518,7 @@ describe Yast::Kdump do
           expect(Yast::Bootloader).to_not receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
-          Yast::Kdump.allocated_memory = {low: "64"}
+          Yast::Kdump.allocated_memory = { low: "64" }
           Yast::Kdump.WriteKdumpBootParameter
         end
 
@@ -527,7 +527,7 @@ describe Yast::Kdump do
 
           expect(Yast::Bootloader)
           .to receive(:modify_kernel_params)
-          .with(:common, :xen_guest, :recovery, {"crashkernel" => :missing})
+          .with(:common, :xen_guest, :recovery, "crashkernel" => :missing)
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Disable).with("kdump")
 
@@ -537,12 +537,12 @@ describe Yast::Kdump do
       end
 
       context "crashkernel is currently not configured in the bootloader" do
-        let (:kernel_param) { :missing }
+        let(:kernel_param) { :missing }
 
         it "writes chrashkernel and enables the service if kdump was enabled" do
           expect(Yast::Bootloader)
           .to receive(:modify_kernel_params)
-          .with(:common, :xen_guest, :recovery, {"crashkernel" => ["64M"]})
+          .with(:common, :xen_guest, :recovery, "crashkernel" => ["64M"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -605,7 +605,7 @@ describe Yast::Kdump do
     end
 
     it "assigns the argument if it's a hash" do
-      Yast::Kdump.allocated_memory = {high: "64", low: "32"}
+      Yast::Kdump.allocated_memory = { high: "64", low: "32" }
       expect(memory).to eq(high: "64", low: "32")
     end
   end
