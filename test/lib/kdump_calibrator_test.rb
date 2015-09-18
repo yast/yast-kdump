@@ -9,7 +9,7 @@ describe Yast::KdumpCalibrator do
   subject { described_class.new(configfile) }
   KDUMPTOOL_OK = {
     "exit" => 0,
-    "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 1024\nMaxHigh: 4096\nTotal: 16465714\n"
+    "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 1024\nMaxHigh: 4096\nTotal: 16079\n"
   }
   KDUMPTOOL_OLD = { "exit" => 0, "stdout" => "64\n" }
   KDUMPTOOL_ERROR = { "exit" => 1, "stdout" => "" }
@@ -201,7 +201,7 @@ describe Yast::KdumpCalibrator do
 
       context "if kdumptool returns 0 for high memory" do
         let(:kdumptool_output) do
-          { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 0\nMaxHigh: 0\nTotal: 2097152" }
+          { "exit" => 0, "stdout" => "MinLow: 32\nMaxLow: 712\nMinHigh: 0\nMaxHigh: 0\nTotal: 2048" }
         end
 
         it "returns false" do

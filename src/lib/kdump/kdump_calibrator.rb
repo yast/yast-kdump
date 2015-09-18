@@ -9,7 +9,6 @@ module Yast
     LOW_MEM = 896
     MIN_LOW_DEFAULT = 72
     MB_SIZE = 1048576
-    KB_SIZE = 1024
 
     KDUMPTOOL_CMD = "kdumptool %s calibrate"
     KDUMPTOOL_ARG = "--configfile '%s'"
@@ -114,7 +113,6 @@ module Yast
         proposal.each_pair do |var_name, var_value|
           instance_variable_set("@#{var_name}", var_value)
         end
-        @total_memory /= KB_SIZE if @total_memory
       else
         log.warn("kdumptool could not be executed: #{out["stderr"]}")
       end
