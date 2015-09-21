@@ -364,9 +364,14 @@ describe Yast::Kdump do
   end
 
   describe ".WriteKdumpBootParameter" do
+    before do
+      Yast::Mode.SetMode(mode)
+    end
+
     context "during autoinstallation" do
+      let(:mode) { "autoinstallation" }
+
       before do
-        Yast::Mode.SetMode("autoinstallation")
         Yast::Kdump.Import(profile)
       end
 
@@ -428,8 +433,9 @@ describe Yast::Kdump do
     end
 
     context "during autoupgrade" do
+      let(:mode) { "autoupgrade" }
+
       before do
-        Yast::Mode.SetMode("autoupgrade")
         Yast::Kdump.Import(profile)
       end
 
@@ -490,11 +496,28 @@ describe Yast::Kdump do
       end
     end
 
-    context "in normal mode" do
-      before do
-        Yast::Mode.SetMode("normal")
-        allow(Yast::Popup).to receive(:Message)
+    context "during update" do
+      let(:mode) { "update" }
 
+      it "removes offsets from crashkernel" do
+        allow(Yast::Bootloader).to receive(:kernel_param).and_return "72M@128"
+
+        expect(Yast::Bootloader)
+          .to receive(:modify_kernel_params)
+          .with(:common, :xen_guest, :recovery, "crashkernel" => ["72M"])
+        expect(Yast::Bootloader).to receive(:Write)
+        expect(Yast::Service).to receive(:Enable).with("kdump")
+
+        Yast::Kdump.ReadKdumpKernelParam
+        Yast::Kdump.WriteKdumpBootParameter
+      end
+    end
+
+    context "in normal mode" do
+      let(:mode) { "normal" }
+
+      before do
+        allow(Yast::Popup).to receive(:Message)
         allow(Yast::Bootloader).to receive(:kernel_param).and_return kernel_param
         Yast::Kdump.ReadKdumpKernelParam
       end

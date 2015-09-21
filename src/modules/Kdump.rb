@@ -471,7 +471,7 @@ module Yast
         else
           # Calculate the param values based on @allocated_memory
           crash_values = crash_kernel_values
-          remove_offsets!(crash_value) if Mode.update
+          remove_offsets!(crash_values) if Mode.update
           # Skip writing of param if it's already set to the desired values
           skip_crash_values = @crashkernel_param && @crashkernel_param_values == crash_values
         end
@@ -1130,7 +1130,7 @@ module Yast
     def remove_offsets!(values)
       # It could also be :missing or :present
       if values.is_a?(Array)
-        crash_values.map! do |value|
+        values.map! do |value|
           pieces = value.split("@")
           if pieces.size > 1
             Builtins.y2milestone("Delete offset crashkernel value: %1", value)
