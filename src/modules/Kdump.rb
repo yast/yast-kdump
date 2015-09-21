@@ -1100,7 +1100,7 @@ module Yast
       # If the current values include "nasty" things and the user has not
       # overriden the value of @crashkernel_list_ranges to autorize the
       # modification, return the old values (ensuring the Array format)
-      return Array(@crashkernel_param_values) if @crashkernel_list_ranges
+      return Array(@crashkernel_param_values.dup) if @crashkernel_list_ranges
 
       result = []
       high = @allocated_memory[:high]
