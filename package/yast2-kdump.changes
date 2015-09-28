@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 28 14:37:26 UTC 2015 - ancor@suse.com
+
+- Prevent kdumptool to be called more than once (bnc#882082)
+- 3.1.30
+
+-------------------------------------------------------------------
 Mon Sep 21 10:47:53 UTC 2015 - ancor@suse.com
 
 - More robust fix for bnc#946639 (see previous changelog message),
