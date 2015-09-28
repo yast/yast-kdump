@@ -94,12 +94,6 @@ module Yast
       # list <string>
       @uknown_fs_partitions = []
 
-      # Total available memory [MB]
-      #
-      #
-      # integer
-      @total_memory = 0
-
       # Boolean option indicates that "crashkernel" includes
       # several values for the same kind of memory (low, high)
       # or several ranges in one of the values
