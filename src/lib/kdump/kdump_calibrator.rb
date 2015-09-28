@@ -135,7 +135,7 @@ module Yast
       else
         log.warn("kdumptool could not be executed: #{out["stderr"]}")
       end
-      @kdump_executed = true
+      @kdumptool_executed = true
     end
 
     # Parses kdumptool output
