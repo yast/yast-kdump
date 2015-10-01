@@ -1431,6 +1431,11 @@ module Yast
       event = deep_copy(event)
       ret = Ops.get(event, "ID")
       if ["allocated_low_memory", "allocated_high_memory"].include?(ret)
+        remaining = Kdump.total_memory - allocated_memory
+        if remaining <= 0
+          # Substract (remaining is negative) the excess from the current value
+          UI.ChangeWidget(Id(ret), :Value, send(ret.to_sym) + remaining)
+        end
         update_usable_memory
       end
 
