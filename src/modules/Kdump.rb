@@ -467,7 +467,7 @@ module Yast
           crash_values = crash_kernel_values
           remove_offsets!(crash_values) if Mode.update
           # Skip writing of param if it's already set to the desired values
-          skip_crash_values = @crashkernel_param && @crashkernel_param_values == crash_values
+          skip_crash_values = @crashkernel_param && @crashkernel_param_values == crash_values && !using_fadump_changed?
         end
 
         if skip_crash_values
