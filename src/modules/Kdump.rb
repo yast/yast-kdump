@@ -167,6 +167,7 @@ module Yast
 
       @DEFAULT_CONFIG = {
         "KDUMP_KERNELVER"          => "",
+        "KDUMP_CPUS"               => "",
         "KDUMP_COMMANDLINE"        => "",
         "KDUMP_COMMANDLINE_APPEND" => "",
         "KEXEC_OPTIONS"            => "",
@@ -179,11 +180,19 @@ module Yast
         "KDUMP_VERBOSE"            => "3",
         "KDUMP_DUMPLEVEL"          => "31",
         "KDUMP_DUMPFORMAT"         => "lzo",
+        "KDUMP_CONTINUE_ON_ERROR"  => "true",
+        "KDUMP_REQUIRED_PROGRAMS"  => "",
+        "KDUMP_PRESCRIPT"          => "",
+        "KDUMP_POSTSCRIPT"         => "",
+        "KDUMPTOOL_FLAGS"          => "",
+        "KDUMP_NETCONFIG"          => "auto",
+        "KDUMP_NET_TIMEOUT"        => "30",
         "KDUMP_SMTP_SERVER"        => "",
         "KDUMP_SMTP_USER"          => "",
         "KDUMP_SMTP_PASSWORD"      => "",
         "KDUMP_NOTIFICATION_TO"    => "",
-        "KDUMP_NOTIFICATION_CC"    => ""
+        "KDUMP_NOTIFICATION_CC"    => "",
+        "KDUMP_HOST_KEY"           => ""
       }
 
       # map <string, string > of kdump settings
