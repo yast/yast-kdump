@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct 29 16:23:55 UTC 2015 - igonzalezsosa@suse.com
+
+- fix validation of AutoYaST profile (add some missing elements)
+  (bsc#805275)
+- 2.17.28
+
+-------------------------------------------------------------------
 Wed May 20 16:38:09 CEST 2015 - schubi@suse.de
 
 - Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
