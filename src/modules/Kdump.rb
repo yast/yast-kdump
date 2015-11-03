@@ -448,13 +448,19 @@ module Yast
       true
     end
 
-    # Write kdump boot argument crashkernel
+    # Write kdump boot arguments - crashkernel and fadump
     # set kdump start at boot
     #
     #  @return [Boolean] successfull
     def WriteKdumpBootParameter
       old_progress = false
+      reboot_needed = using_fadump_changed?
 
+      # First, write or remove the fadump param if needed
+      write_fadump_boot_param
+
+      # Then, do the same for the crashkernel param
+      #
       # If we need to add crashkernel param
       if @add_crashkernel_param
         if Mode.autoinst || Mode.autoupgrade
@@ -467,7 +473,7 @@ module Yast
           crash_values = crash_kernel_values
           remove_offsets!(crash_values) if Mode.update
           # Skip writing of param if it's already set to the desired values
-          skip_crash_values = @crashkernel_param && @crashkernel_param_values == crash_values && !using_fadump_changed?
+          skip_crash_values = @crashkernel_param && @crashkernel_param_values == crash_values
         end
 
         if skip_crash_values
@@ -483,9 +489,7 @@ module Yast
             "[kdump] (WriteKdumpBootParameter) adding chrashkernel options with values: %1",
             crash_values
           )
-          if Mode.normal
-            Popup.Message(_("To apply changes a reboot is necessary."))
-          end
+          reboot_needed = true
           Service.Enable(KDUMP_SERVICE_NAME)
         end
       else
@@ -496,12 +500,14 @@ module Yast
           old_progress = Progress.set(false)
           Bootloader.Write
           Progress.set(old_progress)
-          if Mode.normal
-            Popup.Message(_("To apply changes a reboot is necessary."))
-          end
+          reboot_needed = true
         end
         Service.Disable(KDUMP_SERVICE_NAME)
         Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
+      end
+
+      if reboot_needed && Mode.normal
+        Popup.Message(_("To apply changes a reboot is necessary."))
       end
 
       true
@@ -639,7 +645,7 @@ module Yast
         return false
       end
 
-      # write/delete bootloader option for kernel "crashkernel"
+      # write/delete bootloader options for kernel - "crashkernel" and "fadump"
       return false if Abort()
       Progress.NextStage
       # Error message
@@ -1131,6 +1137,19 @@ module Yast
           end
           pieces.first
         end
+      end
+    end
+
+    def write_fadump_boot_param
+      if fadump_supported?
+        # If fdump is selected and we want to enable kdump
+        if using_fadump? && @add_crashkernel_param
+            value = "on"
+        else
+            value = nil
+        end
+        Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "fadump" => value)
+        Bootloader.Write
       end
     end
   end
