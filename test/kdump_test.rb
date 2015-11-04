@@ -8,6 +8,7 @@ Yast.import "Bootloader"
 Yast.import "Service"
 Yast.import "Popup"
 Yast.import "SpaceCalculation"
+Yast.import "Arch"
 
 describe Yast::Kdump do
   before do
@@ -366,6 +367,8 @@ describe Yast::Kdump do
   describe ".WriteKdumpBootParameter" do
     before do
       Yast::Mode.SetMode(mode)
+      # FIXME: current tests do not cover fadump (ppc64 specific)
+      allow(Yast::Arch).to receive(:ppc64).and_return false
     end
 
     context "during autoinstallation" do
