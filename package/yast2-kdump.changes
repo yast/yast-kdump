@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Nov  9 13:06:10 UTC 2015 - igonzalezsosa@suse.com
+
+- Fix AutoYaST profile schema (bsc#805275)
+- 3.1.20
+
+-------------------------------------------------------------------
 Thu Sep  4 12:22:38 UTC 2014 - mvidner@suse.com
 
 - Use a more flexible rubygem requirement syntax (bnc#895069)
