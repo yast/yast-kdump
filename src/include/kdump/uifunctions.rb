@@ -1844,5 +1844,15 @@ module Yast
       Popup.Message(key)
       true
     end
+
+    def unsupported_kdump_confirmation
+      text = _(
+        "Kdump is not supported on this system.\n" \
+        "If you continue now, the module may not function properly.\n" \
+        "For example, some settings will not be correctly read\n" \
+        "and the resulting configuration will probably be useless.\n"
+      )
+      Popup.ContinueCancelHeadline(_("Kdump not supported"), text)
+    end
   end
 end

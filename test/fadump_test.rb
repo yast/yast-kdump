@@ -18,29 +18,38 @@ describe "#fadump_supported?" do
 end
 
 describe "#use_fadump" do
-  it "returns true if fadump is supported on this architecture" do
-    expect(Yast::Kdump).to receive(:fadump_supported?).twice.and_return(true)
-    expect(Yast::Kdump.use_fadump(true)).to eq(true)
-    expect(Yast::Kdump.use_fadump(false)).to eq(true)
+  before do
+    allow(Yast::Kdump.system).to receive(:supports_fadump?).and_return(supported)
   end
 
-  it "returns false if it's not supported on this architecture" do
-    expect(Yast::Kdump).to receive(:fadump_supported?).and_return(false)
-    expect(Yast::Kdump.use_fadump(true)).to eq(false)
+  context "if fadump is supported on this architecture" do
+    let(:supported) { true }
+
+    it "returns true when enabling fadump" do
+      expect(Yast::Kdump.use_fadump(true)).to eq(true)
+    end
+
+    it "returns true when disabling fadump" do
+      expect(Yast::Kdump.use_fadump(false)).to eq(true)
+    end
   end
 
-  it "returns true if disabling fadump" do
-    expect(Yast::Kdump).to receive(:fadump_supported?).and_return(true)
-    expect(Yast::Kdump.use_fadump(false)).to eq(true)
+  context "if fadump is not supported on this architecture" do
+    let(:supported) { false }
 
-    expect(Yast::Kdump).to receive(:fadump_supported?).and_return(false)
-    expect(Yast::Kdump.use_fadump(false)).to eq(true)
+    it "returns false when enabling fadump" do
+      expect(Yast::Kdump.use_fadump(true)).to eq(false)
+    end
+
+    it "returns true when disabling fadump" do
+      expect(Yast::Kdump.use_fadump(false)).to eq(true)
+    end
   end
 end
 
 describe "#using_fadump?" do
  it "returns that fadump is in use if previously set" do
-   expect(Yast::Kdump).to receive(:fadump_supported?).twice.and_return(true)
+   allow(Yast::Kdump.system).to receive(:supports_fadump?).and_return(true)
 
    Yast::Kdump.use_fadump(true)
    expect(Yast::Kdump.using_fadump?).to eq(true)
@@ -58,9 +67,9 @@ describe "#using_fadump_changed?" do
   end
 
   it "returns true if use_fadump changed" do
+    allow(Yast::Kdump.system).to receive(:supports_fadump?).and_return(true)
     Yast::Kdump.ReadKdumpSettings
 
-    expect(Yast::Kdump).to receive(:fadump_supported?).and_return(true)
     original_value = Yast::Kdump.using_fadump?
     Yast::Kdump.use_fadump(!original_value)
 

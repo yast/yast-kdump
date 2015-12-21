@@ -1,3 +1,6 @@
+require "yast"
+require "kdump/kdump_system"
+
 module Yast
   # This class tries to calibrate Kdump minimum, maximum and recommended values
   #
@@ -8,7 +11,6 @@ module Yast
 
     LOW_MEM = 896
     MIN_LOW_DEFAULT = 72
-    MiB_SIZE = 1048576
 
     KDUMPTOOL_CMD = "kdumptool %s calibrate"
     KDUMPTOOL_ARG = "--configfile '%s'"
@@ -61,7 +63,7 @@ module Yast
     # @return [Fixnum] Memory size (in MiB)
     def max_low
       run_kdumptool unless @kdumptool_executed
-      @max_low ||= propose_high_memory? ? [LOW_MEM, total_memory].min : total_memory
+      @max_low ||= system.supports_high_mem? ? [LOW_MEM, total_memory].min : total_memory
     end
 
     # Determines what's the recommended quantity of high memory
@@ -88,7 +90,7 @@ module Yast
     def max_high
       run_kdumptool unless @kdumptool_executed
       @max_high ||=
-        if propose_high_memory?
+        if system.supports_high_mem?
           (total_memory - LOW_MEM) > 0 ? total_memory - LOW_MEM : 0
         else
           0
@@ -100,14 +102,10 @@ module Yast
     # @return [Fixnum] Memory size (in MiB)
     def total_memory
       run_kdumptool unless @kdumptool_executed
-      return @total_memory if @total_memory
-
-      # Calculating the total memory in a system with kdump enabled is tricky.
       # As a best effort if kdumptool is not available, let's use the physical
       # memory reported by the kernel.
-      probe = SCR.Read(Yast::Path.new(".probe.memory"))
-      resource = probe.first["resource"]
-      @total_memory = resource["phys_mem"][0]["range"] / MiB_SIZE
+      @total_memory = system.reported_memory if @total_memory.nil?
+      @total_memory
     end
 
     # Builds a hash containing memory limits
@@ -120,6 +118,10 @@ module Yast
     end
 
   private
+
+    def system
+      @system ||= KdumpSystem.new
+    end
 
     # Set up memory values relying on kdumptool
     #
@@ -166,15 +168,6 @@ module Yast
         args = ""
       end
       KDUMPTOOL_CMD % args
-    end
-
-    # Checks whether the machine is expected to support high memory
-    #
-    # This method is only used in case the call to kdumptool failed
-    #
-    # @return [Boolean] true if a positive value for max_high is expected
-    def propose_high_memory?
-      Arch.x86_64
     end
   end
 end
