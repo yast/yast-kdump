@@ -368,7 +368,7 @@ describe Yast::Kdump do
     before do
       Yast::Mode.SetMode(mode)
       # FIXME: current tests do not cover fadump (ppc64 specific)
-      allow(Yast::Arch).to receive(:ppc64).and_return false
+      allow(Yast::Kdump).to receive(:fadump_supported?).and_return false
     end
 
     context "during autoinstallation" do
