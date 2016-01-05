@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jan  5 11:18:25 UTC 2016 - ancor@suse.com
+
+- Alert the user when trying to configure a Xen DomU system, which
+  does not support kdump (bsc#952253)
+- 3.1.35
+
+-------------------------------------------------------------------
 Tue Nov  3 09:44:53 UTC 2015 - ancor@suse.com
 
 - manage the value of the fadump kernel param (bsc#951212)

@@ -29,6 +29,7 @@
 # Representation of the configuration of kdump.
 # Input and output routines.
 require "yast"
+require "kdump/kdump_system"
 require "kdump/kdump_calibrator"
 
 module Yast
@@ -314,6 +315,11 @@ module Yast
       end
 
       true
+    end
+
+    # Returns the KdumpSystem instance
+    def system
+     @system ||= Yast::KdumpSystem.new
     end
 
     def write_temporary_config_file
@@ -961,21 +967,13 @@ module Yast
       true
     end
 
-    # Returns whether FADump (Firmware assisted dump) is supported
-    # by the current system
-    #
-    # @return [Boolean] is supported
-    def fadump_supported?
-      Arch.ppc64
-    end
-
     # Sets whether to use FADump (Firmware assisted dump)
     #
     # @param [Boolean] new state
     # @return [Boolean] whether successfully set
     def use_fadump(new_value)
       # Trying to use fadump on unsupported hardware
-      if !fadump_supported? && new_value
+      if !system.supports_fadump? && new_value
         Builtins.y2milestone("FADump is not supported on this hardware")
         Report.Error(_("Cannot use Firmware-assisted dump.\nIt is not supported on this hardware."))
         return false
@@ -1141,7 +1139,7 @@ module Yast
     end
 
     def write_fadump_boot_param
-      if fadump_supported?
+      if system.supports_fadump?
         # If fdump is selected and we want to enable kdump
         if using_fadump? && @add_crashkernel_param
             value = "on"

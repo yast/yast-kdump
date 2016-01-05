@@ -83,6 +83,9 @@ module Yast
       Wizard.RestoreHelp(Ops.get_string(@HELPS, "read", ""))
       # Kdump::AbortFunction = PollAbort;
       return :abort if !Confirm.MustBeRoot
+      if !Kdump.system.supports_kdump? && !unsupported_kdump_confirmation
+        return :abort
+      end
       InstallPackages() or return :abort
 
       ret = Kdump.Read
