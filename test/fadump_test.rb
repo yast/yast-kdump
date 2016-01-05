@@ -3,19 +3,6 @@
 require_relative "./test_helper"
 
 Yast.import "Kdump"
-Yast.import "Arch"
-
-describe "#fadump_supported?" do
-  it "returns that fadump is supported on ppc64 architecture" do
-    expect(Yast::Arch).to receive(:ppc64).and_return(true)
-    expect(Yast::Kdump.fadump_supported?).to eq(true)
-  end
-
-  it "return that fadump is not supported on other architectures" do
-    expect(Yast::Arch).to receive(:ppc64).and_return(false)
-    expect(Yast::Kdump.fadump_supported?).to eq(false)
-  end
-end
 
 describe "#use_fadump" do
   before do

@@ -104,8 +104,7 @@ module Yast
       run_kdumptool unless @kdumptool_executed
       # As a best effort if kdumptool is not available, let's use the physical
       # memory reported by the kernel.
-      @total_memory = system.reported_memory if @total_memory.nil?
-      @total_memory
+      @total_memory ||= system.reported_memory
     end
 
     # Builds a hash containing memory limits

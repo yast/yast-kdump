@@ -3,41 +3,46 @@
 require_relative "../test_helper"
 require_relative "../../src/lib/kdump/kdump_system"
 
+Yast.import "Arch"
+
 describe Yast::KdumpSystem do
   describe "#reported_memory" do
     it "returns the size in MiB" do
       allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
-        .and_return ["resource"=>{"mem"=>[{"active"=>true, "length"=>12465651712, "start"=>0}],
-                                  "phys_mem"=>[{"range"=>12884901888}]}]
+        .and_return ["resource"=>{"mem"=>[{"active"=>true, "length"=>12_465_651_712, "start"=>0}],
+                                  "phys_mem"=>[{"range"=>12_884_901_888}]}]
 
-      expect(subject.reported_memory).to eq 12288
+      expect(subject.reported_memory).to eq 12_288
+    end
+  end
+
+  describe "#supports_fadump?" do
+    it "returns true on ppc64 architecture" do
+      allow(Yast::Arch).to receive(:ppc64).and_return(true)
+      expect(subject.supports_fadump?).to eq true
+    end
+
+    it "returns false on other architectures" do
+      allow(Yast::Arch).to receive(:ppc64).and_return(false)
+      expect(subject.supports_fadump?).to eq false
     end
   end
 
   describe "#supports_kdump?" do
-    # Directory with the simulated systems to chroot into
-    let(:roots_dir) { File.expand_path("../../systems", __FILE__) }
-
-    around { |example| change_scr_root(File.join(roots_dir, root), &example) }
-
-    context "in a non-Xen system" do
-      let(:root) { "non-xen" }
-
-      it "returns true" do
-        expect(subject.supports_kdump?).to eq true
-      end
+    before do
+      allow(Yast::Arch).to receive(:is_xenU).and_return xenU
     end
 
     context "in a Xen DomU" do
-      let(:root) { "domU" }
+      let(:xenU) { true }
 
       it "returns false" do
         expect(subject.supports_kdump?).to eq false
       end
     end
 
-    context "in a Xen Dom0" do
-      let(:root) { "dom0" }
+    context "in a system not being a Xen DomU" do
+      let(:xenU) { false }
 
       it "returns true" do
         expect(subject.supports_kdump?).to eq true

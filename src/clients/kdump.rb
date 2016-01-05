@@ -358,7 +358,7 @@ module Yast
         }
       }
 
-      if Kdump.fadump_supported?
+      if Kdump.system.supports_fadump?
         @cmdline_description["actions"]["fadump"] = {
           "handler" => fun_ref(method(:cmd_handle_fadump), "boolean (map)"),
           # TRANSLATORS: CommandLine help
@@ -725,7 +725,7 @@ module Yast
 
       CommandLine.Print("")
 
-      if Kdump.fadump_supported?
+      if Kdump.system.supports_fadump?
         show_fadump_status
         CommandLine.Print("")
       end

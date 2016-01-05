@@ -967,14 +967,6 @@ module Yast
       true
     end
 
-    # Returns whether FADump (Firmware assisted dump) is supported
-    # by the current system
-    #
-    # @return [Boolean] is supported
-    def fadump_supported?
-      system.supports_fadump?
-    end
-
     # Sets whether to use FADump (Firmware assisted dump)
     #
     # @param [Boolean] new state

@@ -415,7 +415,7 @@ module Yast
           "widget_names"    => [
             "DisBackButton",
             "EnableDisalbeKdump",
-            (Kdump.fadump_supported? ? "FADump":""),
+            (Kdump.system.supports_fadump? ? "FADump":""),
             "KdumpMemory"
           ]
         },
