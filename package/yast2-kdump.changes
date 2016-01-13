@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 13 12:56:29 UTC 2016 - igonzalezsosa@suse.com
+
+- fix AutoYaST profile schema (bsc#954412)
+- 3.1.36
+
+-------------------------------------------------------------------
 Tue Jan  5 11:18:25 UTC 2016 - ancor@suse.com
 
 - Alert the user when trying to configure a Xen DomU system, which
