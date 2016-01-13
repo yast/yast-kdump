@@ -2,6 +2,7 @@
 Fri Nov  6 15:29:00 UTC 2015 - igonzalezsosa@suse.com
 
 - fix AutoYaST profile schema (bsc#954412)
+- 3.1.34.1
 
 -------------------------------------------------------------------
 Tue Nov  3 09:44:53 UTC 2015 - ancor@suse.com
