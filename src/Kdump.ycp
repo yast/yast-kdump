@@ -280,6 +280,15 @@ global void SetModified() {
     y2debug("modified=%1",modified);
 }
 
+/**
+ * Determine whether boot section is Xen or not
+ * It relies on section_pos
+ *
+ * @return boolean
+ */
+boolean is_xen () {
+	return (section_pos != -1);
+}
 
 /**
  * Compare boot section options with 
@@ -623,7 +632,7 @@ define void CheckXenDefault(string act_boot_secion)
             }              
 
        });
-       if (section_pos == -1)
+       if (!is_xen())
           y2milestone("default boot section is NOT Xen...");
     }
 }
@@ -941,6 +950,30 @@ boolean addCrashkernelToKexec (string crashkernel_value)
 }
 
 /**
+ * Update xen_append
+ *
+ * It relies on section_pos.
+ * It refuses to update the parameter unless is_xen().
+ *
+ * @return boolean true if was updated.
+ */
+boolean UpdateXenAppendParameter (string key, string value) {
+	if (!is_xen()) {
+		y2milestone("Not Xen: refusing to update Xen boot section");
+		return false;
+	} else {
+		string xen_append = BootCommon::sections[section_pos, "xen_append"]:"";
+		BootCommon::sections[section_pos, "xen_append"] =
+			BootCommon::setKernelParamToLine(xen_append, key, value);
+		// added flag which means that section was changed bnc #432651
+		BootCommon::sections[section_pos, "__changed"] =
+			(BootCommon::sections[section_pos, "xen_append"]:"" != xen_append);
+		y2milestone("Write boot section to Xen boot section %1", BootCommon::sections[section_pos]:nil);
+		return true;
+	}
+}
+
+/**
  * Write kdump boot argument crashkernel
  * set kernel-kdump start at boot
  *
@@ -982,18 +1015,11 @@ boolean WriteKdumpBootParameter () {
 	    }
 	}
         // write crashkernel option to boot section
-	if (section_pos == -1) // boot section is NOT Xen
+	if (!is_xen()) // boot section is NOT Xen
 	{
             result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", crash_value);
 	} else { // boot section is Xen
-		string xen_append = BootCommon::sections [section_pos, "xen_append"]:"";
-		// Update xen_append parameter
-		BootCommon::sections[section_pos, "xen_append"] =
-			BootCommon::setKernelParamToLine(xen_append, "crashkernel", convertCrashkernelForXEN(crash_value));
-	    // added flag which means that section was changed bnc #432651
-	    BootCommon::sections[section_pos, "__changed"] = true;
-	    result = true;
-	    y2milestone("Write boot section to XEN boot section %1", BootCommon::sections[section_pos]:nil);
+		result = UpdateXenAppendParameter("crashkernel", convertCrashkernelForXEN(crash_value));
 	}
         old_progress = Progress::set (false);
         Bootloader::Write();
@@ -1017,16 +1043,12 @@ boolean WriteKdumpBootParameter () {
   } else {
     if (crashkernel_param) {
        //delete crashkernel paramter from bootloader
-		if (section_pos == -1) // boot section is NOT Xen
-		{
-			result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", "false");
-		} else { // boot section is Xen
-			string xen_append = BootCommon::sections [section_pos, "xen_append"]:"";
-			BootCommon::sections[section_pos, "xen_append"] =
-				BootCommon::setKernelParamToLine(xen_append, "crashkernel", "false");
-	                BootCommon::sections[section_pos, "__changed"] = true;
-			result = true;
-		}
+       if (!is_xen()) // boot section is NOT Xen
+       {
+          result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", "false");
+       } else { // boot section is Xen
+          result = UpdateXenAppendParameter("crashkernel", "false");
+       }
        old_progress = Progress::set (false);
        Bootloader::Write();
        Progress::set (old_progress);
