@@ -1011,7 +1011,6 @@ boolean WriteKdumpBootParameter () {
             result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", crash_value);
 	} else { // boot section is Xen
         UpdateXenAppendParameter("crashkernel", convertCrashkernelForXEN(crash_value));
-        result = true
 	}
         old_progress = Progress::set (false);
         Bootloader::Write();
@@ -1040,7 +1039,6 @@ boolean WriteKdumpBootParameter () {
           result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", "false");
        } else { // boot section is Xen
           UpdateXenAppendParameter("crashkernel", "false");
-          result = true
        }
        old_progress = Progress::set (false);
        Bootloader::Write();
