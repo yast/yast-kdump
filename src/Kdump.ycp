@@ -673,7 +673,8 @@ boolean ReadXenKdumpKernelParam (string act_boot_secion)
 		   crash_arg = key;
            });
         } else {
-	   crash_arg = crash;
+		// crashkernel argument not found (bsc#962008)
+		crash_arg = "";
 	}
 
 	if (crash_arg != "")
@@ -981,11 +982,14 @@ boolean WriteKdumpBootParameter () {
 	    }
 	}
         // write crashkernel option to boot section
-	if (section_pos == -1)
+	if (section_pos == -1) // boot section is NOT Xen
 	{
             result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", crash_value);
-	} else {
-	    BootCommon::sections[section_pos, "xen_append"]= "crashkernel="+convertCrashkernelForXEN(crash_value);
+	} else { // boot section is Xen
+		string xen_append = BootCommon::sections [section_pos, "xen_append"]:"";
+		// Update xen_append parameter
+		BootCommon::sections[section_pos, "xen_append"] =
+			BootCommon::setKernelParamToLine(xen_append, "crashkernel", convertCrashkernelForXEN(crash_value));
 	    // added flag which means that section was changed bnc #432651
 	    BootCommon::sections[section_pos, "__changed"] = true;
 	    result = true;
@@ -1013,7 +1017,16 @@ boolean WriteKdumpBootParameter () {
   } else {
     if (crashkernel_param) {
        //delete crashkernel paramter from bootloader
-       result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", "false");
+		if (section_pos == -1) // boot section is NOT Xen
+		{
+			result = Bootloader::setKernelParam (actual_boot_section, "crashkernel", "false");
+		} else { // boot section is Xen
+			string xen_append = BootCommon::sections [section_pos, "xen_append"]:"";
+			BootCommon::sections[section_pos, "xen_append"] =
+				BootCommon::setKernelParamToLine(xen_append, "crashkernel", "false");
+	                BootCommon::sections[section_pos, "__changed"] = true;
+			result = true;
+		}
        old_progress = Progress::set (false);
        Bootloader::Write();
        Progress::set (old_progress);
