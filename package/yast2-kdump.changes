@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 22 11:58:19 UTC 2016 - igonzalezsosa@suse.com
+
+- Preserve existing content of XEN_APPEND in
+  /etc/sysconfig/bootloader (bsc#962008)
+- 2.17.30
+
+-------------------------------------------------------------------
 Mon Jan 18 14:46:04 UTC 2016 - igonzalezsosa@suse.com
 
 - Backport fix by juhliarik@suse.cz to avoid exporting unknown
