@@ -53,7 +53,6 @@ module Yast
       Yast.import "Report"
       Yast.import "Summary"
       Yast.import "Message"
-      Yast.import "BootCommon"
       Yast.import "Map"
       Yast.import "Bootloader"
       Yast.import "Service"
@@ -80,20 +79,8 @@ module Yast
 
       @proposal_valid = false
 
-      # List of available partiotions
-      # with known partition
-      #
-      # list <string>
-      @available_partitions = []
-
       # true if propose was called
       @propose_called = false
-
-      # List of available partiotions
-      # without filesystem or with uknown
-      #
-      # list <string>
-      @uknown_fs_partitions = []
 
       # Boolean option indicates that "crashkernel" includes
       # several values for the same kind of memory (low, high)
@@ -104,22 +91,6 @@ module Yast
 
       #  list of packages for installation
       @kdump_packages = []
-
-      # Number of cpus
-      #
-      # integer
-      @number_of_cpus = 1
-
-      # kernel version (uname -r)
-      #
-      # string
-      @kernel_version = ""
-
-      # Position actual boot section in BootCommon::sections list
-      # it is relevant only if XEN boot section is used
-      #
-      # integer
-      @section_pos = -1
 
       # Boolean option indicates kernel parameter
       # "crashkernel"
@@ -1020,7 +991,6 @@ module Yast
     publish :variable => :proposal_valid, :type => "boolean"
     publish :variable => :available_partitions, :type => "list <string>"
     publish :variable => :propose_called, :type => "boolean"
-    publish :variable => :uknown_fs_partitions, :type => "list <string>"
     publish :function => :total_memory, :type => "integer ()"
     publish :variable => :crashkernel_list_ranges, :type => "boolean"
     publish :variable => :kdump_packages, :type => "list <string>"
