@@ -989,7 +989,6 @@ module Yast
     publish :function => :SetModified, :type => "void ()"
     publish :variable => :modified, :type => "boolean"
     publish :variable => :proposal_valid, :type => "boolean"
-    publish :variable => :available_partitions, :type => "list <string>"
     publish :variable => :propose_called, :type => "boolean"
     publish :function => :total_memory, :type => "integer ()"
     publish :variable => :crashkernel_list_ranges, :type => "boolean"
