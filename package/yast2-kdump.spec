@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.1.37
+Version:        3.1.38
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0
@@ -43,6 +43,8 @@ Requires:       yast2-ruby-bindings >= 1.0.0
 Requires:       yast2-storage
 # SpaceCalculation.GetPartitionInfo
 Requires:       yast2-packager
+# do not use old installation with wrong finish order
+Conflicts:      yast2-installation < 3.1.198
 Recommends:     makedumpfile
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %ifarch ppc
