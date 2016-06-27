@@ -468,9 +468,12 @@ module Yast
           Service.Restart(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
         else
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => crash_values)
-          old_progress = Progress.set(false)
-          Bootloader.Write
-          Progress.set(old_progress)
+          # do mass write in installation to speed up, so skip this one
+          if !Stage.initial
+            old_progress = Progress.set(false)
+            Bootloader.Write
+            Progress.set(old_progress)
+          end
           Builtins.y2milestone(
             "[kdump] (WriteKdumpBootParameter) adding chrashkernel options with values: %1",
             crash_values
@@ -483,9 +486,11 @@ module Yast
         if @crashkernel_param
           #delete crashkernel parameter from bootloader
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => :missing)
-          old_progress = Progress.set(false)
-          Bootloader.Write
-          Progress.set(old_progress)
+          if !Stage.initial
+            old_progress = Progress.set(false)
+            Bootloader.Write
+            Progress.set(old_progress)
+          end
           reboot_needed = true
         end
         Service.Disable(KDUMP_SERVICE_NAME)
@@ -1125,7 +1130,7 @@ module Yast
             value = nil
         end
         Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "fadump" => value)
-        Bootloader.Write
+        Bootloader.Write unless Yast::Stage.initial # do mass write in installation to speed up
       end
     end
   end
