@@ -661,9 +661,18 @@ module Yast
       @kdump_packages.concat KDUMP_PACKAGES
     end
 
+    # Proposes default state of kdump (enabled/disabled)
+    #
+    # @return [Boolean] the default proposed state
+
     def ProposeCrashkernelParam
-      # propose disable kdump if PC has less than 1024MB RAM
+      # proposing disabled kdump if PC has less than 1024MB RAM
       if total_memory < 1024
+        log.info "not enough memory - kdump proposed as disabled"
+        false
+      # proposing disabled kdump on aarch64 (bsc#989321) - kdump not implemented
+      elsif Arch.aarch64
+        log.info "aarch64 - kdump proposed as disabled"
         false
       else
         true

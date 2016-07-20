@@ -46,6 +46,35 @@ describe Yast::Kdump do
     end
   end
 
+  describe "#ProposeCrashkernelParam" do
+    before do
+      allow(Yast::Kdump).to receive(:total_memory).and_return 1024
+      allow(Yast::Arch).to receive(:aarch64).and_return false
+    end
+
+    context "while running on machine with less than 1024 MB memory" do
+      it "proposes kdump to be disabled" do
+        allow(Yast::Kdump).to receive(:total_memory).and_return 1023
+
+        expect(Yast::Kdump.ProposeCrashkernelParam).to eq false
+      end
+    end
+
+    context "while running on ARM64" do
+      it "proposes kdump to be disabled" do
+        allow(Yast::Arch).to receive(:aarch64).and_return true
+
+        expect(Yast::Kdump.ProposeCrashkernelParam).to eq false
+      end
+    end
+
+    context "otherwise" do
+      it "always proposes kdump to be enabled" do
+        expect(Yast::Kdump.ProposeCrashkernelParam).to eq true
+      end
+    end
+  end
+
   let(:partition_info) do
     [
       { "free" => 389318, "name" => "/", "used" => 1487222 },
