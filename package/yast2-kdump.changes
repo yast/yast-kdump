@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 12 10:45:05 CEST 2016 - schubi@suse.de
+
+- Reading kernel_param: Filtering out empty entries. (bnc#991140)
+- 3.1.40
+
+-------------------------------------------------------------------
 Wed Jul 20 13:48:18 CEST 2016 - locilka@suse.com
 
 - Proposing kdump to be disabled by default on ARM64 (bsc#989321)
