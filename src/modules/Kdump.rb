@@ -288,7 +288,8 @@ module Yast
         @crashkernel_param_values = result
       else
         # Let's make sure it's an array
-        @crashkernel_param_values = Array(result)
+        # filtering nils and empty entries bnc#991140
+        @crashkernel_param_values = Array(result).compact.reject(&:empty?)
         # Read the current value only if crashkernel parameter is set.
         # (bnc#887901)
         @allocated_memory = get_allocated_memory(@crashkernel_param_values)

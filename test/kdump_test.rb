@@ -232,6 +232,26 @@ describe Yast::Kdump do
       end
     end
 
+    context "when the param includes empty/nil entries" do
+      let(:kernel_param) { [nil, ""] }
+
+      it "reports presence of the param" do
+        expect(Yast::Kdump.crashkernel_param).to eq true
+      end
+
+      it "schedules the writing on the param" do
+        expect(Yast::Kdump.add_crashkernel_param).to eq true
+      end
+
+      it "does not find several ranges" do
+        expect(Yast::Kdump.crashkernel_list_ranges).to eq false
+      end
+
+      it "empty value will be returned" do
+        expect(Yast::Kdump.allocated_memory).to be_empty
+      end
+    end
+
     context "when the param is a number" do
       let(:kernel_param) { "32M" }
 
