@@ -247,7 +247,7 @@ describe Yast::Kdump do
         expect(Yast::Kdump.crashkernel_list_ranges).to eq false
       end
 
-      it "empty allocated memory" do
+      it "empty value will be returned" do
         expect(Yast::Kdump.allocated_memory).to be_empty
       end
     end
