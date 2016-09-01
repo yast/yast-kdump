@@ -566,9 +566,10 @@ string getAlocatedMemory(string crash_value)
 
 string BuildCrashkernelValue ()
 {
-    // if user doesn't modified or select don't modify 
-    // return readed value
-    if (crashkernel_list_ranges)
+    // Return read or imported values if the user has not modified
+    // the entry or the value has been imported by AutoYAST.
+    // (bnc#995750)
+    if (crashkernel_list_ranges || import_called)
 	return crashkernel_param_value;
 
     string crash_value = "";
@@ -1230,13 +1231,11 @@ define boolean ProposeCrashkernelParam()
 
 define void ProposeGlobalVars()
 {
-    if (!propose_called)
+    # Settings have not been imported by AutoYaST and have not already
+    # been suggested by proposal. (bnc#930950, bnc#995750).
+    if (!propose_called && !import_called)
     {
-         # Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
-         # (bnc#930950)
-         if (!Mode::autoinst())
-             add_crashkernel_param = ProposeCrashkernelParam();
-
+         add_crashkernel_param = ProposeCrashkernelParam();
          crashkernel_param = false;
          // added defualt settings
          KDUMP_SETTINGS = DEFAULT_CONFIG;

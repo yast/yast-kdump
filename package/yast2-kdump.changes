@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep  1 12:48:14 CEST 2016 - schubi@suse.de
+
+- AutoYaST: Writing entries of profile <general> and <crash_kernel>
+  section correctly. (bnc#995750)
+- 2.17.31
+
+-------------------------------------------------------------------
 Fri Jan 22 11:58:19 UTC 2016 - igonzalezsosa@suse.com
 
 - Preserve existing content of XEN_APPEND in
