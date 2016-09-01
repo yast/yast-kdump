@@ -1,8 +1,8 @@
 -------------------------------------------------------------------
 Thu Sep  1 12:48:14 CEST 2016 - schubi@suse.de
 
-- AutoYaST: Writing entries of profile <general> and <crash_kernel>
-  section correctly. (bnc#995750)
+- AutoYaST: Write <general> and <crash_kernel> sections correctly.
+  (bnc#995750)
 - 2.17.31
 
 -------------------------------------------------------------------
