@@ -729,4 +729,29 @@ describe Yast::Kdump do
       expect(memory).to eq(high: "64", low: "32")
     end
   end
+
+  describe ".AutoYaST" do
+    before do
+      Yast::Mode.SetMode(mode)
+    end
+
+    context "during profile import" do
+      let(:mode) { "autoinstallation" }
+      let(:profile) { {"add_crash_kernel"=>true,
+                        "crash_kernel"=>"256M",
+                        "general"=>{"KDUMP_SAVEDIR"=>"file:///var/dummy"}
+                      }
+                    }
+      # bnc#995750
+      it "imported values will not be overwritten by the proposal" do
+        Yast::Kdump.Import(profile)
+        Yast::Kdump.Propose
+        ret = Yast::Kdump.Export
+        expect(ret["add_crash_kernel"]).to eq(profile["add_crash_kernel"])
+        expect(ret["crash_kernel"]).to eq(profile["crash_kernel"])
+        expect(ret["general"]["KDUMP_SAVEDIR"]).to eq(profile["general"]["KDUMP_SAVEDIR"])
+      end
+    end
+  end
+
 end
