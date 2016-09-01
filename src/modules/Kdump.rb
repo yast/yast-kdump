@@ -1089,7 +1089,7 @@ module Yast
       # If the current values include "nasty" things and the user has not
       # overriden the value of @crashkernel_list_ranges to autorize the
       # modification. OR the value has been imported by AutoYAST (bnc#995750).
-      # In both cases the old values (ensuring the Array format) will be
+      # In both cases the old value (ensuring the Array format) will be
       # returned.
       if @crashkernel_list_ranges || @import_called
         return Array(@crashkernel_param_values.dup)
