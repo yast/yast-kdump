@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Sep  1 16:17:37 CEST 2016 - schubi@suse.de
+
+- AutoYaST: Write <general> and <crash_kernel> sections correctly.
+  Imported settings will not be overwritten by proposal.
+  (bnc#995750)
+- 3.1.41
+
+-------------------------------------------------------------------
 Fri Aug 12 10:45:05 CEST 2016 - schubi@suse.de
 
 - Reading kernel_param: Filtering out empty entries. (bnc#991140)
