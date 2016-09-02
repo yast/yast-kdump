@@ -415,15 +415,13 @@ describe Yast::Kdump do
 
   describe ".WriteKdumpBootParameter" do
     before do
-      Yast::Mode.SetMode(mode)
       # FIXME: current tests do not cover fadump (ppc64 specific)
       allow(Yast::Kdump.system).to receive(:supports_fadump?).and_return false
     end
 
     context "during autoinstallation" do
-      let(:mode) { "autoinstallation" }
-
       before do
+        allow(Yast::Mode).to receive(:autoinst).and_return true
         Yast::Kdump.Import(profile)
       end
 
@@ -485,9 +483,8 @@ describe Yast::Kdump do
     end
 
     context "during autoupgrade" do
-      let(:mode) { "autoupgrade" }
-
       before do
+        allow(Yast::Mode).to receive(:autoupgrade).and_return true
         Yast::Kdump.Import(profile)
       end
 
@@ -549,9 +546,8 @@ describe Yast::Kdump do
     end
 
     context "in normal mode" do
-      let(:mode) { "normal" }
-
       before do
+        allow(Yast::Mode).to receive(:normal).and_return true
         allow(Yast::Popup).to receive(:Message)
         allow(Yast::Bootloader).to receive(:kernel_param).and_return kernel_param
         Yast::Kdump.ReadKdumpKernelParam
@@ -650,9 +646,8 @@ describe Yast::Kdump do
     end
 
     context "during update" do
-      let(:mode) { "update" }
-
       before do
+        allow(Yast::Mode).to receive(:update).and_return true
         allow(Yast::Popup).to receive(:Message)
         allow(Yast::Bootloader).to receive(:kernel_param).and_return kernel_param
         allow(Yast::Bootloader).to receive(:Write)
@@ -686,12 +681,11 @@ describe Yast::Kdump do
   end
 
   describe ".Update" do
-    before do
-      Yast::Mode.SetMode(mode)
-    end
 
     context "in update mode" do
-      let(:mode) { "update" }
+      before do
+        allow(Yast::Mode).to receive(:update).and_return true
+      end
 
       it "reads kernel param, update kdump boot parameter and returns true" do
         expect(Yast::Kdump).to receive(:ReadKdumpKernelParam)
@@ -701,7 +695,9 @@ describe Yast::Kdump do
     end
 
     context "in update mode" do
-      let(:mode) { "autoupgrade" }
+      before do
+        allow(Yast::Mode).to receive(:autoupgrade).and_return true
+      end
 
       it "does not reads kernel param but update kdump boot parameter and returns true" do
         expect(Yast::Kdump).to_not receive(:ReadKdumpKernelParam)
@@ -729,4 +725,28 @@ describe Yast::Kdump do
       expect(memory).to eq(high: "64", low: "32")
     end
   end
+
+  describe ".Proposal" do
+
+    context "during AutoYaST installation" do
+      before do
+        allow(Yast::Mode).to receive(:autoinstallation).and_return true
+      end
+      let(:profile) { {"add_crash_kernel"=>true,
+                        "crash_kernel"=>"256M",
+                        "general"=>{"KDUMP_SAVEDIR"=>"file:///var/dummy"}
+                      }
+                    }
+      # bnc#995750
+      it "does not override imported AutoYaST settings" do
+        Yast::Kdump.Import(profile)
+        Yast::Kdump.Propose
+        ret = Yast::Kdump.Export
+        expect(ret["add_crash_kernel"]).to eq(profile["add_crash_kernel"])
+        expect(ret["crash_kernel"]).to eq(profile["crash_kernel"])
+        expect(ret["general"]["KDUMP_SAVEDIR"]).to eq(profile["general"]["KDUMP_SAVEDIR"])
+      end
+    end
+  end
+
 end

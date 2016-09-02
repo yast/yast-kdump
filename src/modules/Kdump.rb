@@ -684,14 +684,12 @@ module Yast
     # after that remember user settings
 
     def ProposeGlobalVars
-      if !@propose_called
+      # Settings have not been imported by AutoYaST and have not already
+      # been suggested by proposal. (bnc#930950, bnc#995750, bnc#890719).
+      if !@propose_called && !@import_called
         # added default settings
         @KDUMP_SETTINGS = deep_copy(@DEFAULT_CONFIG)
-
-        # Autoyast: "add_crashkernel_param" will be set by using autoinst.xml
-        # (bnc#890719)
-        @add_crashkernel_param = ProposeCrashkernelParam() unless Mode.autoinst
-
+        @add_crashkernel_param = ProposeCrashkernelParam()
         @crashkernel_param = false
       end
       @propose_called = true
@@ -1090,8 +1088,12 @@ module Yast
     def crash_kernel_values
       # If the current values include "nasty" things and the user has not
       # overriden the value of @crashkernel_list_ranges to autorize the
-      # modification, return the old values (ensuring the Array format)
-      return Array(@crashkernel_param_values.dup) if @crashkernel_list_ranges
+      # modification. OR the value has been imported by AutoYAST (bnc#995750).
+      # In both cases the old value (ensuring the Array format) will be
+      # returned.
+      if @crashkernel_list_ranges || @import_called
+        return Array(@crashkernel_param_values.dup)
+      end
 
       result = []
       high = @allocated_memory[:high]
