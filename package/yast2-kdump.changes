@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 22 15:20:08 CEST 2016 - schubi@suse.de
+
+- AutoYaST: Taking proposed values if <crash_kernel> has not been
+  defined in AutoYaST configuration file. (bnc#997448)
+- 3.1.42
+
+-------------------------------------------------------------------
 Thu Sep  1 16:17:37 CEST 2016 - schubi@suse.de
 
 - AutoYaST: Write <general> and <crash_kernel> sections correctly.

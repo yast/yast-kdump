@@ -943,8 +943,17 @@ module Yast
         @KDUMP_SETTINGS[key] = value.nil? ? def_value : value
       end
 
-      # Make sure it's an array
-      @crashkernel_param_values = Array(settings.fetch("crash_kernel", ""))
+      if Builtins.haskey(settings, "crash_kernel")
+        # Make sure it's an array
+        @crashkernel_param_values = Array(settings.fetch("crash_kernel", ""))
+        # In order not to overwrite the values by the proposal we will have to set
+        # according allocated memory too. (bnc#995750)
+        @allocated_memory = get_allocated_memory(@crashkernel_param_values)
+      else
+        # Taking proposed values (bnc#997448)
+        ReadKdumpKernelParam()
+        ProposeAllocatedMemory()
+      end
       if settings.has_key?("add_crash_kernel")
         @add_crashkernel_param = settings["add_crash_kernel"]
       else
@@ -1088,10 +1097,9 @@ module Yast
     def crash_kernel_values
       # If the current values include "nasty" things and the user has not
       # overriden the value of @crashkernel_list_ranges to autorize the
-      # modification. OR the value has been imported by AutoYAST (bnc#995750).
-      # In both cases the old value (ensuring the Array format) will be
-      # returned.
-      if @crashkernel_list_ranges || @import_called
+      # modification.
+      # The old value (ensuring the Array format) will be returned.
+      if @crashkernel_list_ranges
         return Array(@crashkernel_param_values.dup)
       end
 
