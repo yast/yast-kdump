@@ -420,11 +420,12 @@ describe Yast::Kdump do
     end
 
     context "during autoinstallation" do
-      let(:bootlader_kernel_params) { ["64M", "128M,low"] }
+      let(:bootlader_kernel_params) { ["73M,high"] }
 
       before do
         allow(Yast::Mode).to receive(:autoinst).and_return true
-        allow(Yast::Bootloader).to receive(:kernel_param).and_return bootlader_kernel_params
+        allow(Yast::Kdump.calibrator).to receive(:default_low).and_return 0
+        allow(Yast::Kdump.calibrator).to receive(:default_high).and_return 73
         Yast::Kdump.Import(profile)
       end
 
@@ -500,11 +501,12 @@ describe Yast::Kdump do
     end
 
     context "during autoupgrade" do
-      let(:bootlader_kernel_params) { ["64M", "128M,low"] }
+      let(:bootlader_kernel_params) { ["75M,high"] }
 
       before do
         allow(Yast::Mode).to receive(:autoupgrade).and_return true
-        allow(Yast::Bootloader).to receive(:kernel_param).and_return bootlader_kernel_params
+        allow(Yast::Kdump.calibrator).to receive(:default_low).and_return 0
+        allow(Yast::Kdump.calibrator).to receive(:default_high).and_return 75
         Yast::Kdump.Import(profile)
       end
 

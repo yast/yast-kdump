@@ -951,8 +951,9 @@ module Yast
         @allocated_memory = get_allocated_memory(@crashkernel_param_values)
       else
         # Taking proposed values (bnc#997448)
-        ReadKdumpKernelParam()
         ProposeAllocatedMemory()
+        # Make sure it's an array
+        @crashkernel_param_values = Array(crash_kernel_values)
       end
       if settings.has_key?("add_crash_kernel")
         @add_crashkernel_param = settings["add_crash_kernel"]
