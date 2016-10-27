@@ -74,7 +74,7 @@ module Yast
         ) +
           # Dump Format - RadioButtons  2/7
           _(
-            "<p><b>Local Filestem</b> - Save kdump image in the local filesystem.\n" +
+            "<p><b>Local Filesystem</b> - Save kdump image in the local filesystem.\n" +
               "    <i>Directory for Saving Dumps</i> - The path for saving kdump images.\n" +
               "    Selecting directory for saving kdump images via dialog by pressing <i>Browse</i>\n" +
               "    <br></p>"
@@ -167,11 +167,11 @@ module Yast
         ),
         #SMTP User Name
         "SMTPUser"               => _(
-          "<p><b>User Name</b> for SMTP authetication when <i>SMTP Server</i> is\n  set. This is optional. If you do not specifiy a username and password, plain SMTP will be used.</p>\n"
+          "<p><b>User Name</b> for SMTP authentication when <i>SMTP Server</i> is\n  set. This is optional. If you do not specifiy a username and password, plain SMTP will be used.</p>\n"
         ),
         #SMTP Password
         "SMTPPassword"           => _(
-          "<p><b>Password</b> for SMTP authetication when <i>SMTP Server</i> is set. This\n  is optional. If you do not specify a username and password, plain SMTP will be used.</p>\n"
+          "<p><b>Password</b> for SMTP authentication when <i>SMTP Server</i> is set. This\n  is optional. If you do not specify a username and password, plain SMTP will be used.</p>\n"
         ),
         # Notification To (email addresses)
         "NotificationTo"         => _(
