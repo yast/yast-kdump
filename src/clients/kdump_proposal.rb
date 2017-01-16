@@ -44,6 +44,7 @@ module Yast
 
         @ret = {
           "raw_proposal" => Kdump.Summary,
+          "label_proposal" => Kdump.Summary,
           # FATE#317488 When expectation at the end of proposal does not match
           # the value, this proposal will be called again
           "trigger"      => {
