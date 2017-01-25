@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 25 13:01:58 UTC 2017 - mvidner@suse.com
+
+- Implement simple_mode -> label_proposal (FATE#322328)
+- 3.1.43
+
+-------------------------------------------------------------------
 Thu Sep 22 15:20:08 CEST 2016 - schubi@suse.de
 
 - AutoYaST: Taking proposed values if <crash_kernel> has not been
