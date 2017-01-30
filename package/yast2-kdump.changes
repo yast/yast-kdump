@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 25 13:01:58 UTC 2017 - mvidner@suse.com
+
+- Implement simple_mode -> label_proposal (FATE#322328)
+- 3.2.1
+
+-------------------------------------------------------------------
 Thu Oct 27 13:33:19 UTC 2016 - jreidinger@suse.com
 
 - fix typos in kdump help (bsc#703145)

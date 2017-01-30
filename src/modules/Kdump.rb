@@ -65,6 +65,7 @@ module Yast
       Yast.import "FileUtils"
       Yast.import "Directory"
       Yast.import "String"
+      Yast.import "SpaceCalculation"
 
       reset
     end
