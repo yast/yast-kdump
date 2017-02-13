@@ -385,6 +385,8 @@ module Yast
     #
     # @return [Boolean] whether successful
     def update_initrd
+      return true unless using_fadump_changed?
+
       # See FATE#315780
       # See https://www.suse.com/support/kb/doc.php?id=7012786
       # FIXME what about dracut?
@@ -429,11 +431,7 @@ module Yast
     def WriteKdumpSettings
       WriteKdumpSettingsTo(path(".sysconfig.kdump"), @kdump_file)
 
-      if using_fadump_changed? && ! update_initrd
-        return false
-      end
-
-      true
+      update_initrd
     end
 
     # Write kdump boot arguments - crashkernel and fadump
