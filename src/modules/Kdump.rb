@@ -391,6 +391,12 @@ module Yast
       # See https://www.suse.com/support/kb/doc.php?id=7012786
       # FIXME what about dracut?
       update_command = (using_fadump? ? "mkdumprd -f" : "mkinitrd")
+      update_initrd_with(update_command)
+    end
+
+    # @param update_command [String] a command for .target.bash
+    # @return [Boolean] whether successful
+    def update_initrd_with(update_command)
       update_logfile = File.join(Directory.vardir, "y2logmkinitrd")
 
       run_command = update_command + " >> #{update_logfile} 2>&1"
