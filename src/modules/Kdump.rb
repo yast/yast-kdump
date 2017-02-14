@@ -385,6 +385,12 @@ module Yast
     #
     # @return [Boolean] whether successful
     def update_initrd
+      # For CaaSP we need an explicit initrd rebuild before the
+      # first boot, when the root filesystem becomes read only.
+      rebuild_cmd = "/usr/sbin/tu-rebuild-kdump-initrd"
+      # part of transactional-update.rpm
+      update_initrd_with("if test -x #{rebuild_cmd}; then #{rebuild_cmd}; fi")
+
       return true unless using_fadump_changed?
 
       # See FATE#315780
