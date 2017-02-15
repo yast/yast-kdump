@@ -385,10 +385,24 @@ module Yast
     #
     # @return [Boolean] whether successful
     def update_initrd
+      # For CaaSP we need an explicit initrd rebuild before the
+      # first boot, when the root filesystem becomes read only.
+      rebuild_cmd = "/usr/sbin/tu-rebuild-kdump-initrd"
+      # part of transactional-update.rpm
+      update_initrd_with("if test -x #{rebuild_cmd}; then #{rebuild_cmd}; fi")
+
+      return true unless using_fadump_changed?
+
       # See FATE#315780
       # See https://www.suse.com/support/kb/doc.php?id=7012786
       # FIXME what about dracut?
       update_command = (using_fadump? ? "mkdumprd -f" : "mkinitrd")
+      update_initrd_with(update_command)
+    end
+
+    # @param update_command [String] a command for .target.bash
+    # @return [Boolean] whether successful
+    def update_initrd_with(update_command)
       update_logfile = File.join(Directory.vardir, "y2logmkinitrd")
 
       run_command = update_command + " >> #{update_logfile} 2>&1"
@@ -429,11 +443,7 @@ module Yast
     def WriteKdumpSettings
       WriteKdumpSettingsTo(path(".sysconfig.kdump"), @kdump_file)
 
-      if using_fadump_changed? && ! update_initrd
-        return false
-      end
-
-      true
+      update_initrd
     end
 
     # Write kdump boot arguments - crashkernel and fadump

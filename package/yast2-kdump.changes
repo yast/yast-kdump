@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 14 12:08:46 UTC 2017 - mvidner@suse.com
+
+- Explicitly create the kdump initrd (bsc#1022496).
+- 3.2.2
+
+-------------------------------------------------------------------
 Wed Jan 25 13:01:58 UTC 2017 - mvidner@suse.com
 
 - Implement simple_mode -> label_proposal (FATE#322328)
