@@ -106,6 +106,10 @@ module Yast
       # array values of kernel parameter
       @crashkernel_param_values = []
 
+      # array values of kernel parameter for Xen hypervisor
+      # see @crashkernel_param_values for details
+      @crashkernel_xen_param_values = []
+
       # Boolean option indicates add kernel param
       # "crashkernel"
       #
@@ -270,6 +274,7 @@ module Yast
     def ReadKdumpKernelParam
       result = Bootloader.kernel_param(:common, "crashkernel")
       result = Bootloader.kernel_param(:xen_guest, "crashkernel") if result == :missing
+      xen_result = Bootloader.kernel_param(:xen_host, "crashkernel")
       # result could be [String,Array,:missing,:present]
       # String   - the value of the only occurrence
       # Array    - the values of the multiple occurrences
@@ -293,6 +298,14 @@ module Yast
         # Read the current value only if crashkernel parameter is set.
         # (bnc#887901)
         @allocated_memory = get_allocated_memory(@crashkernel_param_values)
+      end
+
+      if xen_result == :missing || xen_result == :present
+        @crashkernel_xen_param_values = xen_result
+      else
+        # Let's make sure it's an array
+        # filtering nils and empty entries bnc#991140
+        @crashkernel_xen_param_values = Array(xen_result).compact.reject(&:empty?)
       end
 
       true
@@ -453,14 +466,18 @@ module Yast
         if Mode.autoinst || Mode.autoupgrade
           # Use the value(s) read by import
           crash_values = @crashkernel_param_values
+          crash_xen_values = @crashkernel_xen_param_values
           # Always write the value
           skip_crash_values = false
         else
           # Calculate the param values based on @allocated_memory
           crash_values = crash_kernel_values
+          crash_xen_values = crash_xen_kernel_values
           remove_offsets!(crash_values) if Mode.update
+          remove_offsets!(crash_xen_values) if Mode.update
           # Skip writing of param if it's already set to the desired values
           skip_crash_values = @crashkernel_param && @crashkernel_param_values == crash_values
+          skip_crash_values &&= @crashkernel_xen_param_values && @crashkernel_xen_param_values == crash_xen_values
         end
 
         if skip_crash_values
@@ -469,6 +486,7 @@ module Yast
           Service.Restart(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
         else
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => crash_values)
+          Bootloader.modify_kernel_params(:xen_host, "crashkernel" => crash_xen_values)
           # do mass write in installation to speed up, so skip this one
           if !Stage.initial
             old_progress = Progress.set(false)
@@ -476,8 +494,12 @@ module Yast
             Progress.set(old_progress)
           end
           Builtins.y2milestone(
-            "[kdump] (WriteKdumpBootParameter) adding chrashkernel options with values: %1",
+            "[kdump] (WriteKdumpBootParameter) adding crashkernel options with values: %1",
             crash_values
+          )
+          Builtins.y2milestone(
+            "[kdump] (WriteKdumpBootParameter) adding xen crashkernel options with values: %1",
+            crash_xen_values
           )
           reboot_needed = true
           Service.Enable(KDUMP_SERVICE_NAME)
@@ -487,6 +509,7 @@ module Yast
         if @crashkernel_param
           #delete crashkernel parameter from bootloader
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => :missing)
+          Bootloader.modify_kernel_params(:common, :xen_host, :recovery, "crashkernel" => :missing)
           if !Stage.initial
             old_progress = Progress.set(false)
             Bootloader.Write
@@ -920,8 +943,11 @@ module Yast
     def Export
       crash_kernel = crash_kernel_values
       crash_kernel = crash_kernel[0] if crash_kernel.size == 1
+      crash_xen_kernel = crash_kernel_values
+      crash_xen_kernel = crash_xen_kernel[0] if crash_xen_kernel.size == 1
       out = {
         "crash_kernel"     => crash_kernel,
+        "crash_xen_kernel" => crash_xen_kernel,
         "add_crash_kernel" => @add_crashkernel_param,
         "general"          => filterExport(@KDUMP_SETTINGS)
       }
@@ -955,6 +981,14 @@ module Yast
         # Make sure it's an array
         @crashkernel_param_values = Array(crash_kernel_values)
       end
+
+      if Builtins.haskey(settings, "crash_xen_kernel")
+        # Make sure it's an array
+        @crashkernel_xen_param_values = Array(settings.fetch("crash_xen_kernel", ""))
+      else
+        @crashkernel_xen_param_values = Array(crash_xen_kernel_values)
+      end
+
       if settings.has_key?("add_crash_kernel")
         @add_crashkernel_param = settings["add_crash_kernel"]
       else
@@ -1119,6 +1153,31 @@ module Yast
         end
       end
       log.info "built crashkernel values are #{result}"
+
+      result
+    end
+
+    def crash_xen_kernel_values
+      # If the current values include "nasty" things and the user has not
+      # overriden the value of @crashkernel_list_ranges to autorize the
+      # modification.
+      # The old value (ensuring the Array format) will be returned.
+      if @crashkernel_list_ranges
+        return Array(@crashkernel_xen_param_values.dup)
+      end
+
+      result = []
+      high = @allocated_memory[:high]
+      low = @allocated_memory[:low]
+      sum = 0
+      sum += low.to_i if low
+      sum += high.to_i if high
+
+      if sum != 0
+        result << "#{sum}M\\<4G"
+      end
+
+      log.info "built xen crashkernel values are #{result}"
 
       result
     end

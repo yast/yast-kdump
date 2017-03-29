@@ -421,6 +421,7 @@ describe Yast::Kdump do
 
     context "during autoinstallation" do
       let(:bootlader_kernel_params) { ["73M,high"] }
+      let(:bootlader_xen_kernel_params) { ["73M\\<4G"] }
 
       before do
         allow(Yast::Mode).to receive(:autoinst).and_return true
@@ -430,12 +431,15 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested and a value for crashkernel is supplied" do
-        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value" } }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value", "crash_xen_kernel" => "xen_value" } }
 
         it "writes the crashkernel value to the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => ["the_value"])
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => ["xen_value"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -444,12 +448,15 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but empty value for crashkernel is supplied" do
-        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => [] } }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => [], "crash_xen_kernel" => [] } }
 
         it "writes an empty crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => [])
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => [])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -464,6 +471,9 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => bootlader_kernel_params)
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => bootlader_xen_kernel_params)
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -486,12 +496,15 @@ describe Yast::Kdump do
       end
 
       context "if kdump crashkernel contains an offset" do
-        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128" } }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128", "crash_xen_kernel" => "72M@128"} }
 
         it "writes the crashkernel value without removing the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => ["72M@128"])
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => ["72M@128"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -502,6 +515,7 @@ describe Yast::Kdump do
 
     context "during autoupgrade" do
       let(:bootlader_kernel_params) { ["75M,high"] }
+      let(:bootlader_xen_kernel_params) { ["75M\\<4G"] }
 
       before do
         allow(Yast::Mode).to receive(:autoupgrade).and_return true
@@ -511,12 +525,15 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested and a value for crashkernel is supplied" do
-        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value" } }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "the_value", "crash_xen_kernel" => "xen_value" } }
 
         it "writes the crashkernel value to the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => ["the_value"])
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => ["xen_value"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -525,12 +542,15 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but an empty value for crashkernel is supplied" do
-        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => [] } }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => [], "crash_xen_kernel" => [] } }
 
         it "writes an empty crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => [])
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => [])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -545,6 +565,9 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => bootlader_kernel_params)
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => bootlader_xen_kernel_params)
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -567,12 +590,15 @@ describe Yast::Kdump do
       end
 
       context "if kdump crashkernel contains an offset" do
-        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128" } }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128", "crash_xen_kernel" => "72@128" } }
 
         it "writes the crashkernel value without removing the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => ["72M@128"])
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => ["72M@128"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -596,6 +622,9 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, "crashkernel" => ["128M"])
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, "crashkernel" => ["128M\\<4G"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -618,6 +647,9 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
           .to receive(:modify_kernel_params)
           .with(:common, :xen_guest, :recovery, "crashkernel" => :missing)
+          expect(Yast::Bootloader)
+          .to receive(:modify_kernel_params)
+          .with(:xen_host, "crashkernel" => :missing)
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Disable).with("kdump")
 
@@ -633,6 +665,9 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
           .to receive(:modify_kernel_params)
           .with(:common, :xen_guest, :recovery, "crashkernel" => ["64M"])
+          expect(Yast::Bootloader)
+          .to receive(:modify_kernel_params)
+          .with(:xen_host, "crashkernel" => ["64M\\<4G"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -666,6 +701,9 @@ describe Yast::Kdump do
             expect(Yast::Bootloader)
               .to receive(:modify_kernel_params)
               .with(:common, :xen_guest, :recovery, {"crashkernel" => ["64M"]})
+            expect(Yast::Bootloader)
+              .to receive(:modify_kernel_params)
+              .with(:xen_host, "crashkernel" => ["64M\\<4G"])
             Yast::Kdump.WriteKdumpBootParameter
           end
         end
@@ -699,6 +737,9 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, {"crashkernel" => ["64M"]})
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => ["64M\\<4G"])
           Yast::Kdump.WriteKdumpBootParameter
         end
       end
@@ -710,6 +751,9 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :xen_guest, :recovery, {"crashkernel" => ["-512M:64M,512M-:128M"]})
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, {"crashkernel" => ["-512M:64M,512M-:128M"]})
           Yast::Kdump.WriteKdumpBootParameter
         end
       end
