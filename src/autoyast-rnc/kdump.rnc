@@ -7,7 +7,7 @@ kdump =
   element kdump {
      (kdump_crash_kernel_value | kdump_crash_kernel_list)? &
     # parameter specify crashkernel value for xen hypervisor
-     (kdump_crash_xen_value | kdump_crash_xen_kernel_list)? &
+     (kdump_crash_xen_kernel_value | kdump_crash_xen_kernel_list)? &
      kdump_add_crash_kernel? &
      kdump_general?
 }
