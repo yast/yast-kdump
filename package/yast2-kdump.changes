@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 29 14:25:05 UTC 2017 - jreidinger@suse.com
+
+- fix dumping kernel with Xen hypervisor (bsc#1014136)
+- 3.1.43
+
+-------------------------------------------------------------------
 Thu Sep 22 15:20:08 CEST 2016 - schubi@suse.de
 
 - AutoYaST: Taking proposed values if <crash_kernel> has not been
