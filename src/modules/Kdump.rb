@@ -508,8 +508,7 @@ module Yast
         # If we don't need the param but it is there
         if @crashkernel_param
           #delete crashkernel parameter from bootloader
-          Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => :missing)
-          Bootloader.modify_kernel_params(:common, :xen_host, :recovery, "crashkernel" => :missing)
+          Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, :xen_host, "crashkernel" => :missing)
           if !Stage.initial
             old_progress = Progress.set(false)
             Bootloader.Write
@@ -943,7 +942,7 @@ module Yast
     def Export
       crash_kernel = crash_kernel_values
       crash_kernel = crash_kernel[0] if crash_kernel.size == 1
-      crash_xen_kernel = crash_kernel_values
+      crash_xen_kernel = crash_xen_kernel_values
       crash_xen_kernel = crash_xen_kernel[0] if crash_xen_kernel.size == 1
       out = {
         "crash_kernel"     => crash_kernel,
