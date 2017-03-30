@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 29 14:25:05 UTC 2017 - jreidinger@suse.com
+
+- fix dumping kernel with Xen hypervisor (bsc#1014136)
+- 3.2.3
+
+-------------------------------------------------------------------
 Tue Feb 14 12:08:46 UTC 2017 - mvidner@suse.com
 
 - Explicitly create the kdump initrd (bsc#1022496).
