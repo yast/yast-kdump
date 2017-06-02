@@ -73,7 +73,7 @@ module Yast
             "handler" => fun_ref(method(:cmdKdumpStartup), "boolean (map)"),
             # TRANSLATORS: CommandLine help
             "help"    => _("Start-up settings"),
-            "example" => ["startup enable alloc_mem=256", "startup disable"]
+            "example" => ["startup enable alloc_mem=128,256", "startup disable"]
           },
           "dumplevel"               => {
             "handler" => fun_ref(method(:cmdKdumpDumpLevel), "boolean (map)"),
@@ -229,10 +229,10 @@ module Yast
             "help" => _("Shows current option status")
           },
           "alloc_mem"   => {
-            "type" => "integer",
+            "type" => "string",
             # TRANSLATORS: CommandLine help
             "help" => _(
-              "Size of allocated memory MB"
+              "Allocate Low and High Memory (in MB) of Kdump separated by comma"
             )
           },
           "dump_level"  => {
@@ -740,7 +740,8 @@ module Yast
       if Ops.get(options, "enable") != nil &&
           Ops.get(options, "alloc_mem") != nil
         Kdump.add_crashkernel_param = true
-        Kdump.allocated_memory = { low: options["alloc_mem"].to_s }
+        alloc_mem_low, alloc_mem_high = options["alloc_mem"].split(',')
+        Kdump.allocated_memory = { low: alloc_mem_low, high: alloc_mem_high }
         #TRANSLATORS: CommandLine printed text
         if Kdump.crashkernel_list_ranges
           CommandLine.Print(
