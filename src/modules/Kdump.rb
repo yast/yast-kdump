@@ -531,7 +531,7 @@ module Yast
         Service.Stop(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
       end
 
-      if reboot_needed && Mode.normal
+      if reboot_needed && Mode.normal && !Mode.commandline
         Popup.Message(_("To apply changes a reboot is necessary."))
       end
 
