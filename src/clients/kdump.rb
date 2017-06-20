@@ -734,6 +734,8 @@ module Yast
     end
 
 
+    # Only numbers are allowed as allow_mem_high and allow_mem_low values
+    ALLOC_MEM_REGEXP = /\D/
 
     def cmdKdumpStartup(options)
       options = deep_copy(options)
@@ -742,8 +744,8 @@ module Yast
         Kdump.add_crashkernel_param = true
         alloc_mem_low, alloc_mem_high = options["alloc_mem"].split(',')
         Kdump.allocated_memory = { low: alloc_mem_low, high: alloc_mem_high }
-        unless alloc_mem_low.scan(/\D/).empty? &&
-                (alloc_mem_high == nil || alloc_mem_high.scan(/\D/).empty?)
+        unless alloc_mem_low =~ ALLOC_MEM_REGEXP &&
+                (alloc_mem_high.nil? || alloc_mem_high =~ ALLOC_MEM_REGEXP)
           CommandLine.Error(_("Invalid allocation memory parameter"))
           return false
         end
