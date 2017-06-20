@@ -742,6 +742,11 @@ module Yast
         Kdump.add_crashkernel_param = true
         alloc_mem_low, alloc_mem_high = options["alloc_mem"].split(',')
         Kdump.allocated_memory = { low: alloc_mem_low, high: alloc_mem_high }
+        unless alloc_mem_low.scan(/\D/).empty? &&
+                (alloc_mem_high == nil || alloc_mem_high.scan(/\D/).empty?)
+          CommandLine.Error(_("Invalid allocation memory parameter"))
+          return false
+        end
         #TRANSLATORS: CommandLine printed text
         if Kdump.crashkernel_list_ranges
           CommandLine.Print(
