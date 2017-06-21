@@ -1,12 +1,21 @@
 require_relative "./test_helper"
 require_relative "../src/clients/kdump"
+Yast.import "CommandLine"
  
 describe Yast::KdumpClient do
  
   describe ".cmdKdumpStartup" do
     let(:alloc_mem_high) {"100"}
     let(:alloc_mem_low) {"50"}
-   
+
+    context "When using wrong inputs in alloc memory" do
+      let(:options) {{"enable"=>"", "alloc_mem"=>"#{alloc_mem_low}:#{alloc_mem_high}"}}
+
+      it "does not enable kdump and return false" do
+        expect(subject.cmdKdumpStartup(options)).to be false
+      end
+    end
+
     context "When using alloc memory high and low" do
       let(:options) {{"enable"=>"", "alloc_mem"=>"#{alloc_mem_low},#{alloc_mem_high}"}}
     
@@ -17,7 +26,7 @@ describe Yast::KdumpClient do
         expect(Yast::Kdump.add_crashkernel_param).to be true
       end
     end
-    
+
     context "when using only alloc memory low" do
       let(:options) {{"enable"=>"", "alloc_mem"=>"#{alloc_mem_low}"}}
       
