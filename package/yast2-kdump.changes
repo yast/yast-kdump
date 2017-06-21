@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jun 21 09:10:56 UTC 2017 - gsouza@suse.com
+
+- Fixed regular expression that verifies alloc_mem parameter
+  (bsc#1045098).
+- 3.2.6
+
+-------------------------------------------------------------------
 Tue Jun 20 12:19:21 UTC 2017 - gsouza@suse.com
 
 - The alloc_mem parameter is verified to be in accordance with
