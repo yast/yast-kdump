@@ -11,7 +11,7 @@ describe Yast::KdumpClient do
     context "When using wrong inputs in alloc memory" do
       let(:options) {{"enable"=>"", "alloc_mem"=>"#{alloc_mem_low}:#{alloc_mem_high}"}}
 
-      it "does not enable kdump and return false" do
+      it "does not enable kdump and returns false" do
         expect(subject.cmdKdumpStartup(options)).to be false
       end
     end
