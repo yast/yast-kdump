@@ -735,20 +735,20 @@ module Yast
 
 
     # Only numbers are allowed as allow_mem_high and allow_mem_low values
-    ALLOC_MEM_REGEXP = /\D/
+    ALLOC_MEM_REGEXP = /\A\d+\z/
 
     def cmdKdumpStartup(options)
       options = deep_copy(options)
       if Ops.get(options, "enable") != nil &&
           Ops.get(options, "alloc_mem") != nil
-        Kdump.add_crashkernel_param = true
         alloc_mem_low, alloc_mem_high = options["alloc_mem"].split(',')
-        Kdump.allocated_memory = { low: alloc_mem_low, high: alloc_mem_high }
         unless alloc_mem_low =~ ALLOC_MEM_REGEXP &&
                 (alloc_mem_high.nil? || alloc_mem_high =~ ALLOC_MEM_REGEXP)
-          CommandLine.Error(_("Invalid allocation memory parameter"))
+          CommandLine.Error(_("alloc_mem parameter used with invalid values"))
           return false
         end
+        Kdump.add_crashkernel_param = true
+        Kdump.allocated_memory = { low: alloc_mem_low, high: alloc_mem_high }
         #TRANSLATORS: CommandLine printed text
         if Kdump.crashkernel_list_ranges
           CommandLine.Print(
