@@ -744,7 +744,7 @@ module Yast
         alloc_mem_low, alloc_mem_high = options["alloc_mem"].split(',')
         unless alloc_mem_low =~ ALLOC_MEM_REGEXP &&
                 (alloc_mem_high.nil? || alloc_mem_high =~ ALLOC_MEM_REGEXP)
-          CommandLine.Error(_("Invalid allocation memory parameter"))
+          CommandLine.Error(_("alloc_mem parameter used with invalid values"))
           return false
         end
         Kdump.add_crashkernel_param = true
