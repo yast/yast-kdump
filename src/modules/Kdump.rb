@@ -1180,7 +1180,7 @@ module Yast
         if @crashkernel_xen_param_values.is_a? Symbol
           return Array(@crashkernel_xen_param_values)
         else
-          return Array(@crashkernel_xen_param_values.to_s.dup)
+          return Array(@crashkernel_xen_param_values.dup)
         end
       end
 
