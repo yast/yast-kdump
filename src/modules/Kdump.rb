@@ -1146,7 +1146,7 @@ module Yast
       # The old value (ensuring the Array format) will be returned.
       if @crashkernel_list_ranges
         if @crashkernel_param_values.is_a? Symbol
-          return Array(@crashkernel_param_values)
+          return Array(@crashkernel_param_values.to_s)
         else
           return Array(@crashkernel_param_values.dup)
         end
@@ -1178,7 +1178,7 @@ module Yast
       # The old value (ensuring the Array format) will be returned.
       if @crashkernel_list_ranges
         if @crashkernel_xen_param_values.is_a? Symbol
-          return Array(@crashkernel_xen_param_values)
+          return Array(@crashkernel_xen_param_values.to_s)
         else
           return Array(@crashkernel_xen_param_values.dup)
         end
