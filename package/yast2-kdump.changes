@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Jun 26 15:27:06 CEST 2017 - schubi@suse.de
+
+- Crash in AutoYaST clone: Fix for "dup" while getting
+  crash_xen_kernel_values and crash_kernel_values values.
+  (bnc#1045965)
+- 3.3.0
+
+-------------------------------------------------------------------
 Wed Jun 21 09:10:56 UTC 2017 - gsouza@suse.com
 
 - Fixed regular expression that verifies alloc_mem parameter
