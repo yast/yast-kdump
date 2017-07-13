@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Jul 13 15:13:34 CEST 2017 - schubi@suse.de
+
+- Switching X-SuSE-YaST-AutoInst flag to "all" because it has an
+  own UI in the installed system and it can write settings in an
+  already installed system. (bnc#1047809)
+- 3.1.44
+
+-------------------------------------------------------------------
 Wed Mar 29 14:25:05 UTC 2017 - jreidinger@suse.com
 
 - fix dumping kernel with Xen hypervisor (bsc#1014136)
