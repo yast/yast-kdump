@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Jul 13 15:13:34 CEST 2017 - schubi@suse.de
+
+- Switching X-SuSE-YaST-AutoInst flag to "all" because it has an
+  own UI in the installed system and it can write settings in an
+  already installed system. (bnc#1047809)
+- 3.2.8
+
+-------------------------------------------------------------------
 Mon Jun 26 15:27:06 CEST 2017 - schubi@suse.de
 
 - Crash in AutoYaST clone: Fix for "dup" while getting

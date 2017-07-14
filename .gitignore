@@ -28,8 +28,7 @@ Makefile.am.common
 .dep
 tmp.*
 *.log
-/doc/autodocs
-!/doc/autodocs/Makefile.am
+/doc
 /testsuite/config/
 /testsuite/run/
 /testsuite/*.exp
