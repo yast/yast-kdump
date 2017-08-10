@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        3.3.1
+Version:        3.3.2
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0
@@ -34,13 +34,11 @@ BuildRequires:  yast2 >= 2.21.22
 BuildRequires:  yast2-bootloader
 BuildRequires:  yast2-buildtools >= 3.1.10
 BuildRequires:  yast2-packager >= 2.17.24
-BuildRequires:  yast2-storage
 BuildRequires:  yast2-testsuite
 Requires:       yast2
 # Kernel parameters with multiple values and bug#945479 fixed
 Requires:       yast2-bootloader >= 3.1.148
 Requires:       yast2-ruby-bindings >= 1.0.0
-Requires:       yast2-storage
 # SpaceCalculation.GetPartitionInfo
 Requires:       yast2-packager
 # do not use old installation with wrong finish order
