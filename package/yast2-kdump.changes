@@ -1,8 +1,8 @@
 -------------------------------------------------------------------
 Fri Dec 15 11:34:57 UTC 2017 - jreidinger@suse.com
 
-- Show kdump as disabled in proposal if product disable it
-  (bsc#1071896)
+- Show kdump as disabled in an installation proposal if the product
+  disables it (bsc#1071242)
 - 4.0.0
 
 -------------------------------------------------------------------
