@@ -621,17 +621,6 @@ module Yast
 
       #number of stages
       steps = 2
-      if Mode.installation
-        write_kdump = ProductFeatures.GetBooleanFeature(
-          "globals",
-          "enable_kdump"
-        )
-        if write_kdump == nil || !write_kdump
-          Builtins.y2milestone("Installation doesn't support kdump.")
-          return true
-        end
-      end
-
       if (Mode.installation || Mode.autoinst) && !@add_crashkernel_param
         Builtins.y2milestone(
           "Skip writing of configuration for kdump during installation"
@@ -700,8 +689,12 @@ module Yast
     # @return [Boolean] the default proposed state
 
     def ProposeCrashkernelParam
+      # proposing disabled kdump if product wants it (bsc#1071242)
+      if !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
+        log.info "Kdump disabled in control file"
+        false
       # proposing disabled kdump if PC has less than 1024MB RAM
-      if total_memory < 1024
+      elsif total_memory < 1024
         log.info "not enough memory - kdump proposed as disabled"
         false
       # proposing disabled kdump on aarch64 (bsc#989321) - kdump not implemented

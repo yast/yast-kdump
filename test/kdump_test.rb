@@ -50,6 +50,8 @@ describe Yast::Kdump do
     before do
       allow(Yast::Kdump).to receive(:total_memory).and_return 1024
       allow(Yast::Arch).to receive(:aarch64).and_return false
+      allow(Yast::ProductFeatures).to receive(:GetBooleanFeature).with("globals", "enable_kdump")
+        .and_return(true)
     end
 
     context "while running on machine with less than 1024 MB memory" do
@@ -63,6 +65,15 @@ describe Yast::Kdump do
     context "while running on ARM64" do
       it "proposes kdump to be disabled" do
         allow(Yast::Arch).to receive(:aarch64).and_return true
+
+        expect(Yast::Kdump.ProposeCrashkernelParam).to eq false
+      end
+    end
+
+    context "while product disabled kdump" do
+      it "proposes kdump to be disabled" do
+        allow(Yast::ProductFeatures).to receive(:GetBooleanFeature).with("globals", "enable_kdump")
+          .and_return(false)
 
         expect(Yast::Kdump.ProposeCrashkernelParam).to eq false
       end
