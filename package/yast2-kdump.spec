@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        4.0.0
+Version:        4.0.1
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0
@@ -50,6 +50,7 @@ Recommends:     kdump
 %else
 Requires:       kdump
 %endif
+Supplements:	packageand(yast2:kdump)
 
 %description
 Configuration of kdump
