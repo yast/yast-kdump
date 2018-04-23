@@ -274,7 +274,6 @@ module Yast
     #  @return [Boolean] successfull
     def ReadKdumpKernelParam
       result = Bootloader.kernel_param(:common, "crashkernel")
-      result = Bootloader.kernel_param(:xen_guest, "crashkernel") if result == :missing
       xen_result = Bootloader.kernel_param(:xen_host, "crashkernel")
       # result could be [String,Array,:missing,:present]
       # String   - the value of the only occurrence
@@ -496,7 +495,7 @@ module Yast
           Service.Enable(KDUMP_SERVICE_NAME)
           Service.Restart(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
         else
-          Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "crashkernel" => crash_values)
+          Bootloader.modify_kernel_params(:common, :recovery, "crashkernel" => crash_values)
           Bootloader.modify_kernel_params(:xen_host, "crashkernel" => crash_xen_values)
           # do mass write in installation to speed up, so skip this one
           if !Stage.initial
@@ -1220,7 +1219,7 @@ module Yast
         else
             value = nil
         end
-        Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, "fadump" => value)
+        Bootloader.modify_kernel_params(:common, :recovery, "fadump" => value)
         Bootloader.Write unless Yast::Stage.initial # do mass write in installation to speed up
       end
     end
