@@ -415,7 +415,7 @@ module Yast
     # @param update_command [String] a command for .target.bash
     # @return [Boolean] whether successful
     def update_initrd_with(update_command)
-      update_logfile = File.join(Directory.vardir, "y2logmkinitrd")
+      update_logfile = File.join(Directory.logdir, "y2logmkinitrd")
 
       run_command = update_command + " >> #{update_logfile} 2>&1"
       y2milestone("Running command: #{run_command}")

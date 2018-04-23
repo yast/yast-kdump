@@ -1,7 +1,13 @@
 -------------------------------------------------------------------
-Wed Apr 18 08:55:41 UTC 2018 - jreidinger@suse.com
+Thu Apr 19 22:55:41 UTC 2018 - jreidinger@suse.com
 
 - do not write crashkernel to XEN dom0 (bsc#1085626)
+- 4.0.3
+
+-------------------------------------------------------------------
+Thu Apr 19 16:25:07 CEST 2018 - snwint@suse.de
+
+- log to /var/log/YaST2, not /var/lib/YaST2 (bsc#1090202)
 - 4.0.2
 
 -------------------------------------------------------------------
