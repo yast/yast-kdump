@@ -17,6 +17,7 @@ X-SuSE-YaST-AutoInstResource=
 X-SuSE-YaST-AutoInstPath=install
 X-SuSE-YaST-AutoInstSchema=kdump.rnc
 X-SuSE-YaST-AutoInstClonable=true
+X-SuSE-YaST-Keywords=system,kernel,crash,dump
 
 Icon=yast-kdump
 Exec=xdg-su -c "/sbin/yast2 kdump"
