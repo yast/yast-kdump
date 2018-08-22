@@ -20,7 +20,7 @@ Name:           yast2-kdump
 Version:        4.0.4
 Release:        0
 Summary:        Configuration of kdump
-License:        GPL-2.0
+License:        GPL-2.0-only
 Group:          System/YaST
 Url:            https://github.com/yast/yast-kdump
 Source0:        %{name}-%{version}.tar.bz2
