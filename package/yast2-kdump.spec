@@ -80,5 +80,5 @@ rake install DESTDIR="%{buildroot}"
 %{yast_schemadir}/autoyast/rnc/kdump.rnc
 %{yast_scrconfdir}/*.scr
 %doc %{yast_docdir}
-%{_datadir}/icons/*
+%{yast_icondir}
 %license COPYING
