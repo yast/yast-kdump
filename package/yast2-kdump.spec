@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        4.0.4
+Version:        4.1.0
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0-only
@@ -80,4 +80,5 @@ rake install DESTDIR="%{buildroot}"
 %{yast_schemadir}/autoyast/rnc/kdump.rnc
 %{yast_scrconfdir}/*.scr
 %doc %{yast_docdir}
+%{yast_icondir}
 %license COPYING
