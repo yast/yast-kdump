@@ -243,13 +243,13 @@ module Yast
     def checkPassword
       return true if Ops.get(@KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", "") != ""
 
-      if Builtins.search(Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", ""), "file") != nil ||
-          Builtins.search(Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", ""), "nfs") != nil ||
+      if Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "").include?("file") ||
+          Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "").include?("nfs") ||
           Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "") == ""
         return false
       end
 
-      if Builtins.search(Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", ""), "@").nil?
+      if !Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "").include?("@")
         return false
       end
 
@@ -263,11 +263,7 @@ module Yast
 
       # if there is 2 times ":" -> it means that password is defined
       # for example cifs://login:password@server....
-      if Ops.greater_than(position, 6)
-        return true
-      else
-        return false
-      end
+      position > 6
     end
 
     # Read current kdump configuration
@@ -463,7 +459,6 @@ module Yast
     #
     #  @return [Boolean] successfull
     def WriteKdumpBootParameter
-      old_progress = false
       reboot_needed = using_fadump_changed?
 
       # First, write or remove the fadump param if needed
@@ -926,17 +921,10 @@ module Yast
 
     def filterExport(settings)
       settings = deep_copy(settings)
-      ret = {}
-      keys = Convert.convert(
-        Map.Keys(@DEFAULT_CONFIG),
-        :from => "list",
-        :to   => "list <string>"
-      )
-      ret = Builtins.filter(settings) do |key, _value|
-        next true if Builtins.contains(keys, key)
+      keys = Map.Keys(@DEFAULT_CONFIG)
+      Builtins.filter(settings) do |key, _value|
+        Builtins.contains(keys, key)
       end
-
-      deep_copy(ret)
     end
 
     # Export kdump settings to a map
@@ -1136,25 +1124,18 @@ module Yast
       # modification.
       # The old value (ensuring the Array format) will be returned.
       if @crashkernel_list_ranges
-        if @crashkernel_param_values.is_a? Symbol
-          return Array(@crashkernel_param_values.to_s)
-        else
-          return Array(@crashkernel_param_values.dup)
-        end
+        return Array(@crashkernel_param_values.to_s) if @crashkernel_param_values.is_a?(Symbol)
+
+        return Array(@crashkernel_param_values.dup)
       end
 
       result = []
       high = @allocated_memory[:high]
       result << high + "M,high" if high && high.to_i != 0
       low = @allocated_memory[:low]
-      if low && low.to_i != 0
-        # Add the ',low' suffix only there is a ',high' one
-        result << if result.empty?
-                    "#{low}M"
-                  else
-                    "#{low}M,low"
-        end
-      end
+      # Add the ',low' suffix only there is a ',high' one
+      result << (result.empty? ? "#{low}M" : "#{low}M,low") if low && low.to_i != 0
+
       log.info "built crashkernel values are #{result}"
 
       result
@@ -1166,7 +1147,7 @@ module Yast
       # modification.
       # The old value (ensuring the Array format) will be returned.
       if @crashkernel_list_ranges
-        if @crashkernel_xen_param_values.is_a? Symbol
+        if @crashkernel_xen_param_values.is_a?(Symbol)
           return Array(@crashkernel_xen_param_values.to_s)
         else
           return Array(@crashkernel_xen_param_values.dup)

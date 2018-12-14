@@ -235,8 +235,7 @@ module Yast
 
     # Function stores option "Enable/Disable kdump"
     #
-    def StoreEnableDisalbeKdump(_key, event)
-      event = deep_copy(event)
+    def StoreEnableDisalbeKdump(_key, _event)
       radiobut = Convert.to_string(
         UI.QueryWidget(Id("EnableDisalbeKdump"), :Value)
       )
@@ -255,137 +254,129 @@ module Yast
 
     def SetUpKDUMP_SAVE_TARGET(target)
       parse_target = target
+      return false if target == ""
 
-      if target != ""
+      pos = Builtins.search(parse_target, "/")
+      pos1 = -1
+      if pos.zero? # Support for the old '/var/crash' style
+        Ops.set(@KDUMP_SAVE_TARGET, "target", "file")
+      else
+        Ops.set(
+          @KDUMP_SAVE_TARGET,
+          "target",
+          Builtins.substring(parse_target, 0, Ops.subtract(pos, 1))
+        )
+        parse_target = Builtins.substring(parse_target, Ops.add(pos, 2))
+      end
+
+      # file
+      if Ops.get(@KDUMP_SAVE_TARGET, "target") == "file"
+        Ops.set(@KDUMP_SAVE_TARGET, "dir", parse_target)
+
+        # nfs
+      elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "nfs"
         pos = Builtins.search(parse_target, "/")
-        pos1 = -1
-        if pos.zero? # Support for the old '/var/crash' style
-          Ops.set(@KDUMP_SAVE_TARGET, "target", "file")
-        else
-          Ops.set(
-            @KDUMP_SAVE_TARGET,
-            "target",
-            Builtins.substring(parse_target, 0, Ops.subtract(pos, 1))
-          )
-          parse_target = Builtins.substring(parse_target, Ops.add(pos, 2))
-        end
+        # pos1 = pos;
+        Ops.set(
+          @KDUMP_SAVE_TARGET,
+          "server",
+          Builtins.substring(parse_target, 0, pos)
+        )
+        # pos = find(parse_target, "/");
+        # KDUMP_SAVE_TARGET["share"]=substring(parse_target,pos1+1,pos-(pos1+1));
+        Ops.set(
+          @KDUMP_SAVE_TARGET,
+          "dir",
+          Builtins.substring(parse_target, pos)
+        )
+      elsif ["ftp", "cifs", "ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
+        pos = Builtins.search(parse_target, "@")
 
-        # file
-        if Ops.get(@KDUMP_SAVE_TARGET, "target") == "file"
-          Ops.set(@KDUMP_SAVE_TARGET, "dir", parse_target)
+        if !pos.nil?
+          user_pas = Builtins.substring(parse_target, 0, pos)
+          pos1 = Builtins.search(user_pas, ":")
 
-          # nfs
-        elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "nfs"
-          pos = Builtins.search(parse_target, "/")
-          # pos1 = pos;
-          Ops.set(
-            @KDUMP_SAVE_TARGET,
-            "server",
-            Builtins.substring(parse_target, 0, pos)
-          )
-          # pos = find(parse_target, "/");
-          # KDUMP_SAVE_TARGET["share"]=substring(parse_target,pos1+1,pos-(pos1+1));
-          Ops.set(
-            @KDUMP_SAVE_TARGET,
-            "dir",
-            Builtins.substring(parse_target, pos)
-          )
-        elsif ["ftp", "cifs", "ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
-          pos = Builtins.search(parse_target, "@")
-
-          if !pos.nil?
-            user_pas = Builtins.substring(parse_target, 0, pos)
-            pos1 = Builtins.search(user_pas, ":")
-
-            if !pos1.nil?
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "user_name",
-                Builtins.substring(user_pas, 0, pos1)
-              )
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "password",
-                Builtins.substring(user_pas, Ops.add(pos1, 1), pos)
-              )
-            else
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "user_name",
-                Builtins.substring(user_pas, 0, pos)
-              )
-            end
-            parse_target = Builtins.substring(parse_target, Ops.add(pos, 1))
-          end
-          # only ftp & ssh
-          if ["ftp", "ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
-            pos1 = Builtins.search(parse_target, ":")
-            pos = Builtins.search(parse_target, "/")
-
-            if !pos1.nil?
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "server",
-                Builtins.substring(parse_target, 0, pos1)
-              )
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "port",
-                Builtins.substring(
-                  parse_target,
-                  Ops.add(pos1, 1),
-                  Ops.subtract(pos, Ops.add(pos1, 1))
-                )
-              )
-            else
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "server",
-                Builtins.substring(parse_target, 0, pos)
-              )
-            end
+          if !pos1.nil?
             Ops.set(
               @KDUMP_SAVE_TARGET,
-              "dir",
-              Builtins.substring(parse_target, pos)
+              "user_name",
+              Builtins.substring(user_pas, 0, pos1)
             )
-
-            # only cifs
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "password",
+              Builtins.substring(user_pas, Ops.add(pos1, 1), pos)
+            )
           else
-            pos = Builtins.search(parse_target, "/")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "user_name",
+              Builtins.substring(user_pas, 0, pos)
+            )
+          end
+          parse_target = Builtins.substring(parse_target, Ops.add(pos, 1))
+        end
+        # only ftp & ssh
+        if ["ftp", "ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
+          pos1 = Builtins.search(parse_target, ":")
+          pos = Builtins.search(parse_target, "/")
+
+          if !pos1.nil?
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "server",
+              Builtins.substring(parse_target, 0, pos1)
+            )
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "port",
+              Builtins.substring(
+                parse_target,
+                Ops.add(pos1, 1),
+                Ops.subtract(pos, Ops.add(pos1, 1))
+              )
+            )
+          else
             Ops.set(
               @KDUMP_SAVE_TARGET,
               "server",
               Builtins.substring(parse_target, 0, pos)
             )
-            parse_target = Builtins.substring(parse_target, Ops.add(pos, 1))
-            pos = Builtins.search(parse_target, "/")
-            Ops.set(
-              @KDUMP_SAVE_TARGET,
-              "share",
-              Builtins.substring(parse_target, 0, pos)
-            )
-            Ops.set(
-              @KDUMP_SAVE_TARGET,
-              "dir",
-              Builtins.substring(parse_target, pos)
-            )
           end
+          # only cifs
+        else
+          pos = Builtins.search(parse_target, "/")
+          Ops.set(
+            @KDUMP_SAVE_TARGET,
+            "server",
+            Builtins.substring(parse_target, 0, pos)
+          )
+          parse_target = Builtins.substring(parse_target, Ops.add(pos, 1))
+          pos = Builtins.search(parse_target, "/")
+          Ops.set(
+            @KDUMP_SAVE_TARGET,
+            "share",
+            Builtins.substring(parse_target, 0, pos)
+          )
         end
-        debug_KDUMP_SAVE_TARGET = deep_copy(@KDUMP_SAVE_TARGET)
 
-        if Ops.get(debug_KDUMP_SAVE_TARGET, "password", "") != ""
-          Ops.set(debug_KDUMP_SAVE_TARGET, "password", "**********")
-        end
-
-        Builtins.y2milestone("--------------KDUMP_SAVE_TARGET---------------")
-        Builtins.y2milestone("%1", debug_KDUMP_SAVE_TARGET)
-        Builtins.y2milestone("--------------KDUMP_SAVE_TARGET---------------")
-
-        return true
-      else
-        return false
+        Ops.set(
+          @KDUMP_SAVE_TARGET,
+          "dir",
+          Builtins.substring(parse_target, pos)
+        )
       end
+      debug_KDUMP_SAVE_TARGET = deep_copy(@KDUMP_SAVE_TARGET)
+
+      if Ops.get(debug_KDUMP_SAVE_TARGET, "password", "") != ""
+        Ops.set(debug_KDUMP_SAVE_TARGET, "password", "**********")
+      end
+
+      Builtins.y2milestone("--------------KDUMP_SAVE_TARGET---------------")
+      Builtins.y2milestone("%1", debug_KDUMP_SAVE_TARGET)
+      Builtins.y2milestone("--------------KDUMP_SAVE_TARGET---------------")
+
+      true
     end
 
     # Function for saving KDUMP_SAVE_TARGET
@@ -410,15 +401,6 @@ module Yast
 
         if Ops.get(@KDUMP_SAVE_TARGET, "user_name") == ""
           result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "server"))
-          # add port if it is set...
-          if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
-            result = Ops.add(
-              Ops.add(Ops.add(result, ":"), Ops.get(@KDUMP_SAVE_TARGET, "port")),
-              Ops.get(@KDUMP_SAVE_TARGET, "dir")
-            )
-          else
-            result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
-          end
         else
           result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "user_name"))
 
@@ -432,17 +414,17 @@ module Yast
             Ops.add(result, "@"),
             Ops.get(@KDUMP_SAVE_TARGET, "server")
           )
-
-          if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
-            result = Ops.add(
-              Ops.add(Ops.add(result, ":"), Ops.get(@KDUMP_SAVE_TARGET, "port")),
-              Ops.get(@KDUMP_SAVE_TARGET, "dir")
-            )
-          else
-            result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
-          end
         end
 
+        # add port if it is set...
+        if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
+          result = Ops.add(
+            Ops.add(Ops.add(result, ":"), Ops.get(@KDUMP_SAVE_TARGET, "port")),
+            Ops.get(@KDUMP_SAVE_TARGET, "dir")
+          )
+        else
+          result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
+        end
         # ssh
       elsif ["ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
         result = @KDUMP_SAVE_TARGET["target"] + "://"
@@ -637,11 +619,9 @@ module Yast
     # Function validates options in
     # "Saving Target for Kdump Image"
 
-    def ValidTargetKdump(_key, event)
-      event = deep_copy(event)
+    def ValidTargetKdump(_key, _event)
       radiobut = Builtins.tostring(UI.QueryWidget(Id("TargetKdump"), :Value))
       value = nil
-      anon = true
 
       if radiobut == "local_filesystem"
         value = Builtins.tostring(UI.QueryWidget(Id("dir"), :Value))
@@ -702,14 +682,12 @@ module Yast
           Builtins.y2milestone(
             "add cifs-mount to selected packages to installation"
           )
-        else
-          if !Package.Installed("cifs-mount")
-            Builtins.y2milestone(
-              "SMB/CIFS share cannot be mounted, installing missing 'cifs-mount' package..."
-            )
-            # install cifs-mount package
-            PackageSystem.CheckAndInstallPackages(["cifs-mount"])
-          end
+        elsif !Package.Installed("cifs-mount")
+          Builtins.y2milestone(
+            "SMB/CIFS share cannot be mounted, installing missing 'cifs-mount' package..."
+          )
+          # install cifs-mount package
+          PackageSystem.CheckAndInstallPackages(["cifs-mount"])
         end
 
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))
@@ -926,7 +904,7 @@ module Yast
         end
 
         # directory
-        if UI.QueryWidget(Id("dir"), :Value) != nil
+        if UI.QueryWidget(Id("dir"), :Value)
           Ops.set(
             @KDUMP_SAVE_TARGET,
             "dir",
@@ -1062,9 +1040,7 @@ module Yast
     # Function stores option
     # "Saving Target for kdump Image"
 
-    def StoreTargetKdump(_key, event)
-      event = deep_copy(event)
-      radiobut = Builtins.tostring(UI.QueryWidget(Id("TargetKdump"), :Value))
+    def StoreTargetKdump(_key, _event)
       @type = Builtins.tostring(UI.QueryWidget(Id("TargetKdump"), :Value))
 
       nil
@@ -1074,7 +1050,6 @@ module Yast
     #
 
     def InitKdumpCommandLine(_key)
-      value = ""
       value = Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_COMMANDLINE")
       UI.ChangeWidget(Id("KdumpCommandLine"), :Value, value.nil? ? "" : value)
 
@@ -1083,8 +1058,7 @@ module Yast
 
     # Function stores option "Kdump Command Line"
     #
-    def StoreKdumpCommandLine(_key, event)
-      event = deep_copy(event)
+    def StoreKdumpCommandLine(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_COMMANDLINE",
@@ -1098,7 +1072,6 @@ module Yast
     #
 
     def InitKdumpCommandLineAppend(_key)
-      value = ""
       value = Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_COMMANDLINE_APPEND")
       UI.ChangeWidget(
         Id("KdumpCommandLineAppend"),
@@ -1111,8 +1084,7 @@ module Yast
 
     # Function stores option "Kdump Command Line Append"
     #
-    def StoreKdumpCommandLineAppend(_key, event)
-      event = deep_copy(event)
+    def StoreKdumpCommandLineAppend(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_COMMANDLINE_APPEND",
@@ -1136,8 +1108,7 @@ module Yast
     end
 
     # Function stores option "Number of Old Dumps"
-    def StoreNumberDumps(_key, event)
-      event = deep_copy(event)
+    def StoreNumberDumps(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_KEEP_OLD_DUMPS",
@@ -1163,8 +1134,7 @@ module Yast
     # Function stores option
     # "Enable Immediate Reboot After Saving the Core"
 
-    def StoreEnableReboot(_key, event)
-      event = deep_copy(event)
+    def StoreEnableReboot(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_IMMEDIATE_REBOOT",
@@ -1236,8 +1206,7 @@ module Yast
     # "Dump Level"
     # install makedumpfile if KDUMP_DUMPLEVEL > 0
 
-    def ValidDumpLevel(_key, event)
-      event = deep_copy(event)
+    def ValidDumpLevel(_key, _event)
       result = true
       value = GetDumpLevel()
       counter = -1
@@ -1260,31 +1229,29 @@ module Yast
           Builtins.y2milestone(
             "add makedumpfile to selected packages to installation"
           )
+        elsif Package.Installed("makedumpfile")
+          return true
         else
-          if Package.Installed("makedumpfile")
-            return true
-          else
-            package_list = []
-            package_list = Builtins.add(package_list, "makedumpfile")
+          package_list = []
+          package_list = Builtins.add(package_list, "makedumpfile")
 
-            if !PackageSystem.CheckAndInstallPackages(package_list)
-              result = false
+          if !PackageSystem.CheckAndInstallPackages(package_list)
+            result = false
 
-              if !Mode.commandline
-                Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
-              else
-                CommandLine.Error(
-                  Message.CannotContinueWithoutPackagesInstalled
-                )
-              end
-              Builtins.y2error(
-                "[kdump] (ValidDumpLevel) Installation of package list %1 failed or aborted",
-                package_list
-              )
+            if !Mode.commandline
+              Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
             else
-              result = true
+              CommandLine.Error(
+                Message.CannotContinueWithoutPackagesInstalled
+              )
             end
-          end # end of else for if (Package::Installed("makedumpfile"))
+            Builtins.y2error(
+              "[kdump] (ValidDumpLevel) Installation of package list %1 failed or aborted",
+              package_list
+            )
+          else
+            result = true
+          end
         end
       end # end of if ((dumplevel >0 ) || (dumplevel == nil))
       result
@@ -1292,8 +1259,7 @@ module Yast
 
     # Function stores option
     # "Dump Level"
-    def StoreDumpLevel(_key, event)
-      event = deep_copy(event)
+    def StoreDumpLevel(_key, _event)
       value = GetDumpLevel()
       counter = -1
       int_value = 0
@@ -1316,7 +1282,6 @@ module Yast
     # "Dump Level"
 
     def HandleDumpLevel(_key, event)
-      event = deep_copy(event)
       ret = Ops.get(event, "ID")
       if ret == "cache_private"
         value_cache_private = Convert.to_boolean(
@@ -1427,8 +1392,7 @@ module Yast
     # several ranges and ask user about rewritting
     #
     # "KdumpMemory"
-    def ValidKdumpMemory(_key, event)
-      event = deep_copy(event)
+    def ValidKdumpMemory(_key, _event)
       if Kdump.crashkernel_list_ranges && Mode.normal
         Kdump.crashkernel_list_ranges = !Popup.YesNo(
           _("Kernel option includes several ranges or redundant values. Rewrite it?")
@@ -1440,8 +1404,7 @@ module Yast
 
     #  Store function for option
     # "KdumpMemory"
-    def StoreKdumpMemory(_key, event)
-      event = deep_copy(event)
+    def StoreKdumpMemory(_key, _event)
       Kdump.allocated_memory[:low] = Builtins.tostring(
         UI.QueryWidget(Id("allocated_low_memory"), :Value)
       )
@@ -1499,8 +1462,7 @@ module Yast
 
     # Function stores option
     # "Custom kdump Kernel"
-    def StoreInitrdKernel(_key, event)
-      event = deep_copy(event)
+    def StoreInitrdKernel(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_KERNELVER",
@@ -1531,8 +1493,7 @@ module Yast
     # "Dump Format"
     # install makedumpfile if KDUMP_DUMPFORMAT == "compressed"
 
-    def ValidDumpFormat(_key, event)
-      event = deep_copy(event)
+    def ValidDumpFormat(_key, _event)
       result = true
       value = Builtins.tostring(UI.QueryWidget(Id("DumpFormat"), :Value))
 
@@ -1545,31 +1506,29 @@ module Yast
           Builtins.y2milestone(
             "add makedumpfile to selected packages to installation"
           )
+        elsif Package.Installed("makedumpfile")
+          return true
         else
-          if Package.Installed("makedumpfile")
-            return true
-          else
-            package_list = []
-            package_list = Builtins.add(package_list, "makedumpfile")
+          package_list = []
+          package_list = Builtins.add(package_list, "makedumpfile")
 
-            if !PackageSystem.CheckAndInstallPackages(package_list)
-              result = false
+          if !PackageSystem.CheckAndInstallPackages(package_list)
+            result = false
 
-              if !Mode.commandline
-                Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
-              else
-                CommandLine.Error(
-                  Message.CannotContinueWithoutPackagesInstalled
-                )
-              end
-              Builtins.y2error(
-                "[kdump] (ValidDumpFormat) Installation of package list %1 failed or aborted",
-                package_list
-              )
+            if !Mode.commandline
+              Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
             else
-              result = true
+              CommandLine.Error(
+                Message.CannotContinueWithoutPackagesInstalled
+              )
             end
-          end # end of else for if (Package::Installed("makedumpfile"))
+            Builtins.y2error(
+              "[kdump] (ValidDumpFormat) Installation of package list %1 failed or aborted",
+              package_list
+            )
+          else
+            result = true
+          end
         end
       end # end of if ((value != "elf_format") || (value == nil))
       result
@@ -1578,8 +1537,7 @@ module Yast
     # Function stores option
     # "Dump Format"
 
-    def StoreDumpFormat(_key, event)
-      event = deep_copy(event)
+    def StoreDumpFormat(_key, _event)
       value = Builtins.tostring(UI.QueryWidget(Id("DumpFormat"), :Value))
       if value == "elf_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "ELF")
@@ -1614,7 +1572,6 @@ module Yast
     # "Enable Delete Old Dump Images"
 
     def HandleEnableDeleteImages(_key, event)
-      event = deep_copy(event)
       ret = Ops.get(event, "ID")
       if ret == "EnableDeleteImages"
         value = Convert.to_boolean(
@@ -1641,8 +1598,7 @@ module Yast
     # Function stores option
     # "Enable Delete Old Dump Images"
 
-    def StoreEnableDeleteImages(_key, event)
-      event = deep_copy(event)
+    def StoreEnableDeleteImages(_key, _event)
       value = Convert.to_boolean(
         UI.QueryWidget(Id("EnableDeleteImages"), :Value)
       )
@@ -1667,8 +1623,7 @@ module Yast
     # Function stores option
     # "Enable Copy Kernel into the Dump Directory"
 
-    def StoreEnableCopyKernel(_key, event)
-      event = deep_copy(event)
+    def StoreEnableCopyKernel(_key, _event)
       value = Convert.to_boolean(UI.QueryWidget(Id("EnableCopyKernel"), :Value))
       if !value
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no")
@@ -1693,8 +1648,7 @@ module Yast
 
     # Function stores option
     # "SMTP Server"
-    def StoreSMTPServer(_key, event)
-      event = deep_copy(event)
+    def StoreSMTPServer(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_SMTP_SERVER",
@@ -1718,8 +1672,7 @@ module Yast
 
     # Function stores option
     # "User Name" (SMTP Settings)
-    def StoreSMTPUser(_key, event)
-      event = deep_copy(event)
+    def StoreSMTPUser(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_SMTP_USER",
@@ -1743,8 +1696,7 @@ module Yast
 
     # Function stores option
     # "Password" (SMTP Settings)
-    def StoreSMTPPassword(_key, event)
-      event = deep_copy(event)
+    def StoreSMTPPassword(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_SMTP_PASSWORD",
@@ -1768,8 +1720,7 @@ module Yast
 
     # Function stores option
     # "Notification To"
-    def StoreNotificationTo(_key, event)
-      event = deep_copy(event)
+    def StoreNotificationTo(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_NOTIFICATION_TO",
@@ -1793,8 +1744,7 @@ module Yast
 
     # Function stores option
     # "Notification CC"
-    def StoreNotificationCC(_key, event)
-      event = deep_copy(event)
+    def StoreNotificationCC(_key, _event)
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_NOTIFICATION_CC",
@@ -1808,8 +1758,7 @@ module Yast
     # "Dump Format"
     # install makedumpfile if KDUMP_DUMPFORMAT == "compressed"
 
-    def ValidEmail(key, event)
-      event = deep_copy(event)
+    def ValidEmail(key, _event)
       Popup.Message(key)
       true
     end
