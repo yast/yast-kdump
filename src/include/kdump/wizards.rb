@@ -82,8 +82,6 @@ module Yast
       deep_copy(ret)
     end
 
-
-
     # Whole configuration of kdump but without reading and writing.
     # For use with autoinstallation.
     # @return sequence result

@@ -476,7 +476,7 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but no value for crashkernel is supplied" do
-        let(:profile) {{ "add_crash_kernel" => true }}
+        let(:profile) { { "add_crash_kernel" => true } }
 
         it "writes a proposed crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
@@ -507,7 +507,7 @@ describe Yast::Kdump do
       end
 
       context "if kdump crashkernel contains an offset" do
-        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128", "crash_xen_kernel" => "72M@128"} }
+        let(:profile) { { "add_crash_kernel" => true, "crash_kernel" => "72M@128", "crash_xen_kernel" => "72M@128" } }
 
         it "writes the crashkernel value without removing the offset" do
           expect(Yast::Bootloader)
@@ -570,7 +570,7 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested but no value for crashkernel is supplied" do
-        let(:profile) {{ "add_crash_kernel" => true }}
+        let(:profile) { { "add_crash_kernel" => true } }
 
         it "rewrites the bootloader crashkernel settings and enables the service" do
           expect(Yast::Bootloader)
@@ -658,8 +658,8 @@ describe Yast::Kdump do
           allow(Yast::Service).to receive(:active?).with("kdump").and_return false
 
           expect(Yast::Bootloader)
-          .to receive(:modify_kernel_params)
-          .with(:common, :xen_guest, :recovery, :xen_host, "crashkernel" => :missing)
+            .to receive(:modify_kernel_params)
+            .with(:common, :xen_guest, :recovery, :xen_host, "crashkernel" => :missing)
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Disable).with("kdump")
 
@@ -674,11 +674,11 @@ describe Yast::Kdump do
 
         it "writes chrashkernel and enables the service if kdump was enabled" do
           expect(Yast::Bootloader)
-          .to receive(:modify_kernel_params)
-          .with(:common, :recovery, "crashkernel" => ["64M"])
+            .to receive(:modify_kernel_params)
+            .with(:common, :recovery, "crashkernel" => ["64M"])
           expect(Yast::Bootloader)
-          .to receive(:modify_kernel_params)
-          .with(:xen_host, "crashkernel" => ["64M\\<4G"])
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => ["64M\\<4G"])
           expect(Yast::Bootloader).to receive(:Write)
           expect(Yast::Service).to receive(:Enable).with("kdump")
 
@@ -712,7 +712,7 @@ describe Yast::Kdump do
           it "removes the range" do
             expect(Yast::Bootloader)
               .to receive(:modify_kernel_params)
-              .with(:common, :recovery, {"crashkernel" => ["64M"]})
+              .with(:common, :recovery, "crashkernel" => ["64M"])
             expect(Yast::Bootloader)
               .to receive(:modify_kernel_params)
               .with(:xen_host, "crashkernel" => ["64M\\<4G"])
@@ -749,7 +749,7 @@ describe Yast::Kdump do
         it "removes the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :recovery, {"crashkernel" => ["64M"]})
+            .with(:common, :recovery, "crashkernel" => ["64M"])
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:xen_host, "crashkernel" => ["64M\\<4G"])
@@ -763,10 +763,10 @@ describe Yast::Kdump do
         it "removes the offset" do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:common, :recovery, {"crashkernel" => ["-512M:64M,512M-:128M"]})
+            .with(:common, :recovery, "crashkernel" => ["-512M:64M,512M-:128M"])
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
-            .with(:xen_host, {"crashkernel" => ["-512M:64M,512M-:128M"]})
+            .with(:xen_host, "crashkernel" => ["-512M:64M,512M-:128M"])
           Yast::Kdump.WriteKdumpBootParameter
         end
       end
@@ -825,11 +825,11 @@ describe Yast::Kdump do
       before do
         allow(Yast::Mode).to receive(:autoinstallation).and_return true
       end
-      let(:profile) { {"add_crash_kernel"=>true,
-                        "crash_kernel"=>"256M",
-                        "general"=>{"KDUMP_SAVEDIR"=>"file:///var/dummy"}
-                      }
-                    }
+      let(:profile) do
+        { "add_crash_kernel" => true,
+          "crash_kernel"     => "256M",
+          "general"          => { "KDUMP_SAVEDIR"=>"file:///var/dummy" } }
+      end
       # bnc#995750
       it "does not override imported AutoYaST settings" do
         Yast::Kdump.Import(profile)

@@ -53,7 +53,7 @@ module Yast
         },
         #---------============ Start-up screen=============------------
         "EnableDisalbeKdump"     => {
-          #TRANSLATORS: RadioButtonGroup Label
+          # TRANSLATORS: RadioButtonGroup Label
           "label"       => _(
             "Enable/Disable Kdump"
           ),
@@ -67,7 +67,7 @@ module Yast
             method(:InitEnableDisalbeKdump),
             "void (string)"
           ),
-          #"handle"		: HandleEnableDisalbeKdump,
+          # "handle"		: HandleEnableDisalbeKdump,
           "store"       => fun_ref(
             method(:StoreEnableDisalbeKdump),
             "void (string, map)"
@@ -96,12 +96,12 @@ module Yast
           ),
           "help"              => HelpKdump("KdumpMemory")
         },
-        "FADump"   => {
-          "widget" => :custom,
+        "FADump"                 => {
+          "widget"        => :custom,
           "custom_widget" => Empty(),
-          "init"   => fun_ref(method(:InitFADump), "void (string)"),
-          "handle" => fun_ref(method(:HandleFADump), "void (string, map)"),
-          "help"   => HelpKdump("FADump"),
+          "init"          => fun_ref(method(:InitFADump), "void (string)"),
+          "handle"        => fun_ref(method(:HandleFADump), "void (string, map)"),
+          "help"          => HelpKdump("FADump")
         },
         #---------============ Dump Filtering screen=============------------
         "DumpLevel"              => {
@@ -116,7 +116,7 @@ module Yast
                     VBox(
                       Left(
                         CheckBox(Id("zero_page"), _("&Pages Filled with Zero"))
-                      ), #`VStretch ()
+                      ), # `VStretch ()
                       Left(
                         CheckBox(
                           Id("cache_page"),
@@ -164,7 +164,7 @@ module Yast
           "help"              => HelpKdump("DumpLevel")
         },
         "DumpFormat"             => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"             => _("&Dump Format"),
           "widget"            => :radio_buttons,
           "items"             => [
@@ -206,7 +206,7 @@ module Yast
             method(:InitTargetKdump),
             "void (string)"
           ),
-          #"handle_events" 	: ["TargetKdump2"],
+          # "handle_events" 	: ["TargetKdump2"],
           "handle"            => fun_ref(
             method(:HandleTargetKdump),
             "symbol (string, map)"
@@ -224,11 +224,11 @@ module Yast
         },
         #---------============ Email Notification screen=============------------
         "SMTPServer"             => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"  => _("&SMTP Server"),
           "widget" => :textentry,
           "init"   => fun_ref(method(:InitSMTPServer), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreSMTPServer),
             "void (string, map)"
@@ -236,11 +236,11 @@ module Yast
           "help"   => HelpKdump("SMTPServer")
         },
         "SMTPUser"               => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"  => _("&User Name"),
           "widget" => :textentry,
           "init"   => fun_ref(method(:InitSMTPUser), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreSMTPUser),
             "void (string, map)"
@@ -248,11 +248,11 @@ module Yast
           "help"   => HelpKdump("SMTPUser")
         },
         "SMTPPassword"           => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"  => _("&Password"),
           "widget" => :password,
           "init"   => fun_ref(method(:InitSMTPPassword), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreSMTPPassword),
             "void (string, map)"
@@ -260,7 +260,7 @@ module Yast
           "help"   => HelpKdump("SMTPPassword")
         },
         "NotificationTo"         => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"         => _("Notification &To"),
           "widget"        => :textentry,
           "init"          => fun_ref(
@@ -268,7 +268,7 @@ module Yast
             "void (string)"
           ),
           "validate_type" => :function,
-          #"validate_function": ValidEmail,
+          # "validate_function": ValidEmail,
           "store"         => fun_ref(
             method(:StoreNotificationTo),
             "void (string, map)"
@@ -276,7 +276,7 @@ module Yast
           "help"          => HelpKdump("NotificationTo")
         },
         "NotificationCC"         => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"         => _("Notifica&tion CC"),
           "widget"        => :textentry,
           "init"          => fun_ref(
@@ -284,7 +284,7 @@ module Yast
             "void (string)"
           ),
           "validate_type" => :function,
-          #"validate_function": ValidEmail,
+          # "validate_function": ValidEmail,
           "store"         => fun_ref(
             method(:StoreNotificationCC),
             "void (string, map)"
@@ -293,11 +293,11 @@ module Yast
         },
         #---------============ Expert Settings screen=============------------
         "InitrdKernel"           => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"  => _("Custom Kdump &Kernel"),
           "widget" => :textentry,
           "init"   => fun_ref(method(:InitInitrdKernel), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreInitrdKernel),
             "void (string, map)"
@@ -305,11 +305,11 @@ module Yast
           "help"   => HelpKdump("InitrdKernel")
         },
         "KdumpCommandLine"       => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"  => _("Kdump Co&mmand Line"),
           "widget" => :textentry,
           "init"   => fun_ref(method(:InitKdumpCommandLine), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreKdumpCommandLine),
             "void (string, map)"
@@ -317,7 +317,7 @@ module Yast
           "help"   => HelpKdump("KdumpCommandLine")
         },
         "KdumpCommandLineAppend" => {
-          #TRANSLATORS: TextEntry Label
+          # TRANSLATORS: TextEntry Label
           "label"  => _(
             "Kdump Command &Line Append"
           ),
@@ -326,7 +326,7 @@ module Yast
             method(:InitKdumpCommandLineAppend),
             "void (string)"
           ),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreKdumpCommandLineAppend),
             "void (string, map)"
@@ -334,13 +334,13 @@ module Yast
           "help"   => HelpKdump("KdumpCommandLineAppend")
         },
         "EnableReboot"           => {
-          #TRANSLATORS: CheckBox Label
+          # TRANSLATORS: CheckBox Label
           "label"  => _(
             "&Enable Immediate Reboot After Saving the Core"
           ),
           "widget" => :checkbox,
           "init"   => fun_ref(method(:InitEnableReboot), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreEnableReboot),
             "void (string, map)"
@@ -348,13 +348,13 @@ module Yast
           "help"   => HelpKdump("EnableReboot")
         },
         "EnableCopyKernel"       => {
-          #TRANSLATORS: CheckBox Label
+          # TRANSLATORS: CheckBox Label
           "label"  => _(
             "Enable Copy Ke&rnel into the Dump Directory"
           ),
           "widget" => :checkbox,
           "init"   => fun_ref(method(:InitEnableCopyKernel), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"  => fun_ref(
             method(:StoreEnableCopyKernel),
             "void (string, map)"
@@ -362,7 +362,7 @@ module Yast
           "help"   => HelpKdump("EnableCopyKernel")
         },
         "EnableDeleteImages"     => {
-          #TRANSLATORS: CheckBox Label
+          # TRANSLATORS: CheckBox Label
           "label"  => _(
             "Enable &Delete Old Dump Images"
           ),
@@ -379,13 +379,13 @@ module Yast
           "help"   => HelpKdump("EnableDeleteImages")
         },
         "NumberDumps"            => {
-          #TRANSLATORS: IntField Label
+          # TRANSLATORS: IntField Label
           "label"   => _("N&umber of Old Dumps"),
           "widget"  => :intfield,
           "minimum" => 0,
           "maximum" => 10,
           "init"    => fun_ref(method(:InitNumberDumps), "void (string)"),
-          #"handle"		:
+          # "handle"		:
           "store"   => fun_ref(
             method(:StoreNumberDumps),
             "void (string, map)"
@@ -415,7 +415,7 @@ module Yast
           "widget_names"    => [
             "DisBackButton",
             "EnableDisalbeKdump",
-            (Kdump.system.supports_fadump? ? "FADump":""),
+            (Kdump.system.supports_fadump? ? "FADump" : ""),
             "KdumpMemory"
           ]
         },
@@ -525,10 +525,10 @@ module Yast
     def kdump_memory_widget
       min = Kdump.memory_limits[:min_low].to_i
       max = Kdump.memory_limits[:max_low].to_i
-      if Kdump.high_memory_supported?
-        low_label = _("Kdump &Low Memory [MiB]")
+      low_label = if Kdump.high_memory_supported?
+        _("Kdump &Low Memory [MiB]")
       else
-        low_label = _("Kdump Memor&y [MiB]")
+        _("Kdump Memor&y [MiB]")
       end
       low_label += " (#{min} - #{max})"
       widgets = [
@@ -574,7 +574,7 @@ module Yast
       VBox(*widgets)
     end
 
-    def DisBackButton(key)
+    def DisBackButton(_key)
       Wizard.SetTitleIcon("yast-kdump")
       UI.ChangeWidget(Id(:back), :Enabled, false)
 
@@ -591,17 +591,15 @@ module Yast
       ]
 
       DialogTree.ShowAndRun(
-        #"functions"	: " ",
-        {
-          #return CWMTab::CreateWidget($[
-          "ids_order"      => sim_dialogs,
-          "initial_screen" => "start_up",
-          "screens"        => tabs,
-          "widget_descr"   => wid_handling,
-          "back_button"    => "",
-          "abort_button"   => Label.CancelButton,
-          "next_button"    => Label.OKButton
-        }
+        # "functions"	: " ",
+        # return CWMTab::CreateWidget($[
+        "ids_order"      => sim_dialogs,
+        "initial_screen" => "start_up",
+        "screens"        => tabs,
+        "widget_descr"   => wid_handling,
+        "back_button"    => "",
+        "abort_button"   => Label.CancelButton,
+        "next_button"    => Label.OKButton
       )
     end
   end

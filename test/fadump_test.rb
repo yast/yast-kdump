@@ -35,15 +35,15 @@ describe "#use_fadump" do
 end
 
 describe "#using_fadump?" do
- it "returns that fadump is in use if previously set" do
-   allow(Yast::Kdump.system).to receive(:supports_fadump?).and_return(true)
+  it "returns that fadump is in use if previously set" do
+    allow(Yast::Kdump.system).to receive(:supports_fadump?).and_return(true)
 
-   Yast::Kdump.use_fadump(true)
-   expect(Yast::Kdump.using_fadump?).to eq(true)
+    Yast::Kdump.use_fadump(true)
+    expect(Yast::Kdump.using_fadump?).to eq(true)
 
-   Yast::Kdump.use_fadump(false)
-   expect(Yast::Kdump.using_fadump?).to eq(false)
- end
+    Yast::Kdump.use_fadump(false)
+    expect(Yast::Kdump.using_fadump?).to eq(false)
+  end
 end
 
 describe "#using_fadump_changed?" do

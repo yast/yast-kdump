@@ -63,14 +63,14 @@ module Yast
 
     # @return true if necessary packages are installed
     def InstallPackages
-      #install packages
+      # install packages
       package_list = KdumpClass::KDUMP_PACKAGES
       if !PackageSystem.CheckAndInstallPackages(package_list)
         Report.Error(Message.CannotContinueWithoutPackagesInstalled)
         Builtins.y2error(
-            "[kdump] Installation of package list %1 failed or aborted",
-            package_list
-          )
+          "[kdump] Installation of package list %1 failed or aborted",
+          package_list
+        )
         return false
       end
 
