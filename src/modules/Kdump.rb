@@ -32,6 +32,8 @@ require "yast"
 require "kdump/kdump_system"
 require "kdump/kdump_calibrator"
 
+require "shellwords"
+
 module Yast
   class KdumpClass < Module
     include Yast::Logger
@@ -222,7 +224,7 @@ module Yast
         return false
       end
 
-      cmd = Builtins.sformat("/bin/chmod %1 %2", permissions, target)
+      cmd = Builtins.sformat("/bin/chmod %1 %2", permissions.shellescape, target.shellescape)
       cmd_out = Convert.to_map(SCR.Execute(path(".target.bash_output"), cmd))
 
       if Ops.get_integer(cmd_out, "exit", -1) != 0
@@ -408,7 +410,7 @@ module Yast
       # See FATE#315780
       # See https://www.suse.com/support/kb/doc.php?id=7012786
       # FIXME what about dracut?
-      update_command = (using_fadump? ? "mkdumprd -f" : "mkinitrd")
+      update_command = (using_fadump? ? "/usr/sbin/mkdumprd -f" : "/sbin/mkinitrd")
       update_initrd_with(update_command)
     end
 
@@ -417,12 +419,12 @@ module Yast
     def update_initrd_with(update_command)
       update_logfile = File.join(Directory.logdir, "y2logmkinitrd")
 
-      run_command = update_command + " >> #{update_logfile} 2>&1"
+      run_command = update_command + " >> #{update_logfile.shellescape} 2>&1"
       y2milestone("Running command: #{run_command}")
       ret = SCR.Execute(path(".target.bash"), run_command)
 
       if ret != 0
-        y2error("Error updating initrd, see #{update_logfile} or call {update_command} manually")
+        y2error("Error updating initrd, see #{update_logfile} or call #{update_command} manually")
         Report.Error(_(
           "Error updating initrd while calling '%{cmd}'.\n" +
           "See %{log} for details."
