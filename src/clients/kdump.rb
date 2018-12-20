@@ -32,7 +32,7 @@ module Yast
     def main
       Yast.import "UI"
 
-      #**
+      # **
       # <h3>Configuration of kdump</h3>
 
       textdomain "kdump"
@@ -362,14 +362,14 @@ module Yast
         @cmdline_description["actions"]["fadump"] = {
           "handler" => fun_ref(method(:cmd_handle_fadump), "boolean (map)"),
           # TRANSLATORS: CommandLine help
-          "help" => _(
+          "help"    => _(
             "Handles usage of firmware-assisted dump"
           ),
           "example" => [
             "fadump status  # shows the current status (enabled/disabled)",
             "fadump enable  # enables using fadump",
-            "fadump disable # disables using fadump",
-          ],
+            "fadump disable # disables using fadump"
+          ]
         }
 
         @cmdline_description["mappings"]["fadump"] = ["enable", "disable", "status"]
@@ -389,7 +389,7 @@ module Yast
       @ret = nil
 
       if @propose
-        #ret = KdumpAutoSequence();
+        # ret = KdumpAutoSequence();
         Popup.Error("AutoYaST is not supported")
         @ret = :abort
       else
@@ -401,25 +401,24 @@ module Yast
       Builtins.y2milestone("Kdump module finished")
       Builtins.y2milestone("----------------------------------------")
 
-      deep_copy(@ret) 
+      deep_copy(@ret)
 
       # EOF
     end
 
     # Command line function for display options from kdump
     #
-    def cmdKdumpShow(options)
-      options = deep_copy(options)
+    def cmdKdumpShow(_options)
       CommandLine.Print("")
-      #TRANSLATORS: CommandLine printed text
+      # TRANSLATORS: CommandLine printed text
       CommandLine.Print(String.UnderlinedHeader(_("Display Settings:"), 0))
       CommandLine.Print("")
       if Kdump.crashkernel_param
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           _("Kdump is enabled (boot option \"crashkernel\" is added)")
         )
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Allocate memory (MB) for kdump is: %1"),
@@ -427,11 +426,11 @@ module Yast
           )
         )
       else
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(_("Kdump is disabled"))
       end
       CommandLine.Print("")
-      #TRANSLATORS: CommandLine printed text
+      # TRANSLATORS: CommandLine printed text
       CommandLine.Print(
         Builtins.sformat(
           _("Dump Level: %1"),
@@ -439,7 +438,7 @@ module Yast
         )
       )
       CommandLine.Print("")
-      #TRANSLATORS: CommandLine printed text
+      # TRANSLATORS: CommandLine printed text
       CommandLine.Print(
         Builtins.sformat(
           _("Dump Format: %1"),
@@ -451,7 +450,7 @@ module Yast
       # parsing target info
       CommandLine.Print(_("Dump Target Settings"))
       if SetUpKDUMP_SAVE_TARGET(Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_SAVEDIR"))
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("target: %1"),
@@ -459,19 +458,19 @@ module Yast
           )
         )
 
-        #local filesystem
+        # local filesystem
         if Ops.get(@KDUMP_SAVE_TARGET, "target") == "file"
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("file directory: %1"),
               Ops.get(@KDUMP_SAVE_TARGET, "dir")
             )
-          ) 
+          )
 
-          #ftp target
+          # ftp target
         elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "ftp"
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("server name: %1"),
@@ -480,7 +479,7 @@ module Yast
           )
 
           if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
-            #TRANSLATORS: CommandLine printed text
+            # TRANSLATORS: CommandLine printed text
             CommandLine.Print(
               Builtins.sformat(
                 _("port: %1"),
@@ -488,7 +487,7 @@ module Yast
               )
             )
           end
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("file directory: %1"),
@@ -498,21 +497,21 @@ module Yast
 
           if Ops.get(@KDUMP_SAVE_TARGET, "user_name") == "" ||
               Ops.get(@KDUMP_SAVE_TARGET, "user_name") == "anonymous"
-            #TRANSLATORS: CommandLine printed text
+            # TRANSLATORS: CommandLine printed text
             CommandLine.Print(_("user name: anonymous connection is allowed"))
           else
-            #TRANSLATORS: CommandLine printed text
+            # TRANSLATORS: CommandLine printed text
             CommandLine.Print(
               Builtins.sformat(
                 _("user name: %1"),
                 Ops.get(@KDUMP_SAVE_TARGET, "user_name")
               )
             )
-          end 
+          end
 
-          #ssh/sftp connection
+          # ssh/sftp connection
         elsif ["ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("server name: %1"),
@@ -520,9 +519,8 @@ module Yast
             )
           )
 
-
           if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
-            #TRANSLATORS: CommandLine printed text
+            # TRANSLATORS: CommandLine printed text
             CommandLine.Print(
               Builtins.sformat(
                 _("port: %1"),
@@ -531,7 +529,7 @@ module Yast
             )
           end
 
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("file directory: %1"),
@@ -541,49 +539,49 @@ module Yast
 
           if Ops.get(@KDUMP_SAVE_TARGET, "user_name") != "" &&
               Ops.get(@KDUMP_SAVE_TARGET, "user_name") != "anonymous"
-            #TRANSLATORS: CommandLine printed text
+            # TRANSLATORS: CommandLine printed text
             CommandLine.Print(
               Builtins.sformat(
                 _("user name: %1"),
                 Ops.get(@KDUMP_SAVE_TARGET, "user_name")
               )
             )
-          end 
+          end
 
           # nfs target
         elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "nfs"
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("server name: %1"),
               Ops.get(@KDUMP_SAVE_TARGET, "server")
             )
           )
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("file directory: %1"),
               Ops.get(@KDUMP_SAVE_TARGET, "dir")
             )
-          ) 
+          )
 
-          #cifs target
+          # cifs target
         elsif Ops.get(@KDUMP_SAVE_TARGET, "target") == "cifs"
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("server name: %1"),
               Ops.get(@KDUMP_SAVE_TARGET, "server")
             )
           )
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("file directory: %1"),
               Ops.get(@KDUMP_SAVE_TARGET, "dir")
             )
           )
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(
             Builtins.sformat(
               _("share: %1"),
@@ -593,10 +591,10 @@ module Yast
 
           if Ops.get(@KDUMP_SAVE_TARGET, "user_name") == "" ||
               Ops.get(@KDUMP_SAVE_TARGET, "user_name") == "anonymous"
-            #TRANSLATORS: CommandLine printed text
+            # TRANSLATORS: CommandLine printed text
             CommandLine.Print(_("user name: anonymous connection is allowed"))
           else
-            #TRANSLATORS: CommandLine printed text
+            # TRANSLATORS: CommandLine printed text
             CommandLine.Print(
               Builtins.sformat(
                 _("user name: %1"),
@@ -606,13 +604,13 @@ module Yast
           end
         end
       else
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(_("EMPTY"))
-      end #end of if (SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil))
+      end # end of if (SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil))
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_KERNELVER") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Custom kdump kernel: %1"),
@@ -623,7 +621,7 @@ module Yast
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_COMMANDLINE") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Kdump command line: %1"),
@@ -634,7 +632,7 @@ module Yast
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_COMMANDLINE_APPEND") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Kdump command line append: %1"),
@@ -644,27 +642,29 @@ module Yast
       end
 
       CommandLine.Print("")
-      #TRANSLATORS: CommandLine printed text
+      # TRANSLATORS: CommandLine printed text
       CommandLine.Print(
         Builtins.sformat(
           _("Kdump immediate reboots: %1"),
-          Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes" ?
-            _("Enabled") :
+          if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes"
+            _("Enabled")
+          else
             _("Disabled")
+          end
         )
       )
 
       CommandLine.Print("")
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_KEEP_OLD_DUMPS") == "0"
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           _(
             "Numbers of old dumps: All dumps are saved without deleting old dumps"
           )
         )
       else
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Numbers of old dumps: %1"),
@@ -675,7 +675,7 @@ module Yast
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_SERVER", "") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Kdump SMTP Server: %1"),
@@ -686,7 +686,7 @@ module Yast
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_USER", "") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Kdump SMTP User: %1"),
@@ -697,13 +697,13 @@ module Yast
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", "") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(_("Kdump SMTP Password: ********"))
       end
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_NOTIFICATION_TO", "") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Kdump Sending Notification To: %1"),
@@ -714,7 +714,7 @@ module Yast
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_NOTIFICATION_CC", "") != ""
         CommandLine.Print("")
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(
           Builtins.sformat(
             _("Kdump Sending Copy of Notification To: %1"),
@@ -733,23 +733,22 @@ module Yast
       true
     end
 
-
     # Only numbers are allowed as allow_mem_high and allow_mem_low values
     ALLOC_MEM_REGEXP = /\A\d+\z/
 
     def cmdKdumpStartup(options)
       options = deep_copy(options)
-      if Ops.get(options, "enable") != nil &&
-          Ops.get(options, "alloc_mem") != nil
-        alloc_mem_low, alloc_mem_high = options["alloc_mem"].split(',')
+      if Ops.get(options, "enable") &&
+          Ops.get(options, "alloc_mem")
+        alloc_mem_low, alloc_mem_high = options["alloc_mem"].split(",")
         unless alloc_mem_low =~ ALLOC_MEM_REGEXP &&
-                (alloc_mem_high.nil? || alloc_mem_high =~ ALLOC_MEM_REGEXP)
+            (alloc_mem_high.nil? || alloc_mem_high =~ ALLOC_MEM_REGEXP)
           CommandLine.Error(_("alloc_mem parameter used with invalid values"))
           return false
         end
         Kdump.add_crashkernel_param = true
         Kdump.allocated_memory = { low: alloc_mem_low, high: alloc_mem_high }
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         if Kdump.crashkernel_list_ranges
           CommandLine.Print(
             _(
@@ -762,9 +761,9 @@ module Yast
         end
         CommandLine.Print(_("To apply changes a reboot is necessary."))
         return true
-      elsif Ops.get(options, "disable") != nil
+      elsif Ops.get(options, "disable")
         Kdump.add_crashkernel_param = false
-        #TRANSLATORS: CommandLine printed text
+        # TRANSLATORS: CommandLine printed text
         CommandLine.Print(_("To apply changes a reboot is necessary."))
         return true
       else
@@ -774,10 +773,9 @@ module Yast
       end
     end
 
-
     def cmdKdumpDumpLevel(options)
       options = deep_copy(options)
-      if Ops.get(options, "dump_level") != nil
+      if Ops.get(options, "dump_level")
         if Ops.less_than(Ops.get(options, "dump_level"), 32) &&
             Ops.greater_than(Ops.get(options, "dump_level"), -1)
           Ops.set(
@@ -785,7 +783,7 @@ module Yast
             "KDUMP_DUMPLEVEL",
             Builtins.tostring(Ops.get(options, "dump_level"))
           )
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(_("Dump level was set."))
           return true
         else
@@ -802,7 +800,7 @@ module Yast
 
     def cmdKdumpDumpFormat(options)
       options = deep_copy(options)
-      if Ops.get(options, "dump_format") != nil
+      if Ops.get(options, "dump_format")
         if Ops.get(options, "dump_format") == "ELF" ||
             Ops.get(options, "dump_format") == "compressed"
           Ops.set(
@@ -810,13 +808,13 @@ module Yast
             "KDUMP_DUMPFORMAT",
             Builtins.tostring(Ops.get(options, "dump_format"))
           )
-          #TRANSLATORS: CommandLine printed text
+          # TRANSLATORS: CommandLine printed text
           CommandLine.Print(_("Dump format was set."))
           return true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value of option."))
-          #TRANSLATORS: CommandLine printed text help
+          # TRANSLATORS: CommandLine printed text help
           CommandLine.Print(
             _("Option can include only \"none\", \"ELF\", \"compressed\" or \"lzo\" value.")
           )
@@ -844,209 +842,207 @@ module Yast
       password
     end
 
-
     def cmdKdumpDumpTarget(options)
       options = deep_copy(options)
-      if Ops.get(options, "target") != nil
+      if Ops.get(options, "target")
         target = Builtins.tostring(Ops.get(options, "target"))
         case target
-          when "file"
-            Ops.set(@KDUMP_SAVE_TARGET, "target", "file")
-            if Ops.get(options, "dir") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "dir",
-                Builtins.tostring(Ops.get(options, "dir"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"dir\" missing."))
-              return false
-            end
-          when "ftp"
-            Ops.set(@KDUMP_SAVE_TARGET, "target", "ftp")
-
-            if Ops.get(options, "server") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "server",
-                Builtins.tostring(Ops.get(options, "server"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"server\" missing."))
-              return false
-            end
-
-            if Ops.get(options, "port") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "port",
-                Builtins.tostring(Ops.get(options, "port"))
-              )
-            end
-
-            if Ops.get(options, "dir") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "dir",
-                Builtins.tostring(Ops.get(options, "dir"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"dir\" missing."))
-              return false
-            end
-
-            if Ops.get(options, "user") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "user_name",
-                Builtins.tostring(Ops.get(options, "user"))
-              )
-            end
-
-            if Ops.get(options, "pass") != nil
-              password = cmdParsePassPath(
-                Builtins.tostring(Ops.get(options, "pass"))
-              )
-              return false if password == nil || password == ""
-              Ops.set(@KDUMP_SAVE_TARGET, "password", password)
-            end
-          when "ssh", "sftp"
-            @KDUMP_SAVE_TARGET["target"] = target
-
-            if Ops.get(options, "server") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "server",
-                Builtins.tostring(Ops.get(options, "server"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"server\" missing."))
-              return false
-            end
-
-            if Ops.get(options, "port") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "port",
-                Builtins.tostring(Ops.get(options, "port"))
-              )
-            end
-
-            if Ops.get(options, "dir") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "dir",
-                Builtins.tostring(Ops.get(options, "dir"))
-              )
-            else
-              CommandLine.Error(_("Value for \"dir\" missing."))
-              return false
-            end
-
-            if Ops.get(options, "user") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "user_name",
-                Builtins.tostring(Ops.get(options, "user"))
-              )
-            end
-          when "nfs"
-            Ops.set(@KDUMP_SAVE_TARGET, "target", "nfs")
-
-            if Ops.get(options, "server") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "server",
-                Builtins.tostring(Ops.get(options, "server"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"server\" missing."))
-              return false
-            end
-
-            if Ops.get(options, "dir") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "dir",
-                Builtins.tostring(Ops.get(options, "dir"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"dir\" missing."))
-              return false
-            end
-          when "cifs"
-            Ops.set(@KDUMP_SAVE_TARGET, "target", "cifs")
-
-            if Ops.get(options, "server") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "server",
-                Builtins.tostring(Ops.get(options, "server"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"server\" missing."))
-              return false
-            end
-
-            if Ops.get(options, "share") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "share",
-                Builtins.tostring(Ops.get(options, "share"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"share\" missing."))
-              return false
-            end
-
-
-            if Ops.get(options, "port") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "port",
-                Builtins.tostring(Ops.get(options, "port"))
-              )
-            end
-
-            if Ops.get(options, "dir") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "dir",
-                Builtins.tostring(Ops.get(options, "dir"))
-              )
-            else
-              # TRANSLATORS: CommandLine error message
-              CommandLine.Error(_("Value for \"dir\" missing."))
-              return false
-            end
-
-            if Ops.get(options, "user") != nil
-              Ops.set(
-                @KDUMP_SAVE_TARGET,
-                "user_name",
-                Builtins.tostring(Ops.get(options, "user"))
-              )
-            end
-
-            if Ops.get(options, "pass") != nil
-              password = cmdParsePassPath(
-                Builtins.tostring(Ops.get(options, "pass"))
-              )
-              return false if password == nil || password == ""
-              Ops.set(@KDUMP_SAVE_TARGET, "password", password)
-            end
+        when "file"
+          Ops.set(@KDUMP_SAVE_TARGET, "target", "file")
+          if Ops.get(options, "dir")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "dir",
+              Builtins.tostring(Ops.get(options, "dir"))
+            )
           else
             # TRANSLATORS: CommandLine error message
-            CommandLine.Error(_("Wrong value for target."))
+            CommandLine.Error(_("Value for \"dir\" missing."))
             return false
+          end
+        when "ftp"
+          Ops.set(@KDUMP_SAVE_TARGET, "target", "ftp")
+
+          if Ops.get(options, "server")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "server",
+              Builtins.tostring(Ops.get(options, "server"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"server\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "port")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "port",
+              Builtins.tostring(Ops.get(options, "port"))
+            )
+          end
+
+          if Ops.get(options, "dir")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "dir",
+              Builtins.tostring(Ops.get(options, "dir"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"dir\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "user")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "user_name",
+              Builtins.tostring(Ops.get(options, "user"))
+            )
+          end
+
+          if Ops.get(options, "pass")
+            password = cmdParsePassPath(
+              Builtins.tostring(Ops.get(options, "pass"))
+            )
+            return false if password.nil? || password == ""
+            Ops.set(@KDUMP_SAVE_TARGET, "password", password)
+          end
+        when "ssh", "sftp"
+          @KDUMP_SAVE_TARGET["target"] = target
+
+          if Ops.get(options, "server")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "server",
+              Builtins.tostring(Ops.get(options, "server"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"server\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "port")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "port",
+              Builtins.tostring(Ops.get(options, "port"))
+            )
+          end
+
+          if Ops.get(options, "dir")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "dir",
+              Builtins.tostring(Ops.get(options, "dir"))
+            )
+          else
+            CommandLine.Error(_("Value for \"dir\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "user")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "user_name",
+              Builtins.tostring(Ops.get(options, "user"))
+            )
+          end
+        when "nfs"
+          Ops.set(@KDUMP_SAVE_TARGET, "target", "nfs")
+
+          if Ops.get(options, "server")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "server",
+              Builtins.tostring(Ops.get(options, "server"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"server\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "dir")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "dir",
+              Builtins.tostring(Ops.get(options, "dir"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"dir\" missing."))
+            return false
+          end
+        when "cifs"
+          Ops.set(@KDUMP_SAVE_TARGET, "target", "cifs")
+
+          if Ops.get(options, "server")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "server",
+              Builtins.tostring(Ops.get(options, "server"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"server\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "share")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "share",
+              Builtins.tostring(Ops.get(options, "share"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"share\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "port")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "port",
+              Builtins.tostring(Ops.get(options, "port"))
+            )
+          end
+
+          if Ops.get(options, "dir")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "dir",
+              Builtins.tostring(Ops.get(options, "dir"))
+            )
+          else
+            # TRANSLATORS: CommandLine error message
+            CommandLine.Error(_("Value for \"dir\" missing."))
+            return false
+          end
+
+          if Ops.get(options, "user")
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "user_name",
+              Builtins.tostring(Ops.get(options, "user"))
+            )
+          end
+
+          if Ops.get(options, "pass")
+            password = cmdParsePassPath(
+              Builtins.tostring(Ops.get(options, "pass"))
+            )
+            return false if password.nil? || password == ""
+            Ops.set(@KDUMP_SAVE_TARGET, "password", password)
+          end
+        else
+          # TRANSLATORS: CommandLine error message
+          CommandLine.Error(_("Wrong value for target."))
+          return false
         end
         Ops.set(
           Kdump.KDUMP_SETTINGS,
@@ -1061,10 +1057,9 @@ module Yast
       end
     end
 
-
     def cmdKdumpCustomKernel(options)
       options = deep_copy(options)
-      if Ops.get(options, "kernel") != nil
+      if Ops.get(options, "kernel")
         Ops.set(
           Kdump.KDUMP_SETTINGS,
           "KDUMP_KERNELVER",
@@ -1078,10 +1073,9 @@ module Yast
       end
     end
 
-
     def cmdKdumpKernelCommandLine(options)
       options = deep_copy(options)
-      if Ops.get(options, "command") != nil
+      if Ops.get(options, "command")
         Ops.set(
           Kdump.KDUMP_SETTINGS,
           "KDUMP_COMMANDLINE",
@@ -1095,10 +1089,9 @@ module Yast
       end
     end
 
-
     def cmdKdumpKernelCommandLineAppend(options)
       options = deep_copy(options)
-      if Ops.get(options, "command") != nil
+      if Ops.get(options, "command")
         Ops.set(
           Kdump.KDUMP_SETTINGS,
           "KDUMP_COMMANDLINE_APPEND",
@@ -1114,10 +1107,10 @@ module Yast
 
     def cmdKdumpImmediateReboot(options)
       options = deep_copy(options)
-      if Ops.get(options, "enable") != nil
+      if Ops.get(options, "enable")
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "yes")
         return true
-      elsif Ops.get(options, "disable") != nil
+      elsif Ops.get(options, "disable")
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "no")
         return true
       else
@@ -1127,13 +1120,12 @@ module Yast
       end
     end
 
-
     def cmdKdumpCopyKernel(options)
       options = deep_copy(options)
-      if Ops.get(options, "enable") != nil
+      if Ops.get(options, "enable")
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "yes")
         return true
-      elsif Ops.get(options, "disable") != nil
+      elsif Ops.get(options, "disable")
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no")
         return true
       else
@@ -1143,10 +1135,9 @@ module Yast
       end
     end
 
-
     def cmdKdumpKeepOldDumps(options)
       options = deep_copy(options)
-      if Ops.get(options, "no") != nil
+      if Ops.get(options, "no")
         if Ops.greater_than(Ops.get(options, "no"), -1)
           Ops.set(
             Kdump.KDUMP_SETTINGS,
@@ -1168,10 +1159,10 @@ module Yast
 
     def cmdKdumpSMTPServer(options)
       options = deep_copy(options)
-      if Ops.get(options, "server") != nil
+      if Ops.get(options, "server")
         server = Builtins.tostring(Ops.get(options, "server"))
 
-        if server != "" && server != nil
+        if server != "" && !server.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_SERVER", server)
           return true
         else
@@ -1188,10 +1179,10 @@ module Yast
 
     def cmdKdumpSMTPUser(options)
       options = deep_copy(options)
-      if Ops.get(options, "user") != nil
+      if Ops.get(options, "user")
         user = Builtins.tostring(Ops.get(options, "user"))
 
-        if user != "" && user != nil
+        if user != "" && !user.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_USER", user)
           return true
         else
@@ -1206,12 +1197,11 @@ module Yast
       end
     end
 
-
     def cmdKdumpSMTPPass(options)
       options = deep_copy(options)
-      if Ops.get(options, "pass") != nil
+      if Ops.get(options, "pass")
         password = cmdParsePassPath(Builtins.tostring(Ops.get(options, "pass")))
-        return false if password == nil || password == ""
+        return false if password.to_s.empty?
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", password)
       else
         # TRANSLATORS: CommandLine error message
@@ -1222,13 +1212,12 @@ module Yast
       nil
     end
 
-
     def cmdKdumpSMTPNotifTo(options)
       options = deep_copy(options)
-      if Ops.get(options, "email") != nil
+      if Ops.get(options, "email")
         email = Builtins.tostring(Ops.get(options, "email"))
 
-        if email != "" && email != nil
+        if email != "" && !email.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_NOTIFICATION_TO", email)
           return true
         else
@@ -1245,10 +1234,10 @@ module Yast
 
     def cmdKdumpSMTPNotifCC(options)
       options = deep_copy(options)
-      if Ops.get(options, "email") != nil
+      if Ops.get(options, "email")
         email = Builtins.tostring(Ops.get(options, "email"))
 
-        if email != "" && email != nil
+        if email != "" && !email.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_NOTIFICATION_CC", email)
           return true
         else
@@ -1266,28 +1255,22 @@ module Yast
     def show_fadump_status
       CommandLine.Print(
         _("Firmware-assisted dump: %{status}") %
-          { :status => Kdump.using_fadump? ?
-            _("Enabled") :
-            _("Disabled")
-          }
+          { :status => Kdump.using_fadump? ? _("Enabled") : _("Disabled") }
       )
     end
 
     def cmd_handle_fadump(options)
-      if options["enable"]
-        return Kdump.use_fadump(true)
-      elsif options["disable"]
-        return Kdump.use_fadump(false)
-      elsif options["status"]
+      return Kdump.use_fadump(true) if options["enable"]
+      return Kdump.use_fadump(false) if options["disable"]
+      if options["status"]
         show_fadump_status
         return true
-      else
-        # TRANSLATORS: CommandLine error message
-        CommandLine.Error(_("No option has been defined."))
-        return false
       end
-    end
 
+      # TRANSLATORS: CommandLine error message
+      CommandLine.Error(_("No option has been defined."))
+      false
+    end
   end
 end
 

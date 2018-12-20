@@ -9,8 +9,8 @@ describe Yast::KdumpSystem do
   describe "#reported_memory" do
     it "returns the size in MiB" do
       allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
-        .and_return ["resource"=>{"mem"=>[{"active"=>true, "length"=>12_465_651_712, "start"=>0}],
-                                  "phys_mem"=>[{"range"=>12_884_901_888}]}]
+        .and_return ["resource" => { "mem"      => [{ "active" => true, "length" => 12_465_651_712, "start" => 0 }],
+                                     "phys_mem" => [{ "range"=>12_884_901_888 }] }]
 
       expect(subject.reported_memory).to eq 12_288
     end

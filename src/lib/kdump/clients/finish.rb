@@ -17,6 +17,7 @@ require "installation/finish_client"
 
 module Y2Kdump
   module Clients
+    # Client to write kdump at the end of installation
     class Finish < ::Installation::FinishClient
       def initialize
         textdomain "kdump"

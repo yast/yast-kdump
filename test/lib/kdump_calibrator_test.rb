@@ -8,12 +8,12 @@ Yast.import "Arch"
 describe Yast::KdumpCalibrator do
   subject { described_class.new(configfile) }
   KDUMPTOOL_OK = {
-    "exit" => 0,
+    "exit"   => 0,
     "stdout" => "Low: 108\nMinLow: 32\nMaxLow: 712\n"\
                 "High: 2048\nMinHigh: 1024\nMaxHigh: 4096\nTotal: 16079\n"
-  }
-  KDUMPTOOL_OLD = { "exit" => 0, "stdout" => "64\n" }
-  KDUMPTOOL_ERROR = { "exit" => 1, "stdout" => "" }
+  }.freeze
+  KDUMPTOOL_OLD = { "exit" => 0, "stdout" => "64\n" }.freeze
+  KDUMPTOOL_ERROR = { "exit" => 1, "stdout" => "" }.freeze
 
   let(:configfile) { "/var/lib/YaST2/kdump.conf" }
   let(:x86_64) { true }
@@ -25,9 +25,10 @@ describe Yast::KdumpCalibrator do
       .with(Yast::Path.new(".target.bash_output"), anything).and_return(kdumptool_output)
     allow(Yast::SCR).to receive(:Read).with(path(".probe.memory"))
       .and_return([
-        {"class_id" => 257, "model" => "Main Memory",
-         "resource" => { "mem" => [{ "active" => true, "length" => 4294967296, "start" => 0 }],
-                         "phys_mem" => [{ "range" => 4294967296 }]}, "sub_class_id" => 2 }])
+                    { "class_id" => 257, "model" => "Main Memory",
+                     "resource" => { "mem"      => [{ "active" => true, "length" => 4294967296, "start" => 0 }],
+                                     "phys_mem" => [{ "range" => 4294967296 }] }, "sub_class_id" => 2 }
+                  ])
   end
 
   describe "#total_memory" do
@@ -251,7 +252,7 @@ describe Yast::KdumpCalibrator do
       context "if kdumptool returns 0 for high memory" do
         let(:kdumptool_output) do
           {
-            "exit" => 0,
+            "exit"   => 0,
             "stdout" => "Low: 108\nMinLow: 32\nMaxLow: 712\n"\
                         "High:0\nMinHigh: 0\nMaxHigh: 0\nTotal: 2048"
           }

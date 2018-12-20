@@ -1,6 +1,8 @@
 require "yast"
 require "kdump/kdump_system"
 
+require "shellwords"
+
 module Yast
   # This class tries to calibrate Kdump minimum, maximum and recommended values
   #
@@ -12,8 +14,8 @@ module Yast
     LOW_MEM = 896
     MIN_LOW_DEFAULT = 72
 
-    KDUMPTOOL_CMD = "kdumptool %s calibrate"
-    KDUMPTOOL_ARG = "--configfile '%s'"
+    KDUMPTOOL_CMD = "/usr/sbin/kdumptool %s calibrate".freeze
+    KDUMPTOOL_ARG = "--configfile '%s'".freeze
     KEYS_MAP = {
       "Low"     => :default_low,
       "MinLow"  => :min_low,
@@ -22,7 +24,7 @@ module Yast
       "MinHigh" => :min_high,
       "MaxHigh" => :max_high,
       "Total"   => :total_memory
-    }
+    }.freeze
 
     def initialize(configfile = nil)
       @configfile = configfile
@@ -161,10 +163,10 @@ module Yast
     #
     # @return [String] kdumptool command line
     def kdumptool_cmd
-      if @configfile
-        args = KDUMPTOOL_ARG % @configfile
+      args = if @configfile
+        KDUMPTOOL_ARG % @configfile.shellescape
       else
-        args = ""
+        ""
       end
       KDUMPTOOL_CMD % args
     end
