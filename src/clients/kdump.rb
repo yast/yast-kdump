@@ -1201,7 +1201,7 @@ module Yast
       options = deep_copy(options)
       if Ops.get(options, "pass")
         password = cmdParsePassPath(Builtins.tostring(Ops.get(options, "pass")))
-        return false if password.nil? || password == ""
+        return false if password.to_s.empty?
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", password)
       else
         # TRANSLATORS: CommandLine error message

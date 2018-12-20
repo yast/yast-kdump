@@ -1190,7 +1190,7 @@ module Yast
     def write_fadump_boot_param
       if system.supports_fadump?
         # If fdump is selected and we want to enable kdump
-        value = ("on" if using_fadump? && @add_crashkernel_param)
+        value = "on" if using_fadump? && @add_crashkernel_param
         Bootloader.modify_kernel_params(:common, :recovery, "fadump" => value)
         Bootloader.Write unless Yast::Stage.initial # do mass write in installation to speed up
       end

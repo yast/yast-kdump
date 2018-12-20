@@ -21,8 +21,7 @@ describe Yast::KdumpClient do
 
       it "sets the low and high values of  Kdump allocated_memory " do
         subject.cmdKdumpStartup(options)
-        expect(Yast::Kdump.allocated_memory).to eq(low:  alloc_mem_low,
-                                                   high: alloc_mem_high)
+        expect(Yast::Kdump.allocated_memory).to eq(low:  alloc_mem_low, high: alloc_mem_high)
         expect(Yast::Kdump.add_crashkernel_param).to be true
       end
     end
@@ -32,8 +31,7 @@ describe Yast::KdumpClient do
 
       it "enables only the low value of Kdump allocated_memory " do
         subject.cmdKdumpStartup(options)
-        expect(Yast::Kdump.allocated_memory).to eq(low:  alloc_mem_low,
-                                                   high: nil)
+        expect(Yast::Kdump.allocated_memory).to eq(low:  alloc_mem_low, high: nil)
         expect(Yast::Kdump.add_crashkernel_param).to be true
       end
     end
