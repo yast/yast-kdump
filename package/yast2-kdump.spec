@@ -17,14 +17,13 @@
 
 
 Name:           yast2-kdump
-Version:        4.1.1
+Version:        4.2.0
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0-only
 Group:          System/YaST
 Url:            https://github.com/yast/yast-kdump
 Source0:        %{name}-%{version}.tar.bz2
-BuildRequires:  perl-XML-Writer
 BuildRequires:  rubygem(rspec)
 BuildRequires:  rubygem(yast-rake)
 BuildRequires:  update-desktop-files
@@ -33,8 +32,6 @@ BuildRequires:  yast2
 BuildRequires:  yast2 >= 2.21.22
 BuildRequires:  yast2-bootloader
 BuildRequires:  yast2-buildtools >= 3.1.10
-BuildRequires:  yast2-packager >= 2.17.24
-BuildRequires:  yast2-testsuite
 Requires:       yast2
 # Kernel parameters with multiple values and bug#945479 fixed
 Requires:       yast2-bootloader >= 3.1.148
