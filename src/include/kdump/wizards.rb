@@ -72,7 +72,7 @@ module Yast
 
       Wizard.CreateDialog
       if Mode.normal
-        Wizard.SetDesktopTitleAndIcon("kdump")
+        Wizard.SetDesktopTitleAndIcon("org.openSUSE.YaST.Kdump")
       else
         Wizard.SetTitleIcon("yast-kdump")
       end
@@ -97,7 +97,7 @@ module Yast
       if Stage.initial
         Wizard.SetTitleIcon("kdump") # no .desktop file in inst-sys
       else
-        Wizard.SetDesktopIcon("kdump")
+        Wizard.SetDesktopIcon("org.openSUSE.YaST.Kdump")
       end
       ret = MainSequence()
       UI.CloseDialog
