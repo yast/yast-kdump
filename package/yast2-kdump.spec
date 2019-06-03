@@ -33,7 +33,7 @@ BuildRequires:  yast2
 # Wizard::SetDesktopTitleAndIcon
 BuildRequires:  yast2 >= 2.21.22
 BuildRequires:  yast2-bootloader
-BuildRequires:  yast2-buildtools >= 3.1.10
+BuildRequires:  yast2-buildtools >= 4.2.2
 
 Requires:       yast2
 # Kernel parameters with multiple values and bug#945479 fixed
