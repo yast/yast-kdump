@@ -22,6 +22,7 @@ X-SuSE-YaST-Keywords=system,kernel,crash,dump
 Icon=yast-kdump
 Exec=xdg-su -c "/sbin/yast2 kdump"
 
-Name=Kernel Kdump
-GenericName=Kernel Kdump Configuration Tool
+Name=YaST Kernel Kdump
+GenericName=Kernel Kdump
+Comment=Kernel Kdump Configuration Tool
 StartupNotify=true
