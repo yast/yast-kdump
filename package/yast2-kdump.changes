@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Wed Aug 28 09:52:34 CEST 2019 - schubi@suse.de
 
-- Removed emtpy entry in desktop file (bsc#144894).
+- Removed empty entry in desktop file (bsc#144894).
 - 4.2.4
 
 -------------------------------------------------------------------
