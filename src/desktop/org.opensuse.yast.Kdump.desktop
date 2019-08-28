@@ -13,7 +13,6 @@ X-SuSE-YaST-RootOnly=true
 X-SuSE-YaST-AutoInst=all
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
-X-SuSE-YaST-AutoInstResource=
 X-SuSE-YaST-AutoInstPath=install
 X-SuSE-YaST-AutoInstResource=kdump
 X-SuSE-YaST-AutoInstSchema=kdump.rnc
