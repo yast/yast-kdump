@@ -15,16 +15,16 @@
 
 require "installation/auto_client"
 
+Yast.import "Kdump"
+Yast.import "Mode"
+Yast.import "Progress"
+
 module Y2Kdump
   module Clients
     # Client to communicate with autoyast
     class Auto < ::Installation::AutoClient
       def initialize
         textdomain "kdump"
-
-        Yast.import "Kdump"
-        Yast.import "Mode"
-        Yast.import "Progress"
 
         Yast.include self, "kdump/wizards.rb" # needed for auto sequence
       end
