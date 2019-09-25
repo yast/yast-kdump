@@ -69,6 +69,17 @@ module Y2Kdump
         Yast::Kdump.Read
         Yast::Progress.set(progress_orig)
       end
+
+      def packages
+        if Yast::Kdump.add_crashkernel_param
+          {
+            "install" => Yast::KdumpClass::KDUMP_PACKAGES,
+            "remove"  => []
+          }
+        else
+          {}
+        end
+      end
     end
   end
 end

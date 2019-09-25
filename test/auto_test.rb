@@ -51,4 +51,26 @@ describe Y2Kdump::Clients::Auto do
       subject.write
     end
   end
+
+  describe "#packages" do
+    before do
+      allow(Yast::Kdump).to receive(:add_crashkernel_param).and_return(enabled)
+    end
+
+    context "kdump is enabled" do
+      let(:enabled) { true }
+
+      it "returns list of packages to install" do
+        expect(subject.packages).to eq({ "install" => ["kexec-tools", "kdump"], "remove" => [] })
+      end
+    end
+
+    context "kdump is disabled" do
+      let(:enabled) { false }
+
+      it "returns empty list" do
+        expect(subject.packages).to eq({})
+      end
+    end
+  end
 end
