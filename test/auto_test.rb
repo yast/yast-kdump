@@ -61,7 +61,7 @@ describe Y2Kdump::Clients::Auto do
       let(:enabled) { true }
 
       it "returns list of packages to install" do
-        expect(subject.packages).to eq({ "install" => ["kexec-tools", "kdump"], "remove" => [] })
+        expect(subject.packages).to eq("install" => ["kexec-tools", "kdump"], "remove" => [])
       end
     end
 
