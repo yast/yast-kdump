@@ -18,6 +18,7 @@ require "installation/auto_client"
 Yast.import "Kdump"
 Yast.import "Mode"
 Yast.import "Progress"
+Yast.import "PackagesProposal"
 
 module Y2Kdump
   module Clients
@@ -31,6 +32,8 @@ module Y2Kdump
 
       def import(profile)
         Yast::Kdump.Import(profile)
+        # add packages needed to proposal, as it is needed already in first stage (bsc#1149208)
+        Yast::PackagesProposal.AddResolvables("yast2-kdump", :package, packages["install"])
       end
 
       def export
