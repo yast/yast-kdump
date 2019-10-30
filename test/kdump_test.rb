@@ -842,4 +842,9 @@ describe Yast::Kdump do
     end
   end
 
+  describe ".Import" do
+    it "does not crash for nil parameter" do
+      expect { Yast::Kdump.Import(nil) }.to_not raise_error
+    end
+  end
 end

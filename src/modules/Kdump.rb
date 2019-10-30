@@ -946,11 +946,11 @@ module Yast
     end
 
     # Import settings from a map
-    # @param [Hash] settings map of kdump settings
+    # @param [Hash, nil] settings map of kdump settings
     # @return [Boolean] true on success
     def Import(settings)
-      settings = deep_copy(settings)
-      Builtins.y2milestone("Importing settings for kdump")
+      settings ||= {}
+      Builtins.y2milestone("Importing settings for kdump #{settings.inspect}")
 
       my_import_map = Ops.get_map(settings, "general", {})
       @DEFAULT_CONFIG.each_pair do |key, def_value|
@@ -958,7 +958,7 @@ module Yast
         @KDUMP_SETTINGS[key] = value.nil? ? def_value : value
       end
 
-      if Builtins.haskey(settings, "crash_kernel")
+      if settings.key?("crash_kernel")
         # Make sure it's an array
         @crashkernel_param_values = Array(settings.fetch("crash_kernel", ""))
         # In order not to overwrite the values by the proposal we will have to set
@@ -971,7 +971,7 @@ module Yast
         @crashkernel_param_values = Array(crash_kernel_values)
       end
 
-      if Builtins.haskey(settings, "crash_xen_kernel")
+      if settings.key?("crash_xen_kernel")
         # Make sure it's an array
         @crashkernel_xen_param_values = Array(settings.fetch("crash_xen_kernel", ""))
       else
@@ -984,9 +984,8 @@ module Yast
         ProposeCrashkernelParam()
       end
 
-      if Builtins.haskey(settings, "crash_kernel") ||
-          Builtins.haskey(settings, "add_crash_kernel") ||
-          Ops.greater_than(Builtins.size(my_import_map), 0)
+      if settings.key?("crash_kernel") || settings.key?("add_crash_kernel") ||
+          !my_import_map.empty?
         @import_called = true
       end
 
