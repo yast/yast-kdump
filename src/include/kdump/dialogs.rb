@@ -523,14 +523,16 @@ module Yast
     end
 
     def kdump_memory_widget
-      min = Kdump.memory_limits[:min_low].to_i
-      max = Kdump.memory_limits[:max_low].to_i
-      low_label = if Kdump.high_memory_supported?
-        _("Kdump &Low Memory [MiB]")
-      else
-        _("Kdump Memor&y [MiB]")
-      end
-      low_label += " (#{min} - #{max})"
+      low_min = Kdump.memory_limits[:min_low].to_i
+      low_max = Kdump.memory_limits[:max_low].to_i
+      low_default = Kdump.memory_limits[:default_low].to_i
+      low_label = Kdump.high_memory_supported? ?
+        _("Kdump &Low Memory [MiB]") : _("Kdump Memor&y [MiB]")
+      # TRANSLATORS: Each momory value is based on MiB
+      low_range = format(_("(%{low_min} - %{low_max}, default: %{low_default})"),
+        low_min:     low_min,
+        low_max:     low_max,
+        low_default: low_default)
       widgets = [
         Left(
           HBox(
@@ -539,6 +541,7 @@ module Yast
             HStretch()
           )
         ),
+        VSpacing(1),
         Left(
           HBox(
             Left(Label(_("Usable Memory [MiB]:"))),
@@ -546,30 +549,38 @@ module Yast
             HStretch()
           )
         ),
-        Left(
-          IntField(
-            Id("allocated_low_memory"),
-            Opt(:notify),
-            low_label,
-            min,
-            max,
-            0
-          )
-        )
+        VSpacing(1),
+        Left(IntField(
+               Id("allocated_low_memory"),
+          Opt(:notify),
+          low_label,
+          low_min,
+          low_max,
+          0
+        )),
+        Left(Label(low_range))
       ]
       if Kdump.high_memory_supported?
-        min = Kdump.memory_limits[:min_high].to_i
-        max = Kdump.memory_limits[:max_high].to_i
+        high_min = Kdump.memory_limits[:min_high].to_i
+        high_max = Kdump.memory_limits[:max_high].to_i
+        high_default = Kdump.memory_limits[:default_high].to_i
+        # TRANSLATORS: Each momory value is based on MiB
+        high_range = format(_("(%{high_min} - %{high_max}, default: %{high_default})"),
+          high_min:     high_min,
+          high_max:     high_max,
+          high_default: high_default)
+        widgets << VSpacing(1)
         widgets << Left(
           IntField(
             Id("allocated_high_memory"),
             Opt(:notify),
-            _("Kdump &High Memory [MiB]") + " (#{min} - #{max})",
-            min,
-            max,
+            _("Kdump &High Memory [MiB]"),
+            high_min,
+            high_max,
             0
           )
         )
+        widgets << Left(Label(high_range))
       end
       VBox(*widgets)
     end

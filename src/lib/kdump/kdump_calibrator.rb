@@ -115,7 +115,8 @@ module Yast
     #
     # @return [Hash] Memory limits
     def memory_limits
-      { min_low: min_low, max_low: max_low, min_high: min_high, max_high: max_high }
+      { min_low: min_low, max_low: max_low, default_low: default_low,
+        min_high: min_high, max_high: max_high, default_high: default_high }
     end
 
   private
