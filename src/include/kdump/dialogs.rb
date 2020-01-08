@@ -526,8 +526,11 @@ module Yast
       low_min = Kdump.memory_limits[:min_low].to_i
       low_max = Kdump.memory_limits[:max_low].to_i
       low_default = Kdump.memory_limits[:default_low].to_i
-      low_label = Kdump.high_memory_supported? ?
-        _("Kdump &Low Memory [MiB]") : _("Kdump Memor&y [MiB]")
+      low_label = if Kdump.high_memory_supported?
+        _("Kdump &Low Memory [MiB]")
+      else
+        _("Kdump Memor&y [MiB]")
+      end
       # TRANSLATORS: Each momory value is based on MiB
       low_range = format(_("(%{low_min} - %{low_max}, default: %{low_default})"),
         low_min:     low_min,
@@ -550,14 +553,12 @@ module Yast
           )
         ),
         VSpacing(1),
-        Left(IntField(
-               Id("allocated_low_memory"),
+        Left(IntField(Id("allocated_low_memory"),
           Opt(:notify),
           low_label,
           low_min,
           low_max,
-          0
-        )),
+          0)),
         Left(Label(low_range))
       ]
       if Kdump.high_memory_supported?
