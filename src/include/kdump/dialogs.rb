@@ -531,11 +531,10 @@ module Yast
       else
         _("Kdump Memor&y [MiB]")
       end
-      # TRANSLATORS: Each momory value is based on MiB
-      low_range = format(_("(%{low_min} - %{low_max}, default: %{low_default})"),
-        low_min:     low_min,
-        low_max:     low_max,
-        low_default: low_default)
+      low_range = format(_("(%{min} - %{max}, default: %{default})"),
+        min:     low_min,
+        max:     low_max,
+        default: low_default)
       widgets = [
         Left(
           HBox(
@@ -565,11 +564,10 @@ module Yast
         high_min = Kdump.memory_limits[:min_high].to_i
         high_max = Kdump.memory_limits[:max_high].to_i
         high_default = Kdump.memory_limits[:default_high].to_i
-        # TRANSLATORS: Each momory value is based on MiB
-        high_range = format(_("(%{high_min} - %{high_max}, default: %{high_default})"),
-          high_min:     high_min,
-          high_max:     high_max,
-          high_default: high_default)
+        high_range = format(_("(%{min} - %{max}, default: %{default})"),
+          min:     high_min,
+          max:     high_max,
+          default: high_default)
         widgets << VSpacing(1)
         widgets << Left(
           IntField(
