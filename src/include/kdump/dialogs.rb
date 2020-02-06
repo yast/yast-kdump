@@ -531,7 +531,7 @@ module Yast
       else
         _("Kdump Memor&y [MiB]")
       end
-      low_range = format(_("(%{min} - %{max}, default: %{default})"),
+      low_range = format(_("(min:%{min}; max:%{max}; suggested: %{default})"),
         min:     low_min,
         max:     low_max,
         default: low_default)
@@ -564,7 +564,7 @@ module Yast
         high_min = Kdump.memory_limits[:min_high].to_i
         high_max = Kdump.memory_limits[:max_high].to_i
         high_default = Kdump.memory_limits[:default_high].to_i
-        high_range = format(_("(%{min} - %{max}, default: %{default})"),
+        high_range = format(_("(min:%{min}; max:%{max}; suggested: %{default})"),
           min:     high_min,
           max:     high_max,
           default: high_default)
