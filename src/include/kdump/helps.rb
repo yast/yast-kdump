@@ -40,8 +40,16 @@ module Yast
         ),
         # Kdump Memor&y [MB] - IntField 1/1
         "KdumpMemory"            => _(
-          "<p><b>Kdump Memory</b><br>\n    Allocation of memory for kdump kernel. <br></p>\n"
-        ),
+          "<p><b>Kdump Memory</b><br>\n    Allocation of memory for kdump kernel.</p>"
+        ) +
+          _("<p>On AMD64/Intel 64 computers, the <i>High</i> value stands for the memory reservation for all " \
+            "available memory. The <i>Low</i> value stands for the memory reservation in the DMA32 zone, that "\
+            "is, all the memory up to the 4 GB mark.<br>\n" \
+            "<i>Low</i> is the amount of memory required by 32-bit-only devices. The kernel will allocate " \
+            "64M for DMA32 bounce buffers. If your server does not have any 32-bit-only devices, " \
+            "everything should work with the default allocation of 72M for <i>Low</i>. A possible " \
+            "exception to this is on NUMA machines, which may make it appear that more Low memory is needed. " \
+            "The Kdump kernel may be booted with numa=off to make sure normal kernel allocations do not use <i>Low</i> memory."),
         # fadump
         "FADump"                 => _(
           # T: help text for a combo box
