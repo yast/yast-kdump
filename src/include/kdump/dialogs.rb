@@ -531,7 +531,7 @@ module Yast
       else
         _("Kdump Memor&y [MiB]")
       end
-      # TRANSLATORS: Valid range of allocated kdump momory.
+      # TRANSLATORS: %{min}, %{max}, %{default} are variable names which must not be translated.
       low_range = format(_("(min: %{min}; max: %{max}; suggested: %{default})"),
         min:     low_min,
         max:     low_max,
@@ -565,7 +565,7 @@ module Yast
         high_min = Kdump.memory_limits[:min_high].to_i
         high_max = Kdump.memory_limits[:max_high].to_i
         high_default = Kdump.memory_limits[:default_high].to_i
-        # TRANSLATORS: Valid range of allocated kdump momory.
+        # TRANSLATORS: %{min}, %{max}, %{default} are variable names which must not be translated.
         high_range = format(_("(min: %{min}; max: %{max}; suggested: %{default})"),
           min:     high_min,
           max:     high_max,
