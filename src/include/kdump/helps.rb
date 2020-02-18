@@ -35,15 +35,15 @@ module Yast
         # Enable/Disable Kdump - RadioButtons 1/1
         "StartRadioBut"          => _(
           "<p><b>Enable/Disable Kdump</b><br>\n" \
-            "    Enable or disable kdump. The boot option crashkernel parameter is added/removed. \n" \
+            "    Enable or disable kdump. The \"crashkernel\" boot parameter is added/removed. \n" \
             "    To apply changes, a reboot is necessary.<br></p>\n"
         ),
         # Kdump Memor&y [MB] - IntField 1/1
         "KdumpMemory"            => _(
-          "<p><b>Kdump Memory</b><br>\n    Allocation of memory for kdump kernel.</p>"
+          "<p><b>Kdump Memory</b><br>\n    Allocation of memory for the kdump kernel.</p>"
         ) +
-          _("<p>On AMD64/Intel 64 computers, the <i>High</i> value stands for the memory reservation for all " \
-            "available memory. The <i>Low</i> value stands for the memory reservation in the DMA32 zone, that "\
+          _("<p>On AMD64/Intel 64 computers, the <i>High</i> value means reserving all " \
+            "available memory. The <i>Low</i> value means reserving memory in the DMA32 zone, that "\
             "is, all the memory up to the 4 GB mark.<br>\n" \
             "<i>Low</i> is the amount of memory required by 32-bit-only devices. The kernel will allocate " \
             "64M for DMA32 bounce buffers. If your server does not have any 32-bit-only devices, " \
@@ -65,24 +65,24 @@ module Yast
         "DumpLevel"              => _(
           "<p><b>Dump Level</b><br>\n" \
             "    Specify the type of necessary page for analysis.\n" \
-            "    Pages of the specified type are copied to dumpfile. \n" \
+            "    Pages of the specified type are copied to the dumpfile. \n" \
             "    The page type marked in the following table is included. <br></p>"
         ),
         # Dump Format - RadioButtons  1/1
         "DumpFormat"             => _(
           "<p><b>Dump Format</b><br>\n" \
             "    <i>No Dump</i> - Only save the kernel log.<br>\n" \
-            "    <i>ELF Format</i> - Create dump file in the ELF format.<br>\n" \
+            "    <i>ELF Format</i> - Create dump file in ELF format.<br>\n" \
             "    <i>Compressed Format</i> - Compress dump data by each page with gzip.<br>\n" \
             "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>"
         ),
         # Dump Format - RadioButtons  1/7
         "TargetKdump"            => _(
-          "<p><b>Saving Target for Kdump Image</b><br>\n    The target for saving kdump images. Select type of target for saving dumps.<br></p>"
+          "<p><b>Saving Target for Kdump Image</b><br>\n    The target for saving kdump images. Select the target type for saving dumps.<br></p>"
         ) +
           # Dump Format - RadioButtons  2/7
           _(
-            "<p><b>Local Filesystem</b> - Save kdump image in the local filesystem.\n" \
+            "<p><b>Local Filesystem</b> - Save the kdump image in the local filesystem.\n" \
               "    <i>Directory for Saving Dumps</i> - The path for saving kdump images.\n" \
               "    Selecting directory for saving kdump images via dialog by pressing <i>Browse</i>\n" \
               "    <br></p>"
@@ -90,17 +90,17 @@ module Yast
           # Dump Format - RadioButtons  3/7
           _(
             "<p><b>FTP</b> - Save kdump image via FTP.\n" \
-              "    <i>Server Name</i> - The name of ftp server.\n" \
-              "    <i>Port</i> - The port number for connection.\n" \
+              "    <i>Server Name</i> - The name of the ftp server.\n" \
+              "    <i>Port</i> - The port number for the connection.\n" \
               "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
-              "    <i>Enable Anonymous FTP</i> enables anonymous connection to server.\n" \
+              "    <i>Enable Anonymous FTP</i> enables anonymous connection to the server.\n" \
               "    <i>User Name</i> for ftp connection. <i>Password</i> for ftp connection.<br></p>"
           ) +
           # Dump Format - RadioButtons  4/7
           _(
             "<p><b>SSH</b> - Save kdump image via SSH and 'dd' on target machine.\n" \
-              "    <i>Server Name</i> - The name of server.\n" \
-              "    <i>Port</i> - The port number for connection.\n" \
+              "    <i>Server Name</i> - The name of the server.\n" \
+              "    <i>Port</i> - The port number for the connection.\n" \
               "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
               "    <i>User Name</i> for SSH connection.  \n" \
               "    <i>Password</i> for SSH connection.<br></p>\n"
@@ -108,8 +108,8 @@ module Yast
           # Dump Format - RadioButtons  5/7
           _(
             "<p><b>SFTP</b> - Save kdump image via SFTP.\n" \
-              "    <i>Server Name</i> - The name of server.\n" \
-              "    <i>Port</i> - The port number for connection.\n" \
+              "    <i>Server Name</i> - The name of the server.\n" \
+              "    <i>Port</i> - The port number for the connection.\n" \
               "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
               "    <i>User Name</i> for SSH connection.  \n" \
               "    <i>Password</i> for SSH connection.<br></p>\n"
@@ -122,17 +122,17 @@ module Yast
           # Dump Format - RadioButtons  6/7
           _(
             "<p><b>NFS</b> - Save kdump image on NFS.\n" \
-              "    <i>Server Name</i> - The name of nfs server.\n" \
+              "    <i>Server Name</i> - The name of the nfs server.\n" \
               "    <i>Directory on Server</i> - The path for saving kdump images.<br></p>"
           ) +
           # Dump Format - RadioButtons  7/7
           _(
             "<p><b>CIFS</b> - Save kdump image via CIFS.\n" \
-              "    <i>Server Name</i> - The name of server.\n" \
+              "    <i>Server Name</i> - The name of the server.\n" \
               "    <i>Exported Share</i> - The windows share name.\n" \
               "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
-              "    <i>Use Authentication</i> enables authenticated connection to server.\n" \
-              "    <i>User Name</i> for connection. <i>Password</i> for connection.<br></p>"
+              "    <i>Use Authentication</i> enables authenticated connection to the server.\n" \
+              "    <i>User Name</i> for the connection. <i>Password</i> for the connection.<br></p>"
           ),
         # Custom Kdump Kernel - TextEntry 1/1
         "InitrdKernel"           => _(
@@ -153,7 +153,7 @@ module Yast
         ),
         # Enable Immediate Reboot After Saving the Core - CheckBox 1/1
         "EnableReboot"           => _(
-          "<p><b>Enable Immediate Reboot After Saving the Core</b> - \n    Enable immediately reboot after saving the core in the kdump.<br></p>"
+          "<p><b>Enable Immediate Reboot After Saving the Core</b> - \n    Enable immediate reboot after saving the core in the kdump.<br></p>"
         ),
         # Enable Delete Old Dump Images - CheckBox 1/1
         "EnableDeleteImages"     => _(
