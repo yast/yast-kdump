@@ -2,57 +2,63 @@ default namespace = "http://www.suse.com/1.0/yast2ns"
 namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
 namespace config = "http://www.suse.com/1.0/configns"
 
+include "common.rnc"
 
 kdump =
   element kdump {
-     (kdump_crash_kernel_value | kdump_crash_kernel_list)? &
-    # parameter specify crashkernel value for xen hypervisor
-     (kdump_crash_xen_kernel_value | kdump_crash_xen_kernel_list)? &
-     kdump_add_crash_kernel? &
-     kdump_general?
+    MAP,
+    (
+      (kdump_crash_kernel_value | kdump_crash_kernel_list)? &
+      # parameter specify crashkernel value for xen hypervisor
+      (kdump_crash_xen_kernel_value | kdump_crash_xen_kernel_list)? &
+      kdump_add_crash_kernel? &
+      kdump_general?
+    )
 }
 
-kdump_crash_kernel_value = element crash_kernel { text }
-kdump_crash_xen_kernel_value = element crash_xen_kernel { text }
+kdump_crash_kernel_value = element crash_kernel { STRING }
+kdump_crash_xen_kernel_value = element crash_xen_kernel { STRING }
 kdump_crash_kernel_list = element crash_kernel {
-     LIST,
-     kdump_crash_kernel_entry+
+  LIST,
+  kdump_crash_kernel_entry+
 }
 kdump_crash_xen_kernel_list = element crash_xen_kernel {
-     LIST,
-     kdump_crash_kernel_entry+
+  LIST,
+  kdump_crash_kernel_entry+
 }
-kdump_crash_kernel_entry = element listentry { text }
+kdump_crash_kernel_entry = element listentry { STRING }
 kdump_add_crash_kernel = element add_crash_kernel { BOOLEAN }
 
-kdump_general =
-  element general {
-     element KDUMP_KERNELVER { text }? &
-     element KDUMP_CPUS { text }? &
-     element KDUMP_COMMANDLINE { text }? &
-     element KDUMP_COMMANDLINE_APPEND { text }? &
-     element KDUMP_CONTINUE_ON_ERROR { text }? &
-     element KDUMP_REQUIRED_PROGRAMS { text }? &
-     element KDUMP_PRESCRIPT { text }? &
-     element KDUMP_POSTSCRIPT { text }? &
-     element KDUMPTOOL_FLAGS { text }? &
-     element KDUMP_NETCONFIG { text }? &
-     element KDUMP_NET_TIMEOUT { text }? &
-     element KDUMP_COPY_KERNEL { text }? &
-     element KEXEC_OPTIONS { text }? &
-     element KDUMP_RUNLEVEL { text }? &
-     element KDUMP_IMMEDIATE_REBOOT { text }? &
-     element KDUMP_TRANSFER { text }? &
-     element KDUMP_SAVEDIR { text }? &
-     element KDUMP_KEEP_OLD_DUMPS { text }? &
-     element KDUMP_FREE_DISK_SIZE { text }? &
-     element KDUMP_VERBOSE { text }? &
-     element KDUMP_DUMPLEVEL { text }? &
-     element KDUMP_DUMPFORMAT { text }? &
-     element KDUMP_SMTP_SERVER { text }? &
-     element KDUMP_SMTP_USER { text }? &
-     element KDUMP_SMTP_PASSWORD { text }? &
-     element KDUMP_NOTIFICATION_TO { text }? &
-     element KDUMP_NOTIFICATION_CC { text }? &
-     element KDUMP_HOST_KEY { text }?
+kdump_general = element general {
+  MAP,
+  (
+    element KDUMP_KERNELVER { STRING }? &
+    element KDUMP_CPUS { STRING }? &
+    element KDUMP_COMMANDLINE { STRING }? &
+    element KDUMP_COMMANDLINE_APPEND { STRING }? &
+    element KDUMP_CONTINUE_ON_ERROR { STRING }? &
+    element KDUMP_REQUIRED_PROGRAMS { STRING }? &
+    element KDUMP_PRESCRIPT { STRING }? &
+    element KDUMP_POSTSCRIPT { STRING }? &
+    element KDUMPTOOL_FLAGS { STRING }? &
+    element KDUMP_NETCONFIG { STRING }? &
+    element KDUMP_NET_TIMEOUT { STRING }? &
+    element KDUMP_COPY_KERNEL { STRING }? &
+    element KEXEC_OPTIONS { STRING }? &
+    element KDUMP_RUNLEVEL { STRING }? &
+    element KDUMP_IMMEDIATE_REBOOT { STRING }? &
+    element KDUMP_TRANSFER { STRING }? &
+    element KDUMP_SAVEDIR { STRING }? &
+    element KDUMP_KEEP_OLD_DUMPS { STRING }? &
+    element KDUMP_FREE_DISK_SIZE { STRING }? &
+    element KDUMP_VERBOSE { STRING }? &
+    element KDUMP_DUMPLEVEL { STRING }? &
+    element KDUMP_DUMPFORMAT { STRING }? &
+    element KDUMP_SMTP_SERVER { STRING }? &
+    element KDUMP_SMTP_USER { STRING }? &
+    element KDUMP_SMTP_PASSWORD { STRING }? &
+    element KDUMP_NOTIFICATION_TO { STRING }? &
+    element KDUMP_NOTIFICATION_CC { STRING }? &
+    element KDUMP_HOST_KEY { STRING }?
+  )
 }
