@@ -15,6 +15,8 @@ describe Yast::Kdump do
     Yast::Kdump.reset
   end
 
+  subject { Yast::Kdump }
+
   # allocated_memory is a hash, values are strings in megabytes
   # total_memory     is an integer in megabytes
   describe "#ProposeAllocatedMemory" do
@@ -845,6 +847,14 @@ describe Yast::Kdump do
   describe ".Import" do
     it "does not crash for nil parameter" do
       expect { Yast::Kdump.Import(nil) }.to_not raise_error
+    end
+  end
+
+  describe ".Export" do
+    it "exports only add_crash_kernel=false if kdump is disabled" do
+      subject.add_crashkernel_param = false
+
+      expect(subject.Export).to eq("add_crash_kernel" => false)
     end
   end
 end
