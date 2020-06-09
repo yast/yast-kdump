@@ -930,16 +930,20 @@ module Yast
     # Export kdump settings to a map
     # @return kdump settings
     def Export
-      crash_kernel = crash_kernel_values
-      crash_kernel = crash_kernel[0] if crash_kernel.size == 1
-      crash_xen_kernel = crash_xen_kernel_values
-      crash_xen_kernel = crash_xen_kernel[0] if crash_xen_kernel.size == 1
-      out = {
-        "crash_kernel"     => crash_kernel,
-        "crash_xen_kernel" => crash_xen_kernel,
-        "add_crash_kernel" => @add_crashkernel_param,
-        "general"          => filterExport(@KDUMP_SETTINGS)
-      }
+      if @add_crashkernel_param
+        crash_kernel = crash_kernel_values
+        crash_kernel = crash_kernel[0] if crash_kernel.size == 1
+        crash_xen_kernel = crash_xen_kernel_values
+        crash_xen_kernel = crash_xen_kernel[0] if crash_xen_kernel.size == 1
+        out = {
+          "crash_kernel"     => crash_kernel,
+          "crash_xen_kernel" => crash_xen_kernel,
+          "add_crash_kernel" => true,
+          "general"          => filterExport(@KDUMP_SETTINGS)
+        }
+      else
+        out = { "add_crash_kernel" => false }
+      end
 
       Builtins.y2milestone("Kdump exporting settings: %1", out)
       deep_copy(out)
