@@ -44,11 +44,11 @@ module Yast
 
     # Check whether the system supports kdump
     #
-    # See bsc#952253. Kdump cannot work in DomU
+    # See bsc#952253. Kdump cannot work in a PV DomU
     #
     # @return [Boolean] true if kdump is supported, false otherwise
     def supports_kdump?
-      !Arch.is_xenU
+      !Arch.paravirtualized_xen_guest?
     end
 
     # Physical memory (in MiB) reported by the kernel.
