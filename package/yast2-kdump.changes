@@ -2,7 +2,7 @@
 Mon Nov 30 15:50:47 UTC 2020 - David Diaz <dgonzalez@suse.com>
 
 - Do not show a warning when running in a HVM Xen guest
-  (bsc#https://bugzilla.suse.com/show_bug.cgi?id=1179197)
+  (bsc#1179197).
 - 4.3.3
 
 -------------------------------------------------------------------
