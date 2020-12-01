@@ -8,6 +8,10 @@ describe Yast::KdumpClient do
     let(:alloc_mem_high) { "100" }
     let(:alloc_mem_low) { "50" }
 
+    before do
+      allow(Yast::Arch).to receive(:paravirtualized_xen_guest?).and_return(false)
+    end
+
     context "When using wrong inputs in alloc memory" do
       let(:options) { { "enable" => "", "alloc_mem" => "#{alloc_mem_low}:#{alloc_mem_high}" } }
 
