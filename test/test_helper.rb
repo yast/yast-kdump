@@ -6,6 +6,13 @@ ENV["LC_ALL"] = "en_US.utf-8"
 require "yast"
 require "yast/rspec"
 
+RSpec.configure do |config|
+  config.mock_with :rspec do |mocks|
+    # make sure we mock only already existing methods
+    mocks.verify_partial_doubles = true
+  end
+end
+
 if ENV["COVERAGE"]
   require "simplecov"
   SimpleCov.start do
@@ -15,12 +22,20 @@ if ENV["COVERAGE"]
   # track all ruby files under src
   SimpleCov.track_files("#{srcdir}/**/*.rb")
 
-  # use coveralls for on-line code coverage reporting at Travis CI
-  if ENV["TRAVIS"]
-    require "coveralls"
+  # additionally use the LCOV format for on-line code coverage reporting at CI
+  if ENV["CI"] || ENV["COVERAGE_LCOV"]
+    require "simplecov-lcov"
+
+    SimpleCov::Formatter::LcovFormatter.config do |c|
+      c.report_with_single_file = true
+      # this is the default Coveralls GitHub Action location
+      # https://github.com/marketplace/actions/coveralls-github-action
+      c.single_report_path = "coverage/lcov.info"
+    end
+
     SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
       SimpleCov::Formatter::HTMLFormatter,
-      Coveralls::SimpleCov::Formatter
+      SimpleCov::Formatter::LcovFormatter
     ]
   end
 end

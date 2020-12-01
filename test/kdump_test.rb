@@ -825,7 +825,7 @@ describe Yast::Kdump do
 
     context "during AutoYaST installation" do
       before do
-        allow(Yast::Mode).to receive(:autoinstallation).and_return true
+        allow(Yast::Mode).to receive(:autoinst).and_return true
       end
       let(:profile) do
         { "add_crash_kernel" => true,
