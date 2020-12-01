@@ -17,7 +17,7 @@
 
 
 Name:           yast2-kdump
-Version:        4.3.2
+Version:        4.3.3
 Release:        0
 Summary:        Configuration of kdump
 License:        GPL-2.0-only
@@ -30,12 +30,13 @@ BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:yast-rake)
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2
-# Wizard::SetDesktopTitleAndIcon
-BuildRequires:  yast2 >= 2.21.22
+# Yast::Arch.paravirtualized_xen_guest?
+BuildRequires:  yast2 >= 4.3.45
 BuildRequires:  yast2-bootloader
 BuildRequires:  yast2-buildtools >= 4.2.2
 
-Requires:       yast2
+# Yast::Arch.paravirtualized_xen_guest?
+Requires:       yast2 >= 4.3.45
 # Kernel parameters with multiple values and bug#945479 fixed
 Requires:       yast2-bootloader >= 3.1.148
 Requires:       yast2-ruby-bindings >= 1.0.0

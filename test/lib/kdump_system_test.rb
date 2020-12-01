@@ -30,19 +30,19 @@ describe Yast::KdumpSystem do
 
   describe "#supports_kdump?" do
     before do
-      allow(Yast::Arch).to receive(:is_xenU).and_return xenU
+      allow(Yast::Arch).to receive(:paravirtualized_xen_guest?).and_return xen_pv_domU
     end
 
-    context "in a Xen DomU" do
-      let(:xenU) { true }
+    context "in a Xen PV DomU" do
+      let(:xen_pv_domU) { true }
 
       it "returns false" do
         expect(subject.supports_kdump?).to eq false
       end
     end
 
-    context "in a system not being a Xen DomU" do
-      let(:xenU) { false }
+    context "in a system not being a Xen PV DomU" do
+      let(:xen_pv_domU) { false }
 
       it "returns true" do
         expect(subject.supports_kdump?).to eq true
