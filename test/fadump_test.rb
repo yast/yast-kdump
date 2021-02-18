@@ -24,7 +24,8 @@ describe "#use_fadump" do
   context "if fadump is not supported on this architecture" do
     let(:supported) { false }
 
-    it "returns false when enabling fadump" do
+    it "returns false and show error popup when enabling fadump" do
+      expect(Yast::Report).to receive(:Error)
       expect(Yast::Kdump.use_fadump(true)).to eq(false)
     end
 
