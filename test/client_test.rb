@@ -1,5 +1,6 @@
 require_relative "./test_helper"
-require_relative "../src/clients/kdump"
+require "kdump/clients/kdump"
+
 Yast.import "CommandLine"
 
 describe Yast::KdumpClient do

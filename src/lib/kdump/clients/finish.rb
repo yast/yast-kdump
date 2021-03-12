@@ -44,13 +44,13 @@ module Y2Kdump
         progress_orig = Progress.set(false)
         # propose settings for kdump
         # if autoyast doesn't include settings for yast2-kdump
-        Kdump.Propose if !Kdump.import_called && Mode.auto
-        if Mode.update
-          Kdump.Update
+        Yast::Kdump.Propose if !Yast::Kdump.import_called && Yast::Mode.auto
+        if Yast::Mode.update
+          Yast::Kdump.Update
         else
-          Kdump.Write
+          Yast::Kdump.Write
         end
-        Progress.set(progress_orig)
+        Yast::Progress.set(progress_orig)
       end
     end
   end
