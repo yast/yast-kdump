@@ -1,11 +1,11 @@
-require_relative "./test_helper"
+require_relative "../../../test_helper"
 require "kdump/clients/kdump"
 
 Yast.import "CommandLine"
 Yast.import "Kdump"
 
 # Let's "dirty-mock" Yast::KdumpComplexInclude to avoid not desired dialogs during test
-require_relative "../src/include/kdump/complex"
+require_relative "../../../../src/include/kdump/complex"
 module Yast::KdumpComplexInclude
   def ReadDialog
     true
