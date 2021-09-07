@@ -897,11 +897,11 @@ module Yast
       if free_space < requested_space
         warning = {
           "warning_level" => :warning,
-          # TRANSLATORS: warning message in installation proposal,
-          # do not translate %{requested} and %{available} - they are replaced with actual sizes later
+          # TRANSLATORS: warning message in installation proposal. Do not translate %{requested} and
+          # %{available} - they are replaced with actual sizes later.
           "warning"       => "<ul><li>" + _(
-            "Warning! There might not be enough free space. " \
-            "%{required} required, but only %{available} are available."
+            "Warning! There might not be enough free space to have kdump enabled. " \
+            "%{required} required for saving a kernel dump, but only %{available} are available."
           ) % {
             required:  String.FormatSizeWithPrecision(requested_space, 2, true),
             available: String.FormatSizeWithPrecision(free_space, 2, true)

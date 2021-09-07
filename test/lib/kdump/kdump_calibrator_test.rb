@@ -1,7 +1,7 @@
 #!/usr/bin/env rspec
 
-require_relative "../test_helper"
-require_relative "../../src/lib/kdump/kdump_calibrator"
+require_relative "../../test_helper"
+require "kdump/kdump_calibrator"
 
 Yast.import "Arch"
 
