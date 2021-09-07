@@ -18,37 +18,33 @@
 # find current contact information at www.suse.com.
 # encoding: utf-8
 
+Yast.import "UI"
+Yast.import "Progress"
+Yast.import "Report"
+Yast.import "Summary"
+Yast.import "Popup"
+Yast.import "String"
+Yast.import "FileUtils"
+Yast.import "CommandLine"
+
 # rubocop:disable Style/MethodName
 # rubocop:disable Metrics/AbcSize, Metrics/ClassLength, Metrics/LineLength, Metrics/MethodLength
 # rubocop:disable Metrics/BlockNesting, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
-# FIXME: move client to a better namespace like Y2Kdump::Clients::Kdump
 module Yast
   # Client for setting Kdump configuration
+  # FIXME: move client to a better namespace like Y2Kdump::Clients::Kdump
   class KdumpClient < Client
-    def main
-      Yast.import "UI"
-
-      # **
-      # <h3>Configuration of kdump</h3>
-
+    def initialize
       textdomain "kdump"
 
-      # The main ()
+      Yast.include self, "kdump/wizards.rb"
+      Yast.include self, "kdump/uifunctions.rb"
+    end
+
+    def main
       Builtins.y2milestone("----------------------------------------")
       Builtins.y2milestone("Kdump module started")
-
-      Yast.import "Progress"
-      Yast.import "Report"
-      Yast.import "Summary"
-      Yast.import "Popup"
-      Yast.import "String"
-      Yast.import "FileUtils"
-
-      Yast.import "CommandLine"
-      Yast.include self, "kdump/wizards.rb"
-
-      Yast.include self, "kdump/uifunctions.rb"
 
       @cmdline_description = {
         "id"         => "kdump",
