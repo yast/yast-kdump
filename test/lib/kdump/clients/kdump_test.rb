@@ -4,15 +4,18 @@ require "kdump/clients/kdump"
 Yast.import "CommandLine"
 Yast.import "Kdump"
 
-# Let's "dirty-mock" Yast::KdumpComplexInclude to avoid not desired dialogs during test
+# FIXME: we should find the way to get rid of this "dirty-mock", which is here
+# to avoid triggering some dialogs from Yast::KdumpComplexInclude routines during tests.
 require_relative "../../../../src/include/kdump/complex"
-module Yast::KdumpComplexInclude
-  def ReadDialog
-    true
-  end
+module Yast
+  module KdumpComplexInclude
+    def ReadDialog
+      true
+    end
 
-  def InstallPackages
-    true
+    def InstallPackages
+      true
+    end
   end
 end
 

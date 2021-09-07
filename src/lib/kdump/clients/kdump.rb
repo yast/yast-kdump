@@ -18,8 +18,13 @@
 # find current contact information at www.suse.com.
 # encoding: utf-8
 
+# rubocop:disable Style/MethodName
+# rubocop:disable Metrics/AbcSize, Metrics/ClassLength, Metrics/LineLength, Metrics/MethodLength
+# rubocop:disable Metrics/BlockNesting, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+
 # FIXME: move client to a better namespace like Y2Kdump::Clients::Kdump
 module Yast
+  # Client for setting Kdump configuration
   class KdumpClient < Client
     def main
       Yast.import "UI"
@@ -1247,7 +1252,7 @@ module Yast
     def show_fadump_status
       CommandLine.Print(
         _("Firmware-assisted dump: %{status}") %
-          { :status => Kdump.using_fadump? ? _("Enabled") : _("Disabled") }
+          { status: Kdump.using_fadump? ? _("Enabled") : _("Disabled") }
       )
     end
 
@@ -1265,3 +1270,7 @@ module Yast
     end
   end
 end
+
+# rubocop:enable Style/MethodName
+# rubocop:enable Metrics/AbcSize, Metrics/ClassLength, Metrics/LineLength, Metrics/MethodLength
+# rubocop:enable Metrics/BlockNesting, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
