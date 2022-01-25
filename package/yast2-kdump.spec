@@ -30,13 +30,13 @@ BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
 BuildRequires:  rubygem(%{rb_default_ruby_abi}:yast-rake)
 BuildRequires:  update-desktop-files
 BuildRequires:  yast2
-# Yast::Arch.paravirtualized_xen_guest?
-BuildRequires:  yast2 >= 4.3.45
+# Replace PackageSystem with Package
+BuildRequires:  yast2 >= 4.4.38
 BuildRequires:  yast2-bootloader
 BuildRequires:  yast2-buildtools >= 4.2.2
 
-# Yast::Arch.paravirtualized_xen_guest?
-Requires:       yast2 >= 4.3.45
+# Replace PackageSystem with Package
+Requires:       yast2 >= 4.4.38
 # Kernel parameters with multiple values and bug#945479 fixed
 Requires:       yast2-bootloader >= 3.1.148
 Requires:       yast2-ruby-bindings >= 1.0.0
