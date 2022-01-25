@@ -42,7 +42,7 @@ module Yast
       Yast.import "Report"
       Yast.import "Mode"
       Yast.import "Message"
-      Yast.import "PackageSystem"
+      Yast.import "Package"
 
       Yast.include include_target, "kdump/helps.rb"
     end
@@ -65,7 +65,7 @@ module Yast
     def InstallPackages
       # install packages
       package_list = KdumpClass::KDUMP_PACKAGES
-      if !PackageSystem.CheckAndInstallPackages(package_list)
+      if !Package.CheckAndInstallPackages(package_list)
         Report.Error(Message.CannotContinueWithoutPackagesInstalled)
         Builtins.y2error(
           "[kdump] Installation of package list %1 failed or aborted",
