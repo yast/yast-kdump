@@ -36,7 +36,7 @@ module Yast
       Yast.import "Kdump"
       Yast.import "Service"
       Yast.import "Package"
-      Yast.import "PackageSystem"
+      Yast.import "Package"
       Yast.import "Mode"
 
       # EXAMPLE FUNCTIONS
@@ -687,7 +687,7 @@ module Yast
             "SMB/CIFS share cannot be mounted, installing missing 'cifs-mount' package..."
           )
           # install cifs-mount package
-          PackageSystem.CheckAndInstallPackages(["cifs-mount"])
+          Package.CheckAndInstallPackages(["cifs-mount"])
         end
 
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))
@@ -1235,7 +1235,7 @@ module Yast
           package_list = []
           package_list = Builtins.add(package_list, "makedumpfile")
 
-          if !PackageSystem.CheckAndInstallPackages(package_list)
+          if !Package.CheckAndInstallPackages(package_list)
             result = false
 
             if !Mode.commandline
@@ -1512,7 +1512,7 @@ module Yast
           package_list = []
           package_list = Builtins.add(package_list, "makedumpfile")
 
-          if !PackageSystem.CheckAndInstallPackages(package_list)
+          if !Package.CheckAndInstallPackages(package_list)
             result = false
 
             if !Mode.commandline
