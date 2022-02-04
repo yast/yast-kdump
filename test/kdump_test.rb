@@ -434,6 +434,7 @@ describe Yast::Kdump do
 
     context "during autoinstallation" do
       let(:bootlader_kernel_params) { ["2047M,high"] }
+      let(:bootloader_kernel_params_noauto) { ["73M,high"] }
       let(:bootlader_xen_kernel_params) { ["73M\\<4G"] }
 
       before do
@@ -496,6 +497,23 @@ describe Yast::Kdump do
         end
       end
 
+      context "if kdump is requested, no value for crashkernel is supplied, and auto-resize is disabled" do
+        let(:profile) { { "add_crash_kernel" => true, "general" => { "KDUMP_AUTO_RESIZE" => "no" } } }
+
+        it "writes a proposed crashkernel in the bootloader and enables the service" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :recovery, "crashkernel" => bootloader_kernel_params_noauto)
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => bootlader_xen_kernel_params)
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable).with("kdump")
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
       context "if kdump is explicitly disabled" do
         let(:profile) { { "add_crash_kernel" => false, "crash_kernel" => "does_not_matter" } }
 
@@ -530,6 +548,7 @@ describe Yast::Kdump do
 
     context "during autoupgrade" do
       let(:bootlader_kernel_params) { ["1968M,high"] }
+      let(:bootloader_kernel_params_noauto) { ["75M,high"] }
       let(:bootlader_xen_kernel_params) { ["75M\\<4G"] }
 
       before do
@@ -582,6 +601,23 @@ describe Yast::Kdump do
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:common, :recovery, "crashkernel" => bootlader_kernel_params)
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => bootlader_xen_kernel_params)
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable).with("kdump")
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
+      context "if kdump is requested, no value for crashkernel is supplied, and auto-resize is disabled" do
+        let(:profile) { { "add_crash_kernel" => true, "general" => { "KDUMP_AUTO_RESIZE" => "no" } } }
+
+        it "rewrites the bootloader crashkernel settings and enables the service" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :recovery, "crashkernel" => bootloader_kernel_params_noauto)
           expect(Yast::Bootloader)
             .to receive(:modify_kernel_params)
             .with(:xen_host, "crashkernel" => bootlader_xen_kernel_params)
