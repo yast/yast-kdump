@@ -536,7 +536,30 @@ module Yast
         min:     low_min,
         max:     low_max,
         default: low_default)
-      widgets = [
+      high_widgets = []
+      if Kdump.high_memory_supported?
+        high_min = Kdump.memory_limits[:min_high].to_i
+        high_max = Kdump.memory_limits[:max_high].to_i
+        high_default = Kdump.memory_limits[:default_high].to_i
+        # TRANSLATORS: %{min}, %{max}, %{default} are variable names which must not be translated.
+        high_range = format(_("(min: %{min}; max: %{max}; suggested: %{default})"),
+          min:     high_min,
+          max:     high_max,
+          default: high_default)
+        high_widgets << VSpacing(1)
+        high_widgets << Left(
+          IntField(
+            Id("allocated_high_memory"),
+            Opt(:notify),
+            _("Kdump &High Memory [MiB]"),
+            high_min,
+            high_max,
+            0
+          )
+        )
+        high_widgets << Left(Label(high_range))
+      end
+      VBox(
         Left(
           HBox(
             Left(Label(_("Total System Memory [MiB]:"))),
@@ -559,31 +582,9 @@ module Yast
           low_min,
           low_max,
           0)),
-        Left(Label(low_range))
-      ]
-      if Kdump.high_memory_supported?
-        high_min = Kdump.memory_limits[:min_high].to_i
-        high_max = Kdump.memory_limits[:max_high].to_i
-        high_default = Kdump.memory_limits[:default_high].to_i
-        # TRANSLATORS: %{min}, %{max}, %{default} are variable names which must not be translated.
-        high_range = format(_("(min: %{min}; max: %{max}; suggested: %{default})"),
-          min:     high_min,
-          max:     high_max,
-          default: high_default)
-        widgets << VSpacing(1)
-        widgets << Left(
-          IntField(
-            Id("allocated_high_memory"),
-            Opt(:notify),
-            _("Kdump &High Memory [MiB]"),
-            high_min,
-            high_max,
-            0
-          )
-        )
-        widgets << Left(Label(high_range))
-      end
-      VBox(*widgets)
+        Left(Label(low_range)),
+        *high_widgets
+      )
     end
 
     def DisBackButton(_key)
