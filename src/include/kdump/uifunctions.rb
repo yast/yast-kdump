@@ -1347,6 +1347,7 @@ module Yast
       auto_resize = Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
       UI.ChangeWidget(Id(:auto_resize), :Value, auto_resize)
       if Kdump.total_memory > 0
+        UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, !auto_resize)
         UI.ChangeWidget(
           Id("total_memory"),
           :Value,
@@ -1387,6 +1388,8 @@ module Yast
         end
         update_usable_memory
       elsif ret == :auto_resize
+        value = UI.QueryWidget(Id(ret), :Value)
+        UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, !value)
         update_usable_memory
       end
 
