@@ -1344,7 +1344,12 @@ module Yast
     # Function initializes option
     # "KdumpMemory"
     def InitKdumpMemory(_key)
-      auto_resize = Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      if Kdump.using_fadump?
+        UI.ChangeWidget(Id(:auto_resize), :Enabled, false)
+        auto_resize = false
+      else
+        auto_resize = Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      end
       UI.ChangeWidget(Id(:auto_resize), :Value, auto_resize)
       if Kdump.total_memory > 0
         UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, !auto_resize)
@@ -1453,6 +1458,14 @@ module Yast
       if !Kdump.use_fadump(UI.QueryWidget(Id("use_fadump"), :Value))
         UI.ChangeWidget(Id("use_fadump"), :Value, false)
       end
+
+      value = UI.QueryWidget(Id("use_fadump"), :Value)
+      if value
+        UI.ChangeWidget(Id(:auto_resize), :Value, false)
+        UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, true)
+        update_usable_memory
+      end
+      UI.ChangeWidget(Id(:auto_resize), :Enabled, !value)
 
       nil
     end
