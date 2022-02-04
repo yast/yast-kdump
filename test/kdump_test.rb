@@ -433,13 +433,15 @@ describe Yast::Kdump do
     end
 
     context "during autoinstallation" do
-      let(:bootlader_kernel_params) { ["73M,high"] }
+      let(:bootlader_kernel_params) { ["2047M,high"] }
       let(:bootlader_xen_kernel_params) { ["73M\\<4G"] }
 
       before do
         allow(Yast::Mode).to receive(:autoinst).and_return true
         allow(Yast::Kdump.calibrator).to receive(:default_low).and_return 0
         allow(Yast::Kdump.calibrator).to receive(:default_high).and_return 73
+        allow(Yast::Kdump.calibrator).to receive(:max_high).and_return 4092
+        allow(Yast::Kdump.calibrator).to receive(:total_memory).and_return 4095
         Yast::Kdump.Import(profile)
       end
 
@@ -527,13 +529,15 @@ describe Yast::Kdump do
     end
 
     context "during autoupgrade" do
-      let(:bootlader_kernel_params) { ["75M,high"] }
+      let(:bootlader_kernel_params) { ["1968M,high"] }
       let(:bootlader_xen_kernel_params) { ["75M\\<4G"] }
 
       before do
         allow(Yast::Mode).to receive(:autoupgrade).and_return true
         allow(Yast::Kdump.calibrator).to receive(:default_low).and_return 0
         allow(Yast::Kdump.calibrator).to receive(:default_high).and_return 75
+        allow(Yast::Kdump.calibrator).to receive(:max_high).and_return 1968
+        allow(Yast::Kdump.calibrator).to receive(:total_memory).and_return 4095
         Yast::Kdump.Import(profile)
       end
 
@@ -828,9 +832,14 @@ describe Yast::Kdump do
         allow(Yast::Mode).to receive(:autoinst).and_return true
       end
       let(:profile) do
-        { "add_crash_kernel" => true,
+        {
+          "add_crash_kernel" => true,
           "crash_kernel"     => "256M",
-          "general"          => { "KDUMP_SAVEDIR"=>"file:///var/dummy" } }
+          "general"          => {
+            "KDUMP_SAVEDIR"     => "file:///var/dummy",
+            "KDUMP_AUTO_RESIZE" => "no"
+          }
+        }
       end
       # bnc#995750
       it "does not override imported AutoYaST settings" do
