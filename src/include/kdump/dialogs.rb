@@ -561,6 +561,15 @@ module Yast
       end
       VBox(
         Left(
+          CheckBox(
+            Id(:auto_resize),
+            Opt(:notify),
+            _("&Automatically Resize at Boot"),
+            false
+          )
+        ),
+        VSpacing(1),
+        Left(
           HBox(
             Left(Label(_("Total System Memory [MiB]:"))),
             Left(Label(Id("total_memory"), "0123456789")),

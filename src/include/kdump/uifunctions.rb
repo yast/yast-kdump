@@ -1340,6 +1340,8 @@ module Yast
     # Function initializes option
     # "KdumpMemory"
     def InitKdumpMemory(_key)
+      auto_resize = Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      UI.ChangeWidget(Id(:auto_resize), :Value, auto_resize)
       if Kdump.total_memory > 0
         UI.ChangeWidget(
           Id("total_memory"),
@@ -1402,6 +1404,8 @@ module Yast
     #  Store function for option
     # "KdumpMemory"
     def StoreKdumpMemory(_key, _event)
+      Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] =
+        UI.QueryWidget(Id(:auto_resize), :Value) ? "yes" : "no"
       Kdump.allocated_memory[:low] = Builtins.tostring(
         UI.QueryWidget(Id("allocated_low_memory"), :Value)
       )
