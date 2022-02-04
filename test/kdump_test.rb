@@ -813,6 +813,63 @@ describe Yast::Kdump do
         end
       end
     end
+
+    context "on a system with no low/high distinction" do
+      let(:bootloader_kernel_params) { ["650M"] }
+      let(:bootloader_xen_kernel_params) { ["93M\\<4G"] }
+
+      before do
+        allow(Yast::Kdump.calibrator).to receive(:default_low).and_return 93
+        allow(Yast::Kdump.calibrator).to receive(:max_low).and_return 650
+        allow(Yast::Kdump.calibrator).to receive(:default_high).and_return 0
+        allow(Yast::Kdump.calibrator).to receive(:max_high).and_return 0
+        allow(Yast::Kdump.calibrator).to receive(:total_memory).and_return 2047
+      end
+
+      context "during autoinstallation" do
+        before do
+          allow(Yast::Mode).to receive(:autoinst).and_return true
+          Yast::Kdump.Import(profile)
+        end
+
+        let(:profile) { { "add_crash_kernel" => true } }
+
+        it "writes a proposed crashkernel in the bootloader and enables the service" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :recovery, "crashkernel" => bootloader_kernel_params)
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => bootloader_xen_kernel_params)
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable).with("kdump")
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+
+      context "during autoupgrade" do
+        before do
+          allow(Yast::Mode).to receive(:autoupgrade).and_return true
+          Yast::Kdump.Import(profile)
+        end
+
+        let(:profile) { { "add_crash_kernel" => true } }
+
+        it "rewrites the bootloader crashkernel settings and enables the service" do
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:common, :recovery, "crashkernel" => bootloader_kernel_params)
+          expect(Yast::Bootloader)
+            .to receive(:modify_kernel_params)
+            .with(:xen_host, "crashkernel" => bootloader_xen_kernel_params)
+          expect(Yast::Bootloader).to receive(:Write)
+          expect(Yast::Service).to receive(:Enable).with("kdump")
+
+          Yast::Kdump.WriteKdumpBootParameter
+        end
+      end
+    end
   end
 
   describe ".Update" do
