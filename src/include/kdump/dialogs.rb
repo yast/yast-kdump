@@ -567,23 +567,29 @@ module Yast
             HStretch()
           )
         ),
-        VSpacing(1),
-        Left(
-          HBox(
-            Left(Label(_("Usable Memory [MiB]:"))),
-            Left(Label(Id("usable_memory"), "0123456789")),
-            HStretch()
-          )
-        ),
-        VSpacing(1),
-        Left(IntField(Id("allocated_low_memory"),
-          Opt(:notify),
-          low_label,
-          low_min,
-          low_max,
-          0)),
-        Left(Label(low_range)),
-        *high_widgets
+        VBox(
+          Id(:allocated_memory_box),
+          Left(
+            HBox(
+              Left(Label(_("Usable Memory [MiB]:"))),
+              Left(Label(Id("usable_memory"), "0123456789")),
+              HStretch()
+            )
+          ),
+          VSpacing(1),
+          Left(
+            IntField(
+              Id("allocated_low_memory"),
+              Opt(:notify),
+              low_label,
+              low_min,
+              low_max,
+              0
+            )
+          ),
+          Left(Label(low_range)),
+          *high_widgets
+        )
       )
     end
 

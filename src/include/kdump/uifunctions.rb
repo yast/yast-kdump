@@ -1360,12 +1360,9 @@ module Yast
         end
         update_usable_memory
       else
+        UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, false)
         UI.ChangeWidget(Id("total_memory"), :Value, "0")
         UI.ChangeWidget(Id("usable_memory"), :Value, "0")
-        UI.ChangeWidget(Id("allocated_low_memory"), :Enabled, false)
-        if Kdump.high_memory_supported?
-          UI.ChangeWidget(Id("allocated_high_memory"), :Enabled, false)
-        end
       end
 
       nil
