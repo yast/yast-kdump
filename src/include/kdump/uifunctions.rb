@@ -1333,7 +1333,11 @@ module Yast
 
     # Updates the free memory displayed in the UI
     def update_usable_memory
-      value = Kdump.total_memory - allocated_memory
+      value = if UI.QueryWidget(Id(:auto_resize), :Value)
+        "---"
+      else
+        Kdump.total_memory - allocated_memory
+      end
       UI.ChangeWidget(Id("usable_memory"), :Value, value.to_s)
     end
 
@@ -1381,6 +1385,8 @@ module Yast
           # Substract (remaining is negative) the excess from the current value
           UI.ChangeWidget(Id(ret), :Value, send(ret.to_sym) + remaining)
         end
+        update_usable_memory
+      elsif ret == :auto_resize
         update_usable_memory
       end
 
