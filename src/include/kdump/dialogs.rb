@@ -523,19 +523,6 @@ module Yast
     end
 
     def kdump_memory_widget
-      low_min = Kdump.memory_limits[:min_low].to_i
-      low_max = Kdump.memory_limits[:max_low].to_i
-      low_default = Kdump.memory_limits[:default_low].to_i
-      low_label = if Kdump.high_memory_supported?
-        _("Kdump &Low Memory [MiB]")
-      else
-        _("Kdump Memor&y [MiB]")
-      end
-      # TRANSLATORS: %{min}, %{max}, %{default} are variable names which must not be translated.
-      low_range = format(_("(min: %{min}; max: %{max}; suggested: %{default})"),
-        min:     low_min,
-        max:     low_max,
-        default: low_default)
       widgets = [
         Left(
           HBox(
@@ -548,18 +535,12 @@ module Yast
         Left(
           HBox(
             Left(Label(_("Usable Memory [MiB]:"))),
-            Left(Label(Id("usable_memory"), "0123456789")),
+            Left(ReplacePoint(Id("usable_memory_rp"), usable_memory_widget)),
             HStretch()
           )
         ),
         VSpacing(1),
-        Left(IntField(Id("allocated_low_memory"),
-          Opt(:notify),
-          low_label,
-          low_min,
-          low_max,
-          0)),
-        Left(Label(low_range))
+        Left(ReplacePoint(Id("allocated_low_memory_rp"), low_memory_widget))
       ]
       if Kdump.high_memory_supported?
         high_min = Kdump.memory_limits[:min_high].to_i
@@ -613,6 +594,53 @@ module Yast
         "abort_button"   => Label.CancelButton,
         "next_button"    => Label.OKButton
       )
+    end
+
+  private
+
+    # Returns the low memory widget
+    #
+    # @param value [Integer] Current value
+    # @return [Yast::Term] Low memory widget
+    def low_memory_widget(value = nil)
+      low_label = if Kdump.high_memory_supported?
+        _("Kdump &Low Memory [MiB]")
+      else
+        _("Kdump Memor&y [MiB]")
+      end
+
+      limits = Kdump.memory_limits
+      current = (limits[:min_low]..limits[:max_low]).cover?(value) ? value : limits[:default_low]
+
+      VBox(
+        IntField(
+          Id("allocated_low_memory"),
+          Opt(:notify),
+          low_label,
+          limits[:min_low],
+          limits[:max_low],
+          current
+        ),
+        Label(
+          # TRANSLATORS: %{min}, %{max}, %{default} are variable names which must not be translated.
+          format(_("(min: %{min}; max: %{max}; suggested: %{default})"),
+            min:     limits[:min_low],
+            max:     limits[:max_low],
+            default: limits[:default_low])
+        )
+      )
+    end
+
+    # Returns the usable memory widget
+    #
+    # It is just a label, but the idea is to redraw the widget to avoid
+    # some resizing problems.
+    #
+    # @param value [Integer,nil] Current value
+    # @return [Yast::Term] Usable memory label
+    def usable_memory_widget(value = nil)
+      content = value ? value.to_s : "0123456789"
+      Label(Id("usable_memory"), content)
     end
   end
 end
