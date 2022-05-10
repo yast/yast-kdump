@@ -337,7 +337,9 @@ module Yast
 
     # Returns the Kdump memory limits
     #
-    # It relies on the calibrator but it adjust the low memory limit when using fadump.
+    # It relies on the calibrator but it adjust the low memory limits when using firmware-assisted
+    # dumps. The reason is that those limits might contradict the recommended value. See
+    # jsc#SLE-21644 for more information.
     #
     # @return [Hash] The hash contains the following keys: :min_low, :max_low,
     #   :default_low, :min_high, :max_high, :default_high
