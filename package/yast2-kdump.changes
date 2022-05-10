@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue May 10 10:04:49 UTC 2022 - Imobach Gonzalez Sosa <igonzalezsosa@suse.com>
+
+- Do not limit to kdumptool MaxLow when using fadump (related
+  to jsc#SLE-21644).
+- 4.4.4
+
+-------------------------------------------------------------------
 Tue Feb  1 08:40:19 UTC 2022 - David Diaz <dgonzalez@suse.com>
 
 - Improve visual perception in help text (by @TarasPanchenko

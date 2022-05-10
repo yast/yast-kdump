@@ -1334,7 +1334,7 @@ module Yast
     # Updates the free memory displayed in the UI
     def update_usable_memory
       value = Kdump.total_memory - allocated_memory
-      UI.ChangeWidget(Id("usable_memory"), :Value, value.to_s)
+      UI.ReplaceWidget(Id("usable_memory_rp"), usable_memory_widget(value))
     end
 
     # Function initializes option
@@ -1442,9 +1442,19 @@ module Yast
       # If cannot adjust the fadump usage
       if !Kdump.use_fadump(UI.QueryWidget(Id("use_fadump"), :Value))
         UI.ChangeWidget(Id("use_fadump"), :Value, false)
+        return
       end
 
+      refresh_kdump_memory
+      update_usable_memory
+
       nil
+    end
+
+    def refresh_kdump_memory
+      widget_id = Id("allocated_low_memory")
+      value = UI.QueryWidget(widget_id, :Value)
+      UI.ReplaceWidget(Id("allocated_low_memory_rp"), low_memory_widget(value))
     end
 
     # Function initializes option
