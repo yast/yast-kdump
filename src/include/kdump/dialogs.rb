@@ -570,7 +570,7 @@ module Yast
           Left(
             HBox(
               Left(Label(_("Usable Memory [MiB]:"))),
-              Left(ReplacePoint(Id("usable_memory_rp"), usable_memory_widget),
+              Left(ReplacePoint(Id("usable_memory_rp"), usable_memory_widget)),
               HStretch()
             )
           ),
