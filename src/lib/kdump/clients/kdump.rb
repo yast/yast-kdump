@@ -80,7 +80,7 @@ module Yast
             "handler" => fun_ref(method(:cmdKdumpDumpFormat), "boolean (map)"),
             # TRANSLATORS: CommandLine help
             "help"    => _(
-              "Dump format for dump image none/ELF/compressed/lzo"
+              "Dump format for dump image: none/ELF/compressed/lzo"
             ),
             "example" => [
               "dumpformat dump_format=none",

@@ -959,4 +959,55 @@ describe Yast::Kdump do
       expect(subject.Export).to eq("add_crash_kernel" => false)
     end
   end
+
+  describe ".memory_limits" do
+    let(:limits) do
+      {
+        min_low:      72,
+        max_low:      3154,
+        default_low:  72,
+        min_high:     0,
+        max_high:     4247,
+        default_high: 323
+      }
+    end
+
+    let(:calibrator) do
+      instance_double(
+        Yast::KdumpCalibrator,
+        total_memory:  16334,
+        memory_limits: limits
+      )
+    end
+
+    let(:fadump?) { false }
+
+    before do
+      allow(Yast::Kdump).to receive(:calibrator).and_return(calibrator)
+      allow(Yast::Kdump).to receive(:using_fadump?).and_return(fadump?)
+    end
+
+    it "returns a hash containing the memory limits from the calibrator" do
+      expect(subject.memory_limits).to eq(
+        min_low:      72,
+        max_low:      3154,
+        default_low:  72,
+        min_high:     0,
+        max_high:     4247,
+        default_high: 323
+      )
+    end
+
+    context "when fadump is enabled" do
+      let(:fadump?) { true }
+
+      it "returns the total memory as limit :max_low limit" do
+        expect(subject.memory_limits[:max_low]).to eq(16334)
+      end
+
+      it "returns :min_low as 0" do
+        expect(subject.memory_limits[:min_low]).to eq(0)
+      end
+    end
+  end
 end
