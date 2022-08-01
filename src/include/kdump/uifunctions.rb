@@ -1333,14 +1333,27 @@ module Yast
 
     # Updates the free memory displayed in the UI
     def update_usable_memory
-      value = Kdump.total_memory - allocated_memory
+      value = if UI.QueryWidget(Id(:auto_resize), :Value)
+        "---"
+      else
+        Kdump.total_memory - allocated_memory
+      end
+
       UI.ReplaceWidget(Id("usable_memory_rp"), usable_memory_widget(value))
     end
 
     # Function initializes option
     # "KdumpMemory"
     def InitKdumpMemory(_key)
+      if Kdump.using_fadump?
+        UI.ChangeWidget(Id(:auto_resize), :Enabled, false)
+        auto_resize = false
+      else
+        auto_resize = Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      end
+      UI.ChangeWidget(Id(:auto_resize), :Value, auto_resize)
       if Kdump.total_memory > 0
+        UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, !auto_resize)
         UI.ChangeWidget(
           Id("total_memory"),
           :Value,
@@ -1360,12 +1373,9 @@ module Yast
         end
         update_usable_memory
       else
+        UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, false)
         UI.ChangeWidget(Id("total_memory"), :Value, "0")
         UI.ChangeWidget(Id("usable_memory"), :Value, "0")
-        UI.ChangeWidget(Id("allocated_low_memory"), :Enabled, false)
-        if Kdump.high_memory_supported?
-          UI.ChangeWidget(Id("allocated_high_memory"), :Enabled, false)
-        end
       end
 
       nil
@@ -1382,6 +1392,10 @@ module Yast
           # Substract (remaining is negative) the excess from the current value
           UI.ChangeWidget(Id(ret), :Value, send(ret.to_sym) + remaining)
         end
+        update_usable_memory
+      elsif ret == :auto_resize
+        value = UI.QueryWidget(Id(ret), :Value)
+        UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, !value)
         update_usable_memory
       end
 
@@ -1405,6 +1419,8 @@ module Yast
     #  Store function for option
     # "KdumpMemory"
     def StoreKdumpMemory(_key, _event)
+      Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] =
+        UI.QueryWidget(Id(:auto_resize), :Value) ? "yes" : "no"
       Kdump.allocated_memory[:low] = Builtins.tostring(
         UI.QueryWidget(Id("allocated_low_memory"), :Value)
       )
@@ -1439,14 +1455,20 @@ module Yast
     def HandleFADump(_key, event)
       return if event["ID"] != "use_fadump"
 
+      use_fadump_value = UI.QueryWidget(Id("use_fadump"), :Value)
+
       # If cannot adjust the fadump usage
-      if !Kdump.use_fadump(UI.QueryWidget(Id("use_fadump"), :Value))
+      if !Kdump.use_fadump(use_fadump_value)
         UI.ChangeWidget(Id("use_fadump"), :Value, false)
         return
       end
 
-      refresh_kdump_memory
+      UI.ChangeWidget(Id(:auto_resize), :Value, false)
+      UI.ChangeWidget(Id(:allocated_memory_box), :Enabled, true)
+      UI.ChangeWidget(Id(:auto_resize), :Enabled, !use_fadump_value)
+
       update_usable_memory
+      refresh_kdump_memory
 
       nil
     end

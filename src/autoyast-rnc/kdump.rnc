@@ -36,6 +36,7 @@ kdump_general = element general {
     element KDUMP_CPUS { STRING }? &
     element KDUMP_COMMANDLINE { STRING }? &
     element KDUMP_COMMANDLINE_APPEND { STRING }? &
+    element KDUMP_AUTO_RESIZE { STRING }? &
     element KDUMP_CONTINUE_ON_ERROR { STRING }? &
     element KDUMP_REQUIRED_PROGRAMS { STRING }? &
     element KDUMP_PRESCRIPT { STRING }? &

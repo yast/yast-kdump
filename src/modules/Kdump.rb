@@ -149,6 +149,7 @@ module Yast
         "KDUMP_CPUS"               => "",
         "KDUMP_COMMANDLINE"        => "",
         "KDUMP_COMMANDLINE_APPEND" => "",
+        "KDUMP_AUTO_RESIZE"        => "yes",
         "KEXEC_OPTIONS"            => "",
         "KDUMP_IMMEDIATE_REBOOT"   => "yes",
         "KDUMP_COPY_KERNEL"        => "yes",
@@ -1144,9 +1145,22 @@ module Yast
       end
 
       result = []
-      high = @allocated_memory[:high]
-      result << high + "M,high" if high && high.to_i != 0
-      low = @allocated_memory[:low]
+      if @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+        maxsize = total_memory / 2
+        if high_memory_supported?
+          low = memory_limits[:default_low]
+          high = memory_limits[:max_high]
+          high = (maxsize - low.to_i).to_s if high.to_i > maxsize
+        else
+          high = memory_limits[:min_high]
+          low = memory_limits[:max_low]
+          low = maxsize.to_s if low.to_i > maxsize
+        end
+      else
+        high = @allocated_memory[:high]
+        low = @allocated_memory[:low]
+      end
+      result << "#{high}M,high" if high && high.to_i != 0
       # Add the ',low' suffix only there is a ',high' one
       result << (result.empty? ? "#{low}M" : "#{low}M,low") if low && low.to_i != 0
 
@@ -1169,8 +1183,13 @@ module Yast
       end
 
       result = []
-      high = @allocated_memory[:high]
-      low = @allocated_memory[:low]
+      if @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+        high = memory_limits[:default_high]
+        low = memory_limits[:default_low]
+      else
+        high = @allocated_memory[:high]
+        low = @allocated_memory[:low]
+      end
       sum = 0
       sum += low.to_i if low
       sum += high.to_i if high

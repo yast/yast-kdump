@@ -523,25 +523,8 @@ module Yast
     end
 
     def kdump_memory_widget
-      widgets = [
-        Left(
-          HBox(
-            Left(Label(_("Total System Memory [MiB]:"))),
-            Left(Label(Id("total_memory"), "0123456789")),
-            HStretch()
-          )
-        ),
-        VSpacing(1),
-        Left(
-          HBox(
-            Left(Label(_("Usable Memory [MiB]:"))),
-            Left(ReplacePoint(Id("usable_memory_rp"), usable_memory_widget)),
-            HStretch()
-          )
-        ),
-        VSpacing(1),
-        Left(ReplacePoint(Id("allocated_low_memory_rp"), low_memory_widget))
-      ]
+      high_widgets = []
+
       if Kdump.high_memory_supported?
         high_min = Kdump.memory_limits[:min_high].to_i
         high_max = Kdump.memory_limits[:max_high].to_i
@@ -551,8 +534,8 @@ module Yast
           min:     high_min,
           max:     high_max,
           default: high_default)
-        widgets << VSpacing(1)
-        widgets << Left(
+        high_widgets << VSpacing(1)
+        high_widgets << Left(
           IntField(
             Id("allocated_high_memory"),
             Opt(:notify),
@@ -562,9 +545,39 @@ module Yast
             0
           )
         )
-        widgets << Left(Label(high_range))
+        high_widgets << Left(Label(high_range))
       end
-      VBox(*widgets)
+
+      VBox(
+        Left(
+          CheckBox(
+            Id(:auto_resize),
+            Opt(:notify),
+            _("&Automatically Resize at Boot"),
+            false
+          )
+        ),
+        VSpacing(1),
+        Left(
+          HBox(
+            Left(Label(_("Total System Memory [MiB]:"))),
+            Left(Label(Id("total_memory"), "0123456789")),
+            HStretch()
+          )
+        ),
+        VBox(
+          Id(:allocated_memory_box),
+          Left(
+            HBox(
+              Left(Label(_("Usable Memory [MiB]:"))),
+              Left(ReplacePoint(Id("usable_memory_rp"), usable_memory_widget)),
+              HStretch()
+            )
+          ),
+          VSpacing(1),
+          *high_widgets
+        )
+      )
     end
 
     def DisBackButton(_key)
