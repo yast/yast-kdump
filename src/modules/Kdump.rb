@@ -51,23 +51,24 @@ module Yast
     def main
       textdomain "kdump"
 
-      Yast.import "Progress"
-      Yast.import "Report"
-      Yast.import "Summary"
-      Yast.import "Message"
-      Yast.import "Map"
-      Yast.import "Bootloader"
-      Yast.import "Service"
-      Yast.import "Popup"
       Yast.import "Arch"
+      Yast.import "Bootloader"
+      Yast.import "Directory"
+      Yast.import "FileUtils"
+      Yast.import "Map"
+      Yast.import "Message"
       Yast.import "Mode"
+      Yast.import "Package"
+      Yast.import "PackagesProposal"
+      Yast.import "Popup"
       Yast.import "ProductControl"
       Yast.import "ProductFeatures"
-      Yast.import "PackagesProposal"
-      Yast.import "FileUtils"
-      Yast.import "Directory"
-      Yast.import "String"
+      Yast.import "Progress"
+      Yast.import "Report"
+      Yast.import "Service"
       Yast.import "SpaceCalculation"
+      Yast.import "String"
+      Yast.import "Summary"
 
       reset
     end
@@ -405,6 +406,13 @@ module Yast
     #
     # @return [Boolean] whether successful
     def update_initrd
+      # when /boot is ro, we need to use transactional update to be able to
+      # rebuild initrd. In the end tu script below is used, but needs sauce
+      # around
+      if Package.IsTransactionalSystem
+        return update_initrd_with("transactional-update --continue kdump")
+      end
+
       # For CaaSP we need an explicit initrd rebuild before the
       # first boot, when the root filesystem becomes read only.
       rebuild_cmd = "/usr/sbin/tu-rebuild-kdump-initrd"
