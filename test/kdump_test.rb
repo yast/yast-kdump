@@ -1010,4 +1010,17 @@ describe Yast::Kdump do
       end
     end
   end
+
+  describe ".update_initrd" do
+    before do
+      allow(Yast::Package).to receive(:IsTransactionalSystem).and_return(false)
+    end
+
+    it "runs transactional-update kdump on transactional systems" do
+      allow(Yast::Package).to receive(:IsTransactionalSystem).and_return(true)
+      expect(subject).to receive(:update_initrd_with).with("transactional-update --continue kdump").and_return(true)
+
+      subject.update_initrd
+    end
+  end
 end
