@@ -575,6 +575,7 @@ module Yast
             )
           ),
           VSpacing(1),
+          Left(ReplacePoint(Id("allocated_low_memory_rp"), low_memory_widget)),
           *high_widgets
         )
       )
