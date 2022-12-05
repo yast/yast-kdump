@@ -17,13 +17,16 @@ module Yast
     KDUMPTOOL_CMD = "/usr/sbin/kdumptool %s calibrate".freeze
     KDUMPTOOL_ARG = "--configfile '%s'".freeze
     KEYS_MAP = {
-      "Low"     => :default_low,
-      "MinLow"  => :min_low,
-      "MaxLow"  => :max_low,
-      "High"    => :default_high,
-      "MinHigh" => :min_high,
-      "MaxHigh" => :max_high,
-      "Total"   => :total_memory
+      "Low"       => :default_low,
+      "MinLow"    => :min_low,
+      "MaxLow"    => :max_low,
+      "High"      => :default_high,
+      "MinHigh"   => :min_high,
+      "MaxHigh"   => :max_high,
+      "Fadump"    => :default_fadump,
+      "MinFadump" => :min_fadump,
+      "MaxFadump" => :max_fadump,
+      "Total"     => :total_memory
     }.freeze
 
     def initialize(configfile = nil)
@@ -36,6 +39,13 @@ module Yast
     # @return [Boolean] true if it's available; 'false' otherwise.
     def high_memory_supported?
       !max_high.zero?
+    end
+
+    # Determines whether fadump support is available
+    #
+    # @return [Boolean] true if it's available; 'false' otherwise.
+    def fadump_supported?
+      !max_fadump.zero?
     end
 
     # Determines what's the recommended quantity of low memory
@@ -99,6 +109,32 @@ module Yast
         end
     end
 
+    # Determines what's the recommended quantity of fadump memory
+    #
+    # @return [Fixnum] Memory size (in MiB)
+    def default_fadump
+      run_kdumptool unless @kdumptool_executed
+      @default_fadump ||= min_fadump
+    end
+
+    # Determines what's the minimum quantity of fadump memory
+    #
+    # @return [Fixnum] Memory size (in MiB)
+    def min_fadump
+      run_kdumptool unless @kdumptool_executed
+      @min_fadump ||= 0
+    end
+
+    # Determines what's the recommended maximum quantity of low memory
+    #
+    # If high memory is not supported, this is 0.
+    #
+    # @return [Fixnum] Memory size (in MiB)
+    def max_fadump
+      run_kdumptool unless @kdumptool_executed
+      @max_fadump ||= system.supports_fadump? ? total_memory : 0
+    end
+
     # System available memory
     #
     # @return [Fixnum] Memory size (in MiB)
@@ -115,8 +151,11 @@ module Yast
     #
     # @return [Hash] Memory limits
     def memory_limits
-      { min_low: min_low, max_low: max_low, default_low: default_low,
-        min_high: min_high, max_high: max_high, default_high: default_high }
+      {
+        min_low: min_low, max_low: max_low, default_low: default_low,
+        min_high: min_high, max_high: max_high, default_high: default_high,
+        min_fadump: min_fadump, max_fadump: max_fadump, default_fadump: default_fadump
+      }
     end
 
   private
