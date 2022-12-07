@@ -344,12 +344,10 @@ module Yast
     # jsc#SLE-21644 for more information.
     #
     # @return [Hash] The hash contains the following keys: :min_low, :max_low,
-    #   :default_low, :min_high, :max_high, :default_high
+    #   :default_low, :min_high, :max_high, :default_high, :min_fadump,
+    #    :max_fadump, :default_fadump
     def memory_limits
-      limits = calibrator.memory_limits
-      return limits unless using_fadump?
-
-      limits.merge(min_low: 0, max_low: total_memory)
+      calibrator.memory_limits
     end
 
     # Propose reserved/allocated memory
@@ -1022,7 +1020,7 @@ module Yast
     # @return [Boolean] whether successfully set
     def use_fadump(new_value)
       # Trying to use fadump on unsupported hardware
-      if !system.supports_fadump? && new_value
+      if !supports_fadump? && new_value
         Builtins.y2milestone("FADump is not supported on this hardware")
         Report.Error(_("Cannot use Firmware-assisted dump.\nIt is not supported on this hardware."))
         return false
@@ -1052,6 +1050,13 @@ module Yast
     # @return [Boolean] is supported
     def high_memory_supported?
       calibrator.high_memory_supported?
+    end
+
+    # Returns whether usage of fadump is supported by the current system
+    #
+    # @return [Boolean] is supported
+    def fadump_supported?
+      calibrator.fadump_supported?
     end
 
     publish :function => :GetModified, :type => "boolean ()"
@@ -1229,7 +1234,7 @@ module Yast
     end
 
     def write_fadump_boot_param
-      if system.supports_fadump?
+      if supports_fadump?
         # If fdump is selected and we want to enable kdump
         value = "on" if using_fadump? && @add_crashkernel_param
         Bootloader.modify_kernel_params(:common, :recovery, "fadump" => value)

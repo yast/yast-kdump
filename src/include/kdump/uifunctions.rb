@@ -1435,7 +1435,7 @@ module Yast
 
     # Initializes FADump settings in UI
     def InitFADump(_key)
-      if Kdump.system.supports_fadump? && UI.WidgetExists(Id("FADump"))
+      if Kdump.supports_fadump? && UI.WidgetExists(Id("FADump"))
         UI.ReplaceWidget(
           Id("FADump"),
           VBox(
@@ -1468,15 +1468,16 @@ module Yast
       UI.ChangeWidget(Id(:auto_resize), :Enabled, !use_fadump_value)
 
       update_usable_memory
-      refresh_kdump_memory
+      refresh_kdump_memory(use_fadump_value)
 
       nil
     end
 
-    def refresh_kdump_memory
+    def refresh_kdump_memory(fadump)
       widget_id = Id("allocated_low_memory")
       value = UI.QueryWidget(widget_id, :Value)
-      UI.ReplaceWidget(Id("allocated_low_memory_rp"), low_memory_widget(value))
+      UI.ReplaceWidget(Id("allocated_low_memory_rp"),
+        low_memory_widget(value: value, fadump: fadump))
     end
 
     # Function initializes option
