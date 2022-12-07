@@ -150,7 +150,7 @@ module Yast
         "KDUMP_CPUS"               => "",
         "KDUMP_COMMANDLINE"        => "",
         "KDUMP_COMMANDLINE_APPEND" => "",
-        "KDUMP_AUTO_RESIZE"        => "yes",
+        "KDUMP_AUTO_RESIZE"        => "no",
         "KEXEC_OPTIONS"            => "",
         "KDUMP_IMMEDIATE_REBOOT"   => "yes",
         "KDUMP_COPY_KERNEL"        => "yes",
