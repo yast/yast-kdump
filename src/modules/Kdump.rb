@@ -419,10 +419,7 @@ module Yast
 
       return true unless using_fadump_changed?
 
-      # See FATE#315780
-      # See https://www.suse.com/support/kb/doc.php?id=7012786
-      # FIXME what about dracut?
-      update_command = (using_fadump? ? "/usr/sbin/mkdumprd -f" : "/sbin/mkinitrd")
+      update_command = "/usr/sbin/mkdumprd -f"
       update_initrd_with(update_command)
     end
 
