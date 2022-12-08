@@ -433,7 +433,7 @@ describe Yast::Kdump do
     end
 
     context "during autoinstallation" do
-      let(:bootloader_kernel_params) { ["2047M,high"] }
+      let(:bootloader_kernel_params) { ["73M,high"] }
       let(:bootloader_kernel_params_noauto) { ["73M,high"] }
       let(:bootloader_xen_kernel_params) { ["73M\\<4G"] }
 
@@ -547,7 +547,7 @@ describe Yast::Kdump do
     end
 
     context "during autoupgrade" do
-      let(:bootloader_kernel_params) { ["1968M,high"] }
+      let(:bootloader_kernel_params) { ["75M,high"] }
       let(:bootloader_kernel_params_noauto) { ["75M,high"] }
       let(:bootloader_xen_kernel_params) { ["75M\\<4G"] }
 
@@ -815,7 +815,7 @@ describe Yast::Kdump do
     end
 
     context "on a system with no low/high distinction" do
-      let(:bootloader_kernel_params) { ["650M"] }
+      let(:bootloader_kernel_params) { ["93M"] }
       let(:bootloader_xen_kernel_params) { ["93M\\<4G"] }
 
       before do
