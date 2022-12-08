@@ -1017,7 +1017,7 @@ module Yast
     # @return [Boolean] whether successfully set
     def use_fadump(new_value)
       # Trying to use fadump on unsupported hardware
-      if !supports_fadump? && new_value
+      if !fadump_supported? && new_value
         Builtins.y2milestone("FADump is not supported on this hardware")
         Report.Error(_("Cannot use Firmware-assisted dump.\nIt is not supported on this hardware."))
         return false
@@ -1231,7 +1231,7 @@ module Yast
     end
 
     def write_fadump_boot_param
-      if supports_fadump?
+      if fadump_supported?
         # If fdump is selected and we want to enable kdump
         value = "on" if using_fadump? && @add_crashkernel_param
         Bootloader.modify_kernel_params(:common, :recovery, "fadump" => value)
