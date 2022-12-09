@@ -162,8 +162,9 @@ module Yast
     def run_kdumptool
       out = Yast::SCR.Execute(Yast::Path.new(".target.bash_output"), kdumptool_cmd)
       if out["exit"].zero?
-        # ensure that fadump is set to unsupported as fadump can be missing in output
-        # and it means fadump not supported ( as oppose to high mem which is always in output)
+        # If fadump is missing from output, it means it isn't supported (unlike
+        # high mem, which is always in output). Thus, let's set fadump related
+        # values to zero before parsing the kdumptool output
         @max_fadump = @min_fadump = @default_fadump = 0
         proposal = parse(out["stdout"])
         # Populate @min_low, @max_low, @total_memory, etc.
