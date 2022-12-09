@@ -415,7 +415,7 @@ module Yast
           "widget_names"    => [
             "DisBackButton",
             "EnableDisalbeKdump",
-            (Kdump.system.supports_fadump? ? "FADump" : ""),
+            (Kdump.fadump_supported? ? "FADump" : ""),
             "KdumpMemory"
           ]
         },
@@ -575,7 +575,8 @@ module Yast
             )
           ),
           VSpacing(1),
-          Left(ReplacePoint(Id("allocated_low_memory_rp"), low_memory_widget)),
+          Left(ReplacePoint(Id("allocated_low_memory_rp"),
+            low_memory_widget(fadump: Kdump.using_fadump?))),
           *high_widgets
         )
       )
@@ -614,9 +615,10 @@ module Yast
 
     # Returns the low memory widget
     #
-    # @param value [Integer] Current value
+    # @param value [Integer] Current value or default if nil passed
+    # @fadump fadump [Boolean] whener use low mem limits or fadump one
     # @return [Yast::Term] Low memory widget
-    def low_memory_widget(value = nil)
+    def low_memory_widget(value: nil, fadump: false)
       low_label = if Kdump.high_memory_supported?
         _("Kdump &Low Memory [MiB]")
       else
@@ -624,23 +626,26 @@ module Yast
       end
 
       limits = Kdump.memory_limits
-      current = (limits[:min_low]..limits[:max_low]).cover?(value) ? value : limits[:default_low]
+      min_limit = fadump ? limits[:min_fadump] : limits[:min_low]
+      max_limit = fadump ? limits[:max_fadump] : limits[:max_low]
+      default = fadump ? limits[:default_fadump] : limits[:default_low]
+      current = (min_limit..max_limit).cover?(value) ? value : default
 
       VBox(
         IntField(
           Id("allocated_low_memory"),
           Opt(:notify),
           low_label,
-          limits[:min_low],
-          limits[:max_low],
+          min_limit,
+          max_limit,
           current
         ),
         Label(
           # TRANSLATORS: %{min}, %{max}, %{default} are variable names which must not be translated.
           format(_("(min: %{min}; max: %{max}; suggested: %{default})"),
-            min:     limits[:min_low],
-            max:     limits[:max_low],
-            default: limits[:default_low])
+            min:     min_limit,
+            max:     max_limit,
+            default: default)
         )
       )
     end

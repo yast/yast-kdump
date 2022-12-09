@@ -429,7 +429,7 @@ describe Yast::Kdump do
   describe ".WriteKdumpBootParameter" do
     before do
       # FIXME: current tests do not cover fadump (ppc64 specific)
-      allow(Yast::Kdump.system).to receive(:supports_fadump?).and_return false
+      allow(Yast::Kdump).to receive(:fadump_supported?).and_return false
     end
 
     context "during autoinstallation" do
@@ -963,12 +963,15 @@ describe Yast::Kdump do
   describe ".memory_limits" do
     let(:limits) do
       {
-        min_low:      72,
-        max_low:      3154,
-        default_low:  72,
-        min_high:     0,
-        max_high:     4247,
-        default_high: 323
+        min_low:        72,
+        max_low:        3154,
+        default_low:    72,
+        min_high:       0,
+        max_high:       4247,
+        default_high:   323,
+        min_fadump:     0,
+        max_fadump:     8096,
+        default_fadump: 512
       }
     end
 
@@ -989,25 +992,16 @@ describe Yast::Kdump do
 
     it "returns a hash containing the memory limits from the calibrator" do
       expect(subject.memory_limits).to eq(
-        min_low:      72,
-        max_low:      3154,
-        default_low:  72,
-        min_high:     0,
-        max_high:     4247,
-        default_high: 323
+        min_low:        72,
+        max_low:        3154,
+        default_low:    72,
+        min_high:       0,
+        max_high:       4247,
+        default_high:   323,
+        min_fadump:     0,
+        max_fadump:     8096,
+        default_fadump: 512
       )
-    end
-
-    context "when fadump is enabled" do
-      let(:fadump?) { true }
-
-      it "returns the total memory as limit :max_low limit" do
-        expect(subject.memory_limits[:max_low]).to eq(16334)
-      end
-
-      it "returns :min_low as 0" do
-        expect(subject.memory_limits[:min_low]).to eq(0)
-      end
     end
   end
 

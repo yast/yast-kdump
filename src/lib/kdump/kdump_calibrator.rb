@@ -11,19 +11,19 @@ module Yast
   class KdumpCalibrator
     include Yast::Logger
 
-    LOW_MEM = 896
-    MIN_LOW_DEFAULT = 72
-
     KDUMPTOOL_CMD = "/usr/sbin/kdumptool %s calibrate".freeze
     KDUMPTOOL_ARG = "--configfile '%s'".freeze
     KEYS_MAP = {
-      "Low"     => :default_low,
-      "MinLow"  => :min_low,
-      "MaxLow"  => :max_low,
-      "High"    => :default_high,
-      "MinHigh" => :min_high,
-      "MaxHigh" => :max_high,
-      "Total"   => :total_memory
+      "Low"       => :default_low,
+      "MinLow"    => :min_low,
+      "MaxLow"    => :max_low,
+      "High"      => :default_high,
+      "MinHigh"   => :min_high,
+      "MaxHigh"   => :max_high,
+      "Fadump"    => :default_fadump,
+      "MinFadump" => :min_fadump,
+      "MaxFadump" => :max_fadump,
+      "Total"     => :total_memory
     }.freeze
 
     def initialize(configfile = nil)
@@ -36,6 +36,13 @@ module Yast
     # @return [Boolean] true if it's available; 'false' otherwise.
     def high_memory_supported?
       !max_high.zero?
+    end
+
+    # Determines whether fadump support is available
+    #
+    # @return [Boolean] true if it's available; 'false' otherwise.
+    def fadump_supported?
+      !max_fadump.zero?
     end
 
     # Determines what's the recommended quantity of low memory
@@ -55,7 +62,7 @@ module Yast
     # @return [Fixnum] Memory size (in MiB)
     def min_low
       run_kdumptool unless @kdumptool_executed
-      @min_low ||= MIN_LOW_DEFAULT
+      @min_low ||= 0
     end
 
     # Determines what's the recommended maximum quantity of low memory
@@ -65,7 +72,7 @@ module Yast
     # @return [Fixnum] Memory size (in MiB)
     def max_low
       run_kdumptool unless @kdumptool_executed
-      @max_low ||= system.supports_high_mem? ? [LOW_MEM, total_memory].min : total_memory
+      @max_low ||= total_memory
     end
 
     # Determines what's the recommended quantity of high memory
@@ -84,19 +91,40 @@ module Yast
       @min_high ||= 0
     end
 
-    # Determines what's the recommended maximum quantity of low memory
+    # Determines what's the recommended maximum quantity of high memory
     #
     # If high memory is not supported, this is 0.
     #
     # @return [Fixnum] Memory size (in MiB)
     def max_high
       run_kdumptool unless @kdumptool_executed
-      @max_high ||=
-        if system.supports_high_mem?
-          (total_memory - LOW_MEM) > 0 ? total_memory - LOW_MEM : 0
-        else
-          0
-        end
+      @max_high ||= system.supports_high_mem? ? total_memory : 0
+    end
+
+    # Determines what's the recommended quantity of fadump memory
+    #
+    # @return [Fixnum] Memory size (in MiB)
+    def default_fadump
+      run_kdumptool unless @kdumptool_executed
+      @default_fadump ||= min_fadump
+    end
+
+    # Determines what's the minimum quantity of fadump memory
+    #
+    # @return [Fixnum] Memory size (in MiB)
+    def min_fadump
+      run_kdumptool unless @kdumptool_executed
+      @min_fadump ||= 0
+    end
+
+    # Determines what's the recommended maximum quantity of fadump memory
+    #
+    # If fadump is not supported, this is 0.
+    #
+    # @return [Fixnum] Memory size (in MiB)
+    def max_fadump
+      run_kdumptool unless @kdumptool_executed
+      @max_fadump ||= system.supports_fadump? ? total_memory : 0
     end
 
     # System available memory
@@ -115,8 +143,11 @@ module Yast
     #
     # @return [Hash] Memory limits
     def memory_limits
-      { min_low: min_low, max_low: max_low, default_low: default_low,
-        min_high: min_high, max_high: max_high, default_high: default_high }
+      {
+        min_low: min_low, max_low: max_low, default_low: default_low,
+        min_high: min_high, max_high: max_high, default_high: default_high,
+        min_fadump: min_fadump, max_fadump: max_fadump, default_fadump: default_fadump
+      }
     end
 
   private
@@ -131,13 +162,17 @@ module Yast
     def run_kdumptool
       out = Yast::SCR.Execute(Yast::Path.new(".target.bash_output"), kdumptool_cmd)
       if out["exit"].zero?
+        # If fadump is missing from output, it means it isn't supported (unlike
+        # high mem, which is always in output). Thus, let's set fadump related
+        # values to zero before parsing the kdumptool output
+        @max_fadump = @min_fadump = @default_fadump = 0
         proposal = parse(out["stdout"])
         # Populate @min_low, @max_low, @total_memory, etc.
         proposal.each_pair do |var_name, var_value|
           instance_variable_set("@#{var_name}", var_value)
         end
       else
-        log.warn("kdumptool could not be executed: #{out["stderr"]}")
+        log.warn("kdumptool failed: #{out["stderr"]}")
       end
       @kdumptool_executed = true
     end
@@ -149,14 +184,9 @@ module Yast
     # @return [Hash] Hash containing minimum and maximum low/high memory limits
     def parse(output)
       lines = output.split("\n")
-      if lines.size == 1 # Old kdumptool version
-        low = lines.first.to_i
-        { min_low: low, default_low: low }
-      else
-        lines.each_with_object({}) do |line, prop|
-          key, value = line.split(":").map(&:strip)
-          prop[KEYS_MAP[key]] = value.to_i if KEYS_MAP.key?(key)
-        end
+      lines.each_with_object({}) do |line, prop|
+        key, value = line.split(":").map(&:strip)
+        prop[KEYS_MAP[key]] = value.to_i if KEYS_MAP.key?(key)
       end
     end
 
