@@ -1435,7 +1435,7 @@ module Yast
 
     # Initializes FADump settings in UI
     def InitFADump(_key)
-      if Kdump.supports_fadump? && UI.WidgetExists(Id("FADump"))
+      if Kdump.fadump_supported? && UI.WidgetExists(Id("FADump"))
         UI.ReplaceWidget(
           Id("FADump"),
           VBox(
