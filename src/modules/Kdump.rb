@@ -409,18 +409,9 @@ module Yast
       # around
       if Package.IsTransactionalSystem
         return update_initrd_with("transactional-update --continue kdump")
+      else
+        return update_initrd_with("mkdumprd")
       end
-
-      # For CaaSP we need an explicit initrd rebuild before the
-      # first boot, when the root filesystem becomes read only.
-      rebuild_cmd = "/usr/sbin/tu-rebuild-kdump-initrd"
-      # part of transactional-update.rpm
-      update_initrd_with("if test -x #{rebuild_cmd}; then #{rebuild_cmd}; fi")
-
-      return true unless using_fadump_changed?
-
-      update_command = "/usr/sbin/mkdumprd -f"
-      update_initrd_with(update_command)
     end
 
     # @param update_command [String] a command for .target.bash
