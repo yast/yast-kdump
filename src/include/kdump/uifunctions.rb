@@ -1641,33 +1641,6 @@ module Yast
     end
 
     # Function initializes option
-    # "Enable Copy Kernel into the Dump Directory"
-
-    def InitEnableCopyKernel(_key)
-      if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no") == "yes"
-        UI.ChangeWidget(Id("EnableCopyKernel"), :Value, true)
-      else
-        UI.ChangeWidget(Id("EnableCopyKernel"), :Value, false)
-      end
-
-      nil
-    end
-
-    # Function stores option
-    # "Enable Copy Kernel into the Dump Directory"
-
-    def StoreEnableCopyKernel(_key, _event)
-      value = Convert.to_boolean(UI.QueryWidget(Id("EnableCopyKernel"), :Value))
-      if !value
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no")
-      else
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "yes")
-      end
-
-      nil
-    end
-
-    # Function initializes option
     # "SMTP Server"
     def InitSMTPServer(_key)
       UI.ChangeWidget(
