@@ -164,7 +164,6 @@ module Yast
         "KDUMP_REQUIRED_PROGRAMS"  => "",
         "KDUMP_PRESCRIPT"          => "",
         "KDUMP_POSTSCRIPT"         => "",
-        "KDUMPTOOL_FLAGS"          => "",
         "KDUMP_NETCONFIG"          => "auto",
         "KDUMP_NET_TIMEOUT"        => "30",
         "KDUMP_SMTP_SERVER"        => "",
