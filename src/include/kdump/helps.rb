@@ -161,14 +161,6 @@ module Yast
             "    Enable Delete Old Dump Images. If the number of dump files in \n" \
             "    <i>Number of Old Dumps</i> exceeds this number, older dumps are removed.<br></p>"
         ),
-        # Enable Copy Ke&rnel into the Dump Directory - CheckBox 1/1
-        "EnableCopyKernel"       => _(
-          "<p><b>Enable Copy Kernel into the Dump Directory</b> - \n" \
-            "    If this option is selected, the kernel and the\n" \
-            "      debugging information (if installed) are copied into the dump\n" \
-            "      directory. The default is \"off\". It is useful to have\n" \
-            "      everything in place for debugging.<br></p>\n"
-        ),
         # SMTP Server
         "SMTPServer"             => _(
           "<p><b>SMTP Server</b> used for sending a notification email after a dump.</p>"

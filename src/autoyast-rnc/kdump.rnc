@@ -44,7 +44,6 @@ kdump_general = element general {
     element KDUMPTOOL_FLAGS { STRING }? &
     element KDUMP_NETCONFIG { STRING }? &
     element KDUMP_NET_TIMEOUT { STRING }? &
-    element KDUMP_COPY_KERNEL { STRING }? &
     element KEXEC_OPTIONS { STRING }? &
     element KDUMP_RUNLEVEL { STRING }? &
     element KDUMP_IMMEDIATE_REBOOT { STRING }? &

@@ -153,7 +153,6 @@ module Yast
         "KDUMP_AUTO_RESIZE"        => "no",
         "KEXEC_OPTIONS"            => "",
         "KDUMP_IMMEDIATE_REBOOT"   => "yes",
-        "KDUMP_COPY_KERNEL"        => "yes",
         "KDUMP_TRANSFER"           => "",
         "KDUMP_SAVEDIR"            => "file:///var/crash",
         "KDUMP_KEEP_OLD_DUMPS"     => "5",

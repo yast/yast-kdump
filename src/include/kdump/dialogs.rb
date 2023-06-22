@@ -347,20 +347,6 @@ module Yast
           ),
           "help"   => HelpKdump("EnableReboot")
         },
-        "EnableCopyKernel"       => {
-          # TRANSLATORS: CheckBox Label
-          "label"  => _(
-            "Enable Copy Ke&rnel into the Dump Directory"
-          ),
-          "widget" => :checkbox,
-          "init"   => fun_ref(method(:InitEnableCopyKernel), "void (string)"),
-          # "handle"		:
-          "store"  => fun_ref(
-            method(:StoreEnableCopyKernel),
-            "void (string, map)"
-          ),
-          "help"   => HelpKdump("EnableCopyKernel")
-        },
         "EnableDeleteImages"     => {
           # TRANSLATORS: CheckBox Label
           "label"  => _(
@@ -499,7 +485,6 @@ module Yast
                   Left("EnableDeleteImages"),
                   Left("NumberDumps"),
                   Left("EnableReboot"),
-                  Left("EnableCopyKernel")
                 )
               )
             ),
@@ -516,7 +501,6 @@ module Yast
             "InitrdKernel",
             "SelectKernel",
             "EnableReboot",
-            "EnableCopyKernel"
           ]
         }
       }

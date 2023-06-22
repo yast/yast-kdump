@@ -145,14 +145,6 @@ module Yast
             ),
             "example" => ["immediatereboot enable", "immediatereboot disable"]
           },
-          "copykernel"              => {
-            "handler" => fun_ref(method(:cmdKdumpCopyKernel), "boolean (map)"),
-            # TRANSLATORS: CommandLine help
-            "help"    => _(
-              "Copy kernel into dump directory."
-            ),
-            "example" => ["copykernel enable", "copykernel disable"]
-          },
           "keepolddumps"            => {
             "handler" => fun_ref(method(:cmdKdumpKeepOldDumps), "boolean (map)"),
             # TRANSLATORS: CommandLine help
@@ -1105,21 +1097,6 @@ module Yast
         return true
       elsif Ops.get(options, "disable")
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "no")
-        return true
-      else
-        # TRANSLATORS: CommandLine error message
-        CommandLine.Error(_("Wrong options were used."))
-        return false
-      end
-    end
-
-    def cmdKdumpCopyKernel(options)
-      options = deep_copy(options)
-      if Ops.get(options, "enable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "yes")
-        return true
-      elsif Ops.get(options, "disable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no")
         return true
       else
         # TRANSLATORS: CommandLine error message
