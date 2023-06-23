@@ -171,7 +171,10 @@ module Yast
             ["none_format", _("&No Dump")],
             ["elf_format", _("&ELF Format")],
             ["compressed_format", _("C&ompressed Format")],
-            ["lzo_format", _("&LZO Compressed Format")]
+            ["lzo_format", _("&LZO Compressed Format")],
+            ["snappy_format", _("&Snappy Compressed Format")],
+            ["zstd_format", _("Zstandard Compressed Format")],
+            ["raw_format", _("Raw copy of /proc/vmcore")]
           ],
           "orientation"       => :horizontal,
           "init"              => fun_ref(

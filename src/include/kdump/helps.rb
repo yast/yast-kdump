@@ -74,7 +74,10 @@ module Yast
             "    <i>No Dump</i> - Only save the kernel log.<br>\n" \
             "    <i>ELF Format</i> - Create dump file in ELF format.<br>\n" \
             "    <i>Compressed Format</i> - Compress dump data by each page with gzip.<br>\n" \
-            "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>"
+            "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>" \
+            "    <i>Snappy Compressed Format</i> - Considerably faster, 64-bit optimized.<br>\n</p>" \
+            "    <i>Zstandard Compressed Format</i> - Smaller files, slower.<br>\n</p>" \
+            "    <i>Raw copy of /proc/vmcore</i> - does not use makedumpfile.<br>\n</p>"
         ),
         # Dump Format - RadioButtons  1/7
         "TargetKdump"            => _(
