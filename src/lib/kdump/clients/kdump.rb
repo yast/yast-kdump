@@ -631,7 +631,7 @@ module Yast
       CommandLine.Print(
         Builtins.sformat(
           _("Kdump immediate reboots: %1"),
-          if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes"
+          if ["yes", "true", "1"].include?(Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT"))
             _("Enabled")
           else
             _("Disabled")
@@ -1093,10 +1093,10 @@ module Yast
     def cmdKdumpImmediateReboot(options)
       options = deep_copy(options)
       if Ops.get(options, "enable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "yes")
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "true")
         return true
       elsif Ops.get(options, "disable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "no")
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "false")
         return true
       else
         # TRANSLATORS: CommandLine error message
