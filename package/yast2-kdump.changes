@@ -7,6 +7,7 @@ Fri Jun 23 12:00:54 CEST 2023 - Jiri Bohac <jbohac@suse.cz>
 - remove KDUMP_COPY_KERNEL and KDUMPTOOL_FLAGS options
 - update default config values according to kdump defaults
 - unify config boolean variables to "true" or "false"
+- support the snappy, zstd and raw dump formats
 - 4.6.1
 
 -------------------------------------------------------------------

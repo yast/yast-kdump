@@ -1517,6 +1517,12 @@ module Yast
         UI.ChangeWidget(Id("DumpFormat"), :Value, "compressed_format")
       elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "lzo"
         UI.ChangeWidget(Id("DumpFormat"), :Value, "lzo_format")
+      elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "snappy"
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "snappy_format")
+      elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "zstd"
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "zstd_format")
+      elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "raw"
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "raw_format")
       else
         UI.ChangeWidget(Id("DumpFormat"), :Value, "none_format")
       end
@@ -1532,7 +1538,7 @@ module Yast
       result = true
       value = Builtins.tostring(UI.QueryWidget(Id("DumpFormat"), :Value))
 
-      if value != "elf_format" || value.nil?
+      if value != "raw_format" || value.nil?
         if Mode.installation || Mode.autoinst
           Kdump.kdump_packages = Builtins.add(
             Kdump.kdump_packages,
@@ -1580,6 +1586,12 @@ module Yast
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "compressed")
       elsif value == "lzo_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "lzo")
+      elsif value == "snappy_format"
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "snappy")
+      elsif value == "zstd_format"
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "zstd")
+      elsif value == "raw_format"
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "raw")
       else
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "none")
       end
