@@ -31,6 +31,7 @@
 require "yast"
 require "kdump/kdump_system"
 require "kdump/kdump_calibrator"
+require "set"
 
 require "shellwords"
 
@@ -1012,7 +1013,7 @@ module Yast
         return false
       end
 
-      @KDUMP_SETTINGS[FADUMP_KEY] = (new_value ? "yes" : "no")
+      @KDUMP_SETTINGS[FADUMP_KEY] = (new_value ? "true" : "false")
       true
     end
 
@@ -1020,7 +1021,7 @@ module Yast
     #
     # @return [Boolean] currently in use
     def using_fadump?
-      @KDUMP_SETTINGS[FADUMP_KEY] == "yes"
+      Set["yes", "true", "1"] === @KDUMP_SETTINGS[FADUMP_KEY]
     end
 
     # Has the using_fadump? been changed?
@@ -1144,7 +1145,7 @@ module Yast
       end
 
       result = []
-      if @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      if Set["yes", "true", "1"] === @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"]
         maxsize = total_memory / 2
         if high_memory_supported?
           low = memory_limits[:default_low]
@@ -1182,7 +1183,7 @@ module Yast
       end
 
       result = []
-      if @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      if Set["yes", "true", "1"] === @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"]
         high = memory_limits[:default_high]
         low = memory_limits[:default_low]
       else

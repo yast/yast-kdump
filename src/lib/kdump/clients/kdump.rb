@@ -18,6 +18,8 @@
 # find current contact information at www.suse.com.
 # encoding: utf-8
 
+require "set"
+
 Yast.import "UI"
 Yast.import "Progress"
 Yast.import "Report"
@@ -631,7 +633,7 @@ module Yast
       CommandLine.Print(
         Builtins.sformat(
           _("Kdump immediate reboots: %1"),
-          if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes"
+          if Set["yes", "true", "1"] === Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT")
             _("Enabled")
           else
             _("Disabled")
@@ -1093,10 +1095,10 @@ module Yast
     def cmdKdumpImmediateReboot(options)
       options = deep_copy(options)
       if Ops.get(options, "enable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "yes")
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "true")
         return true
       elsif Ops.get(options, "disable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "no")
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "false")
         return true
       else
         # TRANSLATORS: CommandLine error message

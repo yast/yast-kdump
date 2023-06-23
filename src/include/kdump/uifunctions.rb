@@ -19,6 +19,8 @@
 # current contact information at www.novell.com.
 # ------------------------------------------------------------------------------
 
+require "set"
+
 # File:	clients/kdump.ycp
 # Package:	Configuration of kdump
 # Summary:	Main file
@@ -1125,7 +1127,7 @@ module Yast
       UI.ChangeWidget(
         Id("EnableReboot"),
         :Value,
-        Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes" ? true : false
+        Set["yes", "true", "1"] === Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") ? true : false
       )
 
       nil
@@ -1138,7 +1140,7 @@ module Yast
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_IMMEDIATE_REBOOT",
-        Convert.to_boolean(UI.QueryWidget(Id("EnableReboot"), :Value)) ? "yes" : "no"
+        Convert.to_boolean(UI.QueryWidget(Id("EnableReboot"), :Value)) ? "true" : "false"
       )
 
       nil
@@ -1349,7 +1351,7 @@ module Yast
         UI.ChangeWidget(Id(:auto_resize), :Enabled, false)
         auto_resize = false
       else
-        auto_resize = Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+        auto_resize = Set["yes", "true", "1"] === Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"]
       end
       UI.ChangeWidget(Id(:auto_resize), :Value, auto_resize)
       if Kdump.total_memory > 0
@@ -1420,7 +1422,7 @@ module Yast
     # "KdumpMemory"
     def StoreKdumpMemory(_key, _event)
       Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] =
-        UI.QueryWidget(Id(:auto_resize), :Value) ? "yes" : "no"
+        UI.QueryWidget(Id(:auto_resize), :Value) ? "true" : "false"
       Kdump.allocated_memory[:low] = Builtins.tostring(
         UI.QueryWidget(Id("allocated_low_memory"), :Value)
       )
