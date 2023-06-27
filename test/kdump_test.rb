@@ -498,7 +498,7 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested, no value for crashkernel is supplied, and auto-resize is disabled" do
-        let(:profile) { { "add_crash_kernel" => true, "general" => { "KDUMP_AUTO_RESIZE" => "no" } } }
+        let(:profile) { { "add_crash_kernel" => true, "general" => { "KDUMP_AUTO_RESIZE" => "false" } } }
 
         it "writes a proposed crashkernel in the bootloader and enables the service" do
           expect(Yast::Bootloader)
@@ -612,7 +612,7 @@ describe Yast::Kdump do
       end
 
       context "if kdump is requested, no value for crashkernel is supplied, and auto-resize is disabled" do
-        let(:profile) { { "add_crash_kernel" => true, "general" => { "KDUMP_AUTO_RESIZE" => "no" } } }
+        let(:profile) { { "add_crash_kernel" => true, "general" => { "KDUMP_AUTO_RESIZE" => "false" } } }
 
         it "rewrites the bootloader crashkernel settings and enables the service" do
           expect(Yast::Bootloader)
@@ -930,7 +930,7 @@ describe Yast::Kdump do
           "crash_kernel"     => "256M",
           "general"          => {
             "KDUMP_SAVEDIR"     => "file:///var/dummy",
-            "KDUMP_AUTO_RESIZE" => "no"
+            "KDUMP_AUTO_RESIZE" => "false"
           }
         }
       end
