@@ -4,7 +4,8 @@ Fri Jun 23 12:00:54 CEST 2023 - Jiri Bohac <jbohac@suse.cz>
 - adapt for version kdump versions 1.9+ (bsc#1212646)
 - call mkdumprd directly, not through tu-rebuild-kdump-initrd
 - update initrd even in non-fadump case
-- remove KDUMP_COPY_KERNEL and KDUMPTOOL_FLAGS options
+- remove KDUMP_COPY_KERNEL and KDUMPTOOL_FLAGS options from UI
+- deprecate KDUMP_COPY_KERNEL and KDUMPTOOL_FLAGS options in AY
 - update default config values according to kdump defaults
 - unify config boolean variables to "true" or "false"
 - support the snappy, zstd and raw dump formats
