@@ -41,10 +41,12 @@ kdump_general = element general {
     element KDUMP_REQUIRED_PROGRAMS { STRING }? &
     element KDUMP_PRESCRIPT { STRING }? &
     element KDUMP_POSTSCRIPT { STRING }? &
+    # deprecated and ignored option. Will be dropped
     element KDUMPTOOL_FLAGS { STRING }? &
     element KDUMP_NETCONFIG { STRING }? &
-    element KDUMP_NET_TIMEOUT { STRING }? &
+    # deprecated and ignored option. Will be dropped
     element KDUMP_COPY_KERNEL { STRING }? &
+    element KDUMP_NET_TIMEOUT { STRING }? &
     element KEXEC_OPTIONS { STRING }? &
     element KDUMP_RUNLEVEL { STRING }? &
     element KDUMP_IMMEDIATE_REBOOT { STRING }? &

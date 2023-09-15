@@ -80,7 +80,7 @@ module Yast
             "handler" => fun_ref(method(:cmdKdumpDumpFormat), "boolean (map)"),
             # TRANSLATORS: CommandLine help
             "help"    => _(
-              "Dump format for dump image: none/ELF/compressed/lzo"
+              "Dump format for dump image: none/ELF/compressed/lzo/snappy/zstd/raw"
             ),
             "example" => [
               "dumpformat dump_format=none",
@@ -144,14 +144,6 @@ module Yast
               "Immediately reboot after saving the core in the kdump kernel."
             ),
             "example" => ["immediatereboot enable", "immediatereboot disable"]
-          },
-          "copykernel"              => {
-            "handler" => fun_ref(method(:cmdKdumpCopyKernel), "boolean (map)"),
-            # TRANSLATORS: CommandLine help
-            "help"    => _(
-              "Copy kernel into dump directory."
-            ),
-            "example" => ["copykernel enable", "copykernel disable"]
           },
           "keepolddumps"            => {
             "handler" => fun_ref(method(:cmdKdumpKeepOldDumps), "boolean (map)"),
@@ -239,7 +231,7 @@ module Yast
             "type" => "string",
             # TRANSLATORS: CommandLine help
             "help" => _(
-              "Dump format can be none, ELF, compressed or lzo"
+              "Dump format can be none, ELF, compressed, lzo, snappy, zstd, or raw"
             )
           },
           "target"      => {
@@ -639,7 +631,7 @@ module Yast
       CommandLine.Print(
         Builtins.sformat(
           _("Kdump immediate reboots: %1"),
-          if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes"
+          if ["yes", "true", "1"].include?(Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT"))
             _("Enabled")
           else
             _("Disabled")
@@ -794,8 +786,7 @@ module Yast
     def cmdKdumpDumpFormat(options)
       options = deep_copy(options)
       if Ops.get(options, "dump_format")
-        if Ops.get(options, "dump_format") == "ELF" ||
-            Ops.get(options, "dump_format") == "compressed"
+        if ["none", "ELF", "compressed", "lzo", "snappy", "zstd", "raw"].include?(Ops.get(options, "dump_format"))
           Ops.set(
             Kdump.KDUMP_SETTINGS,
             "KDUMP_DUMPFORMAT",
@@ -809,7 +800,7 @@ module Yast
           CommandLine.Error(_("Wrong value of option."))
           # TRANSLATORS: CommandLine printed text help
           CommandLine.Print(
-            _("Option can include only \"none\", \"ELF\", \"compressed\" or \"lzo\" value.")
+            _("Option can include only \"none\", \"ELF\", \"compressed\", \"lzo\", \"snappy\", \"zstd\" or \"raw\" value.")
           )
           return false
         end
@@ -1101,25 +1092,10 @@ module Yast
     def cmdKdumpImmediateReboot(options)
       options = deep_copy(options)
       if Ops.get(options, "enable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "yes")
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "true")
         return true
       elsif Ops.get(options, "disable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "no")
-        return true
-      else
-        # TRANSLATORS: CommandLine error message
-        CommandLine.Error(_("Wrong options were used."))
-        return false
-      end
-    end
-
-    def cmdKdumpCopyKernel(options)
-      options = deep_copy(options)
-      if Ops.get(options, "enable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "yes")
-        return true
-      elsif Ops.get(options, "disable")
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no")
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "false")
         return true
       else
         # TRANSLATORS: CommandLine error message

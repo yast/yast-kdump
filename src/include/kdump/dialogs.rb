@@ -171,7 +171,10 @@ module Yast
             ["none_format", _("&No Dump")],
             ["elf_format", _("&ELF Format")],
             ["compressed_format", _("C&ompressed Format")],
-            ["lzo_format", _("&LZO Compressed Format")]
+            ["lzo_format", _("&LZO Compressed Format")],
+            ["snappy_format", _("&Snappy Compressed Format")],
+            ["zstd_format", _("Zstandard Compressed Format")],
+            ["raw_format", _("Raw copy of /proc/vmcore")]
           ],
           "orientation"       => :horizontal,
           "init"              => fun_ref(
@@ -347,20 +350,6 @@ module Yast
           ),
           "help"   => HelpKdump("EnableReboot")
         },
-        "EnableCopyKernel"       => {
-          # TRANSLATORS: CheckBox Label
-          "label"  => _(
-            "Enable Copy Ke&rnel into the Dump Directory"
-          ),
-          "widget" => :checkbox,
-          "init"   => fun_ref(method(:InitEnableCopyKernel), "void (string)"),
-          # "handle"		:
-          "store"  => fun_ref(
-            method(:StoreEnableCopyKernel),
-            "void (string, map)"
-          ),
-          "help"   => HelpKdump("EnableCopyKernel")
-        },
         "EnableDeleteImages"     => {
           # TRANSLATORS: CheckBox Label
           "label"  => _(
@@ -498,8 +487,7 @@ module Yast
                 VBox(
                   Left("EnableDeleteImages"),
                   Left("NumberDumps"),
-                  Left("EnableReboot"),
-                  Left("EnableCopyKernel")
+                  Left("EnableReboot")
                 )
               )
             ),
@@ -515,8 +503,7 @@ module Yast
             "NumberDumps",
             "InitrdKernel",
             "SelectKernel",
-            "EnableReboot",
-            "EnableCopyKernel"
+            "EnableReboot"
           ]
         }
       }

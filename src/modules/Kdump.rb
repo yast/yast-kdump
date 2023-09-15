@@ -147,25 +147,23 @@ module Yast
 
       @DEFAULT_CONFIG = {
         "KDUMP_KERNELVER"          => "",
-        "KDUMP_CPUS"               => "",
+        "KDUMP_CPUS"               => "1",
         "KDUMP_COMMANDLINE"        => "",
         "KDUMP_COMMANDLINE_APPEND" => "",
-        "KDUMP_AUTO_RESIZE"        => "no",
+        "KDUMP_AUTO_RESIZE"        => "false",
         "KEXEC_OPTIONS"            => "",
-        "KDUMP_IMMEDIATE_REBOOT"   => "yes",
-        "KDUMP_COPY_KERNEL"        => "yes",
+        "KDUMP_IMMEDIATE_REBOOT"   => "true",
         "KDUMP_TRANSFER"           => "",
         "KDUMP_SAVEDIR"            => "file:///var/crash",
-        "KDUMP_KEEP_OLD_DUMPS"     => "5",
+        "KDUMP_KEEP_OLD_DUMPS"     => "0",
         "KDUMP_FREE_DISK_SIZE"     => "64",
-        "KDUMP_VERBOSE"            => "3",
+        "KDUMP_VERBOSE"            => "0",
         "KDUMP_DUMPLEVEL"          => "31",
-        "KDUMP_DUMPFORMAT"         => "lzo",
+        "KDUMP_DUMPFORMAT"         => "compressed",
         "KDUMP_CONTINUE_ON_ERROR"  => "true",
         "KDUMP_REQUIRED_PROGRAMS"  => "",
         "KDUMP_PRESCRIPT"          => "",
         "KDUMP_POSTSCRIPT"         => "",
-        "KDUMPTOOL_FLAGS"          => "",
         "KDUMP_NETCONFIG"          => "auto",
         "KDUMP_NET_TIMEOUT"        => "30",
         "KDUMP_SMTP_SERVER"        => "",
@@ -409,18 +407,9 @@ module Yast
       # around
       if Package.IsTransactionalSystem
         return update_initrd_with("transactional-update --continue kdump")
+      else
+        return update_initrd_with("mkdumprd")
       end
-
-      # For CaaSP we need an explicit initrd rebuild before the
-      # first boot, when the root filesystem becomes read only.
-      rebuild_cmd = "/usr/sbin/tu-rebuild-kdump-initrd"
-      # part of transactional-update.rpm
-      update_initrd_with("if test -x #{rebuild_cmd}; then #{rebuild_cmd}; fi")
-
-      return true unless using_fadump_changed?
-
-      update_command = "/usr/sbin/mkdumprd -f"
-      update_initrd_with(update_command)
     end
 
     # @param update_command [String] a command for .target.bash
@@ -1023,7 +1012,7 @@ module Yast
         return false
       end
 
-      @KDUMP_SETTINGS[FADUMP_KEY] = (new_value ? "yes" : "no")
+      @KDUMP_SETTINGS[FADUMP_KEY] = (new_value ? "true" : "false")
       true
     end
 
@@ -1031,7 +1020,7 @@ module Yast
     #
     # @return [Boolean] currently in use
     def using_fadump?
-      @KDUMP_SETTINGS[FADUMP_KEY] == "yes"
+      ["yes", "true", "1"].include?(@KDUMP_SETTINGS[FADUMP_KEY])
     end
 
     # Has the using_fadump? been changed?
@@ -1155,7 +1144,7 @@ module Yast
       end
 
       result = []
-      if @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      if ["yes", "true", "1"].include?(@KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"])
         maxsize = total_memory / 2
         if high_memory_supported?
           low = memory_limits[:default_low]
@@ -1193,7 +1182,7 @@ module Yast
       end
 
       result = []
-      if @KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+      if ["yes", "true", "1"].include?(@KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"])
         high = memory_limits[:default_high]
         low = memory_limits[:default_low]
       else

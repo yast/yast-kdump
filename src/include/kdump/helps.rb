@@ -74,7 +74,10 @@ module Yast
             "    <i>No Dump</i> - Only save the kernel log.<br>\n" \
             "    <i>ELF Format</i> - Create dump file in ELF format.<br>\n" \
             "    <i>Compressed Format</i> - Compress dump data by each page with gzip.<br>\n" \
-            "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>"
+            "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>" \
+            "    <i>Snappy Compressed Format</i> - Considerably faster, 64-bit optimized.<br>\n</p>" \
+            "    <i>Zstandard Compressed Format</i> - Smaller files, slower.<br>\n</p>" \
+            "    <i>Raw copy of /proc/vmcore</i> - does not use makedumpfile.<br>\n</p>"
         ),
         # Dump Format - RadioButtons  1/7
         "TargetKdump"            => _(
@@ -160,14 +163,6 @@ module Yast
           "<p><b>Enable Delete Old Dump Images</b> - \n" \
             "    Enable Delete Old Dump Images. If the number of dump files in \n" \
             "    <i>Number of Old Dumps</i> exceeds this number, older dumps are removed.<br></p>"
-        ),
-        # Enable Copy Ke&rnel into the Dump Directory - CheckBox 1/1
-        "EnableCopyKernel"       => _(
-          "<p><b>Enable Copy Kernel into the Dump Directory</b> - \n" \
-            "    If this option is selected, the kernel and the\n" \
-            "      debugging information (if installed) are copied into the dump\n" \
-            "      directory. The default is \"off\". It is useful to have\n" \
-            "      everything in place for debugging.<br></p>\n"
         ),
         # SMTP Server
         "SMTPServer"             => _(

@@ -1125,7 +1125,7 @@ module Yast
       UI.ChangeWidget(
         Id("EnableReboot"),
         :Value,
-        Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT") == "yes" ? true : false
+        ["yes", "true", "1"].include?(Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT"))
       )
 
       nil
@@ -1138,7 +1138,7 @@ module Yast
       Ops.set(
         Kdump.KDUMP_SETTINGS,
         "KDUMP_IMMEDIATE_REBOOT",
-        Convert.to_boolean(UI.QueryWidget(Id("EnableReboot"), :Value)) ? "yes" : "no"
+        Convert.to_boolean(UI.QueryWidget(Id("EnableReboot"), :Value)) ? "true" : "false"
       )
 
       nil
@@ -1349,7 +1349,7 @@ module Yast
         UI.ChangeWidget(Id(:auto_resize), :Enabled, false)
         auto_resize = false
       else
-        auto_resize = Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] == "yes"
+        auto_resize = ["yes", "true", "1"].include?(Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"])
       end
       UI.ChangeWidget(Id(:auto_resize), :Value, auto_resize)
       if Kdump.total_memory > 0
@@ -1420,7 +1420,7 @@ module Yast
     # "KdumpMemory"
     def StoreKdumpMemory(_key, _event)
       Kdump.KDUMP_SETTINGS["KDUMP_AUTO_RESIZE"] =
-        UI.QueryWidget(Id(:auto_resize), :Value) ? "yes" : "no"
+        UI.QueryWidget(Id(:auto_resize), :Value) ? "true" : "false"
       Kdump.allocated_memory[:low] = Builtins.tostring(
         UI.QueryWidget(Id("allocated_low_memory"), :Value)
       )
@@ -1509,12 +1509,19 @@ module Yast
     # "Dump Format"
 
     def InitDumpFormat(_key)
-      if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "ELF"
+      case Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT")
+      when "ELF"
         UI.ChangeWidget(Id("DumpFormat"), :Value, "elf_format")
-      elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "compressed"
+      when "compressed"
         UI.ChangeWidget(Id("DumpFormat"), :Value, "compressed_format")
-      elsif Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT") == "lzo"
+      when "lzo"
         UI.ChangeWidget(Id("DumpFormat"), :Value, "lzo_format")
+      when "snappy"
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "snappy_format")
+      when "zstd"
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "zstd_format")
+      when "raw"
+        UI.ChangeWidget(Id("DumpFormat"), :Value, "raw_format")
       else
         UI.ChangeWidget(Id("DumpFormat"), :Value, "none_format")
       end
@@ -1530,7 +1537,7 @@ module Yast
       result = true
       value = Builtins.tostring(UI.QueryWidget(Id("DumpFormat"), :Value))
 
-      if value != "elf_format" || value.nil?
+      if value != "raw_format" || value.nil?
         if Mode.installation || Mode.autoinst
           Kdump.kdump_packages = Builtins.add(
             Kdump.kdump_packages,
@@ -1578,6 +1585,12 @@ module Yast
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "compressed")
       elsif value == "lzo_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "lzo")
+      elsif value == "snappy_format"
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "snappy")
+      elsif value == "zstd_format"
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "zstd")
+      elsif value == "raw_format"
+        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "raw")
       else
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "none")
       end
@@ -1636,33 +1649,6 @@ module Yast
         UI.QueryWidget(Id("EnableDeleteImages"), :Value)
       )
       Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_KEEP_OLD_DUMPS", "0") if !value
-
-      nil
-    end
-
-    # Function initializes option
-    # "Enable Copy Kernel into the Dump Directory"
-
-    def InitEnableCopyKernel(_key)
-      if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no") == "yes"
-        UI.ChangeWidget(Id("EnableCopyKernel"), :Value, true)
-      else
-        UI.ChangeWidget(Id("EnableCopyKernel"), :Value, false)
-      end
-
-      nil
-    end
-
-    # Function stores option
-    # "Enable Copy Kernel into the Dump Directory"
-
-    def StoreEnableCopyKernel(_key, _event)
-      value = Convert.to_boolean(UI.QueryWidget(Id("EnableCopyKernel"), :Value))
-      if !value
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "no")
-      else
-        Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_COPY_KERNEL", "yes")
-      end
 
       nil
     end
