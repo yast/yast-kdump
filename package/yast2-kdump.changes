@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Nov 13 15:35:53 UTC 2023 - Josef Reidinger <jreidinger@suse.com>
+
+- Bump properly version as old 4.6.1 contains removal of keys from
+  AY  that breaks old autoyast profile. So we fix it to just
+  deprecate it, but we need proper new version. (bsc#1217057)
+- 4.6.2
+
+-------------------------------------------------------------------
 Fri Jun 23 12:00:54 CEST 2023 - Jiri Bohac <jbohac@suse.cz>
 
 - adapt for version kdump versions 1.9+ (bsc#1212646)
