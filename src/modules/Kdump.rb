@@ -83,9 +83,6 @@ module Yast
 
       @proposal_valid = false
 
-      # true if propose was called
-      @propose_called = false
-
       # Boolean option indicates that "crashkernel" includes
       # several values for the same kind of memory (low, high)
       # or several ranges in one of the values
@@ -712,14 +709,13 @@ module Yast
 
     def ProposeGlobalVars
       # Settings have not been imported by AutoYaST and have not already
-      # been suggested by proposal. (bnc#930950, bnc#995750, bnc#890719).
-      if !@propose_called && !@import_called
+      # been changed. (bnc#930950, bnc#995750, bnc#890719).
+      if !@modified && !@import_called
         # added default settings
         @KDUMP_SETTINGS = deep_copy(@DEFAULT_CONFIG)
         @add_crashkernel_param = ProposeCrashkernelParam()
         @crashkernel_param = false
       end
-      @propose_called = true
 
       nil
     end
@@ -1053,7 +1049,6 @@ module Yast
     publish :function => :SetModified, :type => "void ()"
     publish :variable => :modified, :type => "boolean"
     publish :variable => :proposal_valid, :type => "boolean"
-    publish :variable => :propose_called, :type => "boolean"
     publish :function => :total_memory, :type => "integer ()"
     publish :variable => :crashkernel_list_ranges, :type => "boolean"
     publish :variable => :kdump_packages, :type => "list <string>"
