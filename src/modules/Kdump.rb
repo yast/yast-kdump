@@ -688,7 +688,7 @@ module Yast
     def ProposeCrashkernelParam
       # proposing disabled kdump because it does not work with systemd-boot together
       if Bootloader.getLoaderType == "systemd-boot"
-        log.info ("kdump disabled because systemd-boot is active."
+        log.info ("kdump disabled because systemd-boot is active.")
         false
       # proposing disabled kdump if product wants it (bsc#1071242)
       elsif !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
