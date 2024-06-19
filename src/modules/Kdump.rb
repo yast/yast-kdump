@@ -915,7 +915,7 @@ module Yast
         if warning_string.length > 0
           warning_string += "<br>"
         end
-        warning_string += _("Kdump will not be installed correctly if systemd-boot is used.")
+        warning_string += _("Kdump will not be installed correctly if Systemd Boot is used.")
       end
 
       if warning_string.length > 0
