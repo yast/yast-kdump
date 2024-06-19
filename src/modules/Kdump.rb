@@ -918,14 +918,14 @@ module Yast
         warning_string += _("Kdump will not be installed correctly if systemd-boot is used.")
       end
 
-      if free_space < requested_space
+      if warning_string.length > 0
         warning = {
           "warning_level" => :warning,
           "warning"       => "<ul><li>" + warning_string + "</li></ul>"
         }
       end
 
-      log.warn warning["warning"] if warning_string.length > 0
+      log.warn warning["warning"] if warning["warning"]
       warning
     end
 
