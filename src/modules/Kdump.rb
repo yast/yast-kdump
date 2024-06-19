@@ -897,23 +897,35 @@ module Yast
       return {} if free_space.nil? || requested_space.nil?
 
       warning = {}
+      warning_string = ""
+
+      if free_space < requested_space
+        # TRANSLATORS: warning message in installation proposal. Do not translate %{requested} and
+        # %{available} - they are replaced with actual sizes later.
+        warning_string = _(
+          "Warning! There might not be enough free space to have kdump enabled. " \
+          "%{required} required for saving a kernel dump, but only %{available} are available."
+        ) % {
+          required:  String.FormatSizeWithPrecision(requested_space, 2, true),
+          available: String.FormatSizeWithPrecision(free_space, 2, true)
+        }
+      end
+
+      if Bootloader.getLoaderType == "systemd-boot" && @add_crashkernel_param
+        if warning_string.length > 0
+          warning_string += "<br>"
+        end
+        warning_string += _("Kdump will not be installed correctly if systemd-boot is used.")
+      end
 
       if free_space < requested_space
         warning = {
           "warning_level" => :warning,
-          # TRANSLATORS: warning message in installation proposal. Do not translate %{requested} and
-          # %{available} - they are replaced with actual sizes later.
-          "warning"       => "<ul><li>" + _(
-            "Warning! There might not be enough free space to have kdump enabled. " \
-            "%{required} required for saving a kernel dump, but only %{available} are available."
-          ) % {
-            required:  String.FormatSizeWithPrecision(requested_space, 2, true),
-            available: String.FormatSizeWithPrecision(free_space, 2, true)
-          } + "</li></ul>"
+          "warning"       => "<ul><li>" + warning_string + "</li></ul>"
         }
       end
 
-      log.warn warning["warning"] if warning["warning"]
+      log.warn warning["warning"] if warning_string.length > 0
       warning
     end
 
