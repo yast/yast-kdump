@@ -16,7 +16,7 @@
 #
 # To contact SUSE LLC about this file by physical or electronic mail, you may
 # find current contact information at www.suse.com.
-# encoding: utf-8
+# frozen_string_literal: true
 
 Yast.import "UI"
 Yast.import "Progress"
@@ -40,6 +40,7 @@ module Yast
 
       Yast.include self, "kdump/wizards.rb"
       Yast.include self, "kdump/uifunctions.rb"
+      super
     end
 
     def main
@@ -363,11 +364,9 @@ module Yast
       # is this proposal or not?
       @propose = false
       @args = WFM.Args
-      if Ops.greater_than(Builtins.size(@args), 0)
-        if Ops.is_path?(WFM.Args(0)) && WFM.Args(0) == path(".propose")
-          Builtins.y2milestone("Using PROPOSE mode")
-          @propose = true
-        end
+      if Ops.greater_than(Builtins.size(@args), 0) && (Ops.is_path?(WFM.Args(0)) && WFM.Args(0) == path(".propose"))
+        Builtins.y2milestone("Using PROPOSE mode")
+        @propose = true
       end
 
       # main ui function
@@ -591,7 +590,7 @@ module Yast
       else
         # TRANSLATORS: CommandLine printed text
         CommandLine.Print(_("EMPTY"))
-      end # end of if (SetUpKDUMP_SAVE_TARGET(Kdump::KDUMP_SETTINGS["KDUMP_SAVEDIR"]:nil))
+      end
 
       if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_KERNELVER") != ""
         CommandLine.Print("")
@@ -719,7 +718,7 @@ module Yast
     end
 
     # Only numbers are allowed as allow_mem_high and allow_mem_low values
-    ALLOC_MEM_REGEXP = /\A\d+\z/
+    ALLOC_MEM_REGEXP = /\A\d+\z/.freeze
 
     def cmdKdumpStartup(options)
       options = deep_copy(options)
@@ -745,16 +744,16 @@ module Yast
           Kdump.crashkernel_list_ranges = false
         end
         CommandLine.Print(_("To apply changes a reboot is necessary."))
-        return true
+        true
       elsif Ops.get(options, "disable")
         Kdump.add_crashkernel_param = false
         # TRANSLATORS: CommandLine printed text
         CommandLine.Print(_("To apply changes a reboot is necessary."))
-        return true
+        true
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -770,16 +769,16 @@ module Yast
           )
           # TRANSLATORS: CommandLine printed text
           CommandLine.Print(_("Dump level was set."))
-          return true
+          true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value of option."))
-          return false
+          false
         end
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -794,7 +793,7 @@ module Yast
           )
           # TRANSLATORS: CommandLine printed text
           CommandLine.Print(_("Dump format was set."))
-          return true
+          true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value of option."))
@@ -802,12 +801,12 @@ module Yast
           CommandLine.Print(
             _("Option can include only \"none\", \"ELF\", \"compressed\", \"lzo\", \"snappy\", \"zstd\" or \"raw\" value.")
           )
-          return false
+          false
         end
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -892,6 +891,7 @@ module Yast
               Builtins.tostring(Ops.get(options, "pass"))
             )
             return false if password.nil? || password == ""
+
             Ops.set(@KDUMP_SAVE_TARGET, "password", password)
           end
         when "ssh", "sftp"
@@ -1021,6 +1021,7 @@ module Yast
               Builtins.tostring(Ops.get(options, "pass"))
             )
             return false if password.nil? || password == ""
+
             Ops.set(@KDUMP_SAVE_TARGET, "password", password)
           end
         else
@@ -1033,11 +1034,11 @@ module Yast
           "KDUMP_SAVEDIR",
           tostringKDUMP_SAVE_TARGET
         )
-        return true
+        true
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1049,11 +1050,11 @@ module Yast
           "KDUMP_KERNELVER",
           Builtins.tostring(Ops.get(options, "kernel"))
         )
-        return true
+        true
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1065,11 +1066,11 @@ module Yast
           "KDUMP_COMMANDLINE",
           Builtins.tostring(Ops.get(options, "command"))
         )
-        return true
+        true
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1081,11 +1082,11 @@ module Yast
           "KDUMP_COMMANDLINE_APPEND",
           Builtins.tostring(Ops.get(options, "command"))
         )
-        return true
+        true
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1093,14 +1094,14 @@ module Yast
       options = deep_copy(options)
       if Ops.get(options, "enable")
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "true")
-        return true
+        true
       elsif Ops.get(options, "disable")
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_IMMEDIATE_REBOOT", "false")
-        return true
+        true
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1113,16 +1114,16 @@ module Yast
             "KDUMP_KEEP_OLD_DUMPS",
             Builtins.tostring(Ops.get(options, "no"))
           )
-          return true
+          true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value of options \"no\"."))
-          return false
+          false
         end
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1133,16 +1134,16 @@ module Yast
 
         if server != "" && !server.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_SERVER", server)
-          return true
+          true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value for option \"server\"."))
-          return false
+          false
         end
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1153,16 +1154,16 @@ module Yast
 
         if user != "" && !user.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_USER", user)
-          return true
+          true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value for option \"user\"."))
-          return false
+          false
         end
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1171,6 +1172,7 @@ module Yast
       if Ops.get(options, "pass")
         password = cmdParsePassPath(Builtins.tostring(Ops.get(options, "pass")))
         return false if password.to_s.empty?
+
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_SMTP_PASSWORD", password)
       else
         # TRANSLATORS: CommandLine error message
@@ -1188,16 +1190,16 @@ module Yast
 
         if email != "" && !email.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_NOTIFICATION_TO", email)
-          return true
+          true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value for option \"email\"."))
-          return false
+          false
         end
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
@@ -1208,29 +1210,29 @@ module Yast
 
         if email != "" && !email.nil?
           Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_NOTIFICATION_CC", email)
-          return true
+          true
         else
           # TRANSLATORS: CommandLine error message
           CommandLine.Error(_("Wrong value for option \"email\"."))
-          return false
+          false
         end
       else
         # TRANSLATORS: CommandLine error message
         CommandLine.Error(_("Wrong options were used."))
-        return false
+        false
       end
     end
 
     def show_fadump_status
       CommandLine.Print(
-        _("Firmware-assisted dump: %{status}") %
-          { status: Kdump.using_fadump? ? _("Enabled") : _("Disabled") }
+        format(_("Firmware-assisted dump: %{status}"), status: Kdump.using_fadump? ? _("Enabled") : _("Disabled"))
       )
     end
 
     def cmd_handle_fadump(options)
       return Kdump.use_fadump(true) if options["enable"]
       return Kdump.use_fadump(false) if options["disable"]
+
       if options["status"]
         show_fadump_status
         return true

@@ -1,4 +1,4 @@
-# encoding: utf-8
+# frozen_string_literal: true
 
 # ------------------------------------------------------------------------------
 # Copyright (c) 2006 Novell, Inc. All Rights Reserved.
@@ -83,9 +83,8 @@ module Yast
       Wizard.RestoreHelp(Ops.get_string(@HELPS, "read", ""))
       # Kdump::AbortFunction = PollAbort;
       return :abort if !Confirm.MustBeRoot
-      if !Kdump.system.supports_kdump? && !unsupported_kdump_confirmation
-        return :abort
-      end
+      return :abort if !Kdump.system.supports_kdump? && !unsupported_kdump_confirmation
+
       InstallPackages() or return :abort
 
       ret = Kdump.Read

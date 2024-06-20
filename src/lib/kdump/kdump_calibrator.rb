@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "yast"
 require "kdump/kdump_system"
 
@@ -11,8 +13,8 @@ module Yast
   class KdumpCalibrator
     include Yast::Logger
 
-    KDUMPTOOL_CMD = "/usr/sbin/kdumptool %s calibrate".freeze
-    KDUMPTOOL_ARG = "--configfile '%s'".freeze
+    KDUMPTOOL_CMD = "/usr/sbin/kdumptool %s calibrate"
+    KDUMPTOOL_ARG = "--configfile '%s'"
     KEYS_MAP = {
       "Low"       => :default_low,
       "MinLow"    => :min_low,

@@ -1,4 +1,4 @@
-# encoding: utf-8
+# frozen_string_literal: true
 
 # ------------------------------------------------------------------------------
 # Copyright (c) 2008 Novell, Inc. All Rights Reserved.
@@ -39,7 +39,8 @@ module Yast
       @param = Convert.to_map(WFM.Args(1))
       @ret = {}
 
-      if @func == "MakeProposal"
+      case @func
+      when "MakeProposal"
         Kdump.Propose
 
         @ret = {
@@ -57,7 +58,7 @@ module Yast
         }
 
         @ret.merge!(Kdump.proposal_warning)
-      elsif @func == "AskUser"
+      when "AskUser"
         @has_next = Ops.get_boolean(@param, "has_next", false)
         @settings = Kdump.Export
         Kdump.modified = false
@@ -77,7 +78,7 @@ module Yast
         # Kdump::CheckPackages();
         # Fill return map
         @ret = { "workflow_sequence" => @result }
-      elsif @func == "Description"
+      when "Description"
         @ret = {
           # proposal part - kdump label
           "rich_text_title" => _("Kdump"),
@@ -85,7 +86,7 @@ module Yast
           "menu_title"      => _("&Kdump"),
           "id"              => "kdump_stuff"
         }
-      elsif @func == "Write"
+      when "Write"
         # Write is called in finish script (kdump_finish.ycp)
         # it is necessary do it after bootloader write his settings
         # boolean succ = Kdump::Write ();

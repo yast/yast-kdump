@@ -1,4 +1,5 @@
 #!/usr/bin/env rspec
+# frozen_string_literal: true
 
 require_relative "../test_helper"
 
@@ -13,6 +14,7 @@ describe "Yast::KdumpUifunctionsInclude" do
 
       def initialize
         main
+        super
       end
 
       # Convenience method to expose @KDUMP_SAVE_TARGET
@@ -69,8 +71,8 @@ describe "Yast::KdumpUifunctionsInclude" do
       it "sets KDUMP_SAVE_TARGET as 'ftp' with server, user_name, password and dir" do
         expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
-                                      "target" => "ftp", "user_name" => "user", "password" => "pass",
-                                      "server" => "ftp.suse.com", "dir" => "/pub"
+          "target" => "ftp", "user_name" => "user", "password" => "pass",
+          "server" => "ftp.suse.com", "dir" => "/pub"
         ))
       end
     end
@@ -81,7 +83,7 @@ describe "Yast::KdumpUifunctionsInclude" do
       it "sets KDUMP_SAVE_TARGET as 'nfs' with server and dir" do
         expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
-                                      "target" => "nfs", "server" => "nfs.suse.cz", "dir" => "/exports"
+          "target" => "nfs", "server" => "nfs.suse.cz", "dir" => "/exports"
         ))
       end
     end
@@ -92,8 +94,8 @@ describe "Yast::KdumpUifunctionsInclude" do
       it "sets KDUMP_SAVE_TARGET as 'ssh' with server, port, user_name, password and dir" do
         expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
-                                      "target" => "ssh", "user_name" => "user", "password" => "pass",
-                                      "server" => "people.suse.cz", "dir" => "/home/user/kdump", "port" => "9000"
+          "target" => "ssh", "user_name" => "user", "password" => "pass",
+          "server" => "people.suse.cz", "dir" => "/home/user/kdump", "port" => "9000"
         ))
       end
     end
@@ -104,8 +106,8 @@ describe "Yast::KdumpUifunctionsInclude" do
       it "sets KDUMP_SAVE_TARGET 'sftp' with server, port, user_name, password and dir" do
         expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
-                                      "target" => "sftp", "user_name" => "user", "password" => "pass",
-                                      "server" => "people.suse.cz", "dir" => "/home/user/kdump", "port" => "9000"
+          "target" => "sftp", "user_name" => "user", "password" => "pass",
+          "server" => "people.suse.cz", "dir" => "/home/user/kdump", "port" => "9000"
         ))
       end
     end
@@ -116,8 +118,8 @@ describe "Yast::KdumpUifunctionsInclude" do
       it "sets KDUMP_SAVE_TARGET 'cifs' with server, user_name, password, share and dir" do
         expect(client.SetUpKDUMP_SAVE_TARGET(target)).to eq(true)
         expect(client.target).to eq(build_target(
-                                      "target" => "cifs", "user_name" => "user", "password" => "pass",
-                                      "server" => "people.suse.cz", "dir" => "/user/kdump", "share" => "homes"
+          "target" => "cifs", "user_name" => "user", "password" => "pass",
+          "server" => "people.suse.cz", "dir" => "/user/kdump", "share" => "homes"
         ))
       end
     end

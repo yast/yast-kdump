@@ -1,4 +1,6 @@
-srcdir = File.expand_path("../../src", __FILE__)
+# frozen_string_literal: true
+
+srcdir = File.expand_path("../src", __dir__)
 y2dirs = ENV.fetch("Y2DIR", "").split(":")
 ENV["Y2DIR"] = y2dirs.unshift(srcdir).join(":")
 ENV["LC_ALL"] = "en_US.utf-8"
@@ -23,7 +25,7 @@ if ENV["COVERAGE"]
   SimpleCov.track_files("#{srcdir}/**/*.rb")
 
   # additionally use the LCOV format for on-line code coverage reporting at CI
-  if ENV["CI"] || ENV["COVERAGE_LCOV"]
+  if ENV.fetch("CI", nil) || ENV.fetch("COVERAGE_LCOV", nil)
     require "simplecov-lcov"
 
     SimpleCov::Formatter::LcovFormatter.config do |c|
