@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2006 Novell, Inc. All Rights Reserved.
 #
@@ -46,7 +44,7 @@ module Yast
 
     # Space on disk reserved for dump additionally to memory size in bytes
     # @see FATE #317488
-    RESERVED_DISK_SPACE_BUFFER_B = 4 * 1024**3
+    RESERVED_DISK_SPACE_BUFFER_B = 4 * (1024**3)
 
     def main
       textdomain "kdump"
@@ -183,6 +181,7 @@ module Yast
     # @return [Boolean] return true if abort
     def Abort
       return @AbortFunction.call == true if !@AbortFunction.nil?
+
       false
     end
 
@@ -246,9 +245,7 @@ module Yast
         return false
       end
 
-      if !Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "").include?("@")
-        return false
-      end
+      return false if !Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "").include?("@")
 
       temp = Builtins.splitstring(
         Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", ""),
@@ -284,7 +281,7 @@ module Yast
         @add_crashkernel_param = true
       end
 
-      if result == :missing || result == :present
+      if [:missing, :present].include?(result)
         @crashkernel_param_values = result
       else
         # Let's make sure it's an array
@@ -295,12 +292,12 @@ module Yast
         @allocated_memory = get_allocated_memory(@crashkernel_param_values)
       end
 
-      if xen_result == :missing || xen_result == :present
-        @crashkernel_xen_param_values = xen_result
+      @crashkernel_xen_param_values = if [:missing, :present].include?(xen_result)
+        xen_result
       else
         # Let's make sure it's an array
         # filtering nils and empty entries bnc#991140
-        @crashkernel_xen_param_values = Array(xen_result).compact.reject(&:empty?)
+        Array(xen_result).compact.reject(&:empty?)
       end
 
       true
@@ -324,6 +321,7 @@ module Yast
     # @return [Yast::KdumpCalibrator] Calibrator instance
     def calibrator
       return @calibrator unless @calibrator.nil?
+
       if Mode.normal
         @calibrator = Yast::KdumpCalibrator.new
       else
@@ -403,9 +401,9 @@ module Yast
       # rebuild initrd. In the end tu script below is used, but needs sauce
       # around
       if Package.IsTransactionalSystem
-        return update_initrd_with("transactional-update --continue kdump")
+        update_initrd_with("transactional-update --continue kdump")
       else
-        return update_initrd_with("mkdumprd")
+        update_initrd_with("mkdumprd")
       end
     end
 
@@ -420,10 +418,10 @@ module Yast
 
       if ret != 0
         y2error("Error updating initrd, see #{update_logfile} or call #{update_command} manually")
-        Report.Error(_(
+        Report.Error(format(_(
           "Error updating initrd while calling '%{cmd}'.\n" \
           "See %{log} for details."
-        ) % { :cmd => update_command, :log => update_logfile })
+        ), :cmd => update_command, :log => update_logfile))
         return false
       end
 
@@ -567,32 +565,33 @@ module Yast
 
       # read database
       return false if Abort()
+
       Progress.NextStage
       # Error message
-      if !ReadKdumpSettings()
-        Report.Error(_("Cannot read config file /etc/sysconfig/kdump"))
-      end
+      Report.Error(_("Cannot read config file /etc/sysconfig/kdump")) if !ReadKdumpSettings()
 
       # read another database
       return false if Abort()
+
       Progress.NextStep
       # Error message
-      if !ReadKdumpKernelParam()
-        Report.Error(_("Cannot read kernel boot options."))
-      end
+      Report.Error(_("Cannot read kernel boot options.")) if !ReadKdumpKernelParam()
 
       # read another database
       return false if Abort()
+
       Progress.NextStep
       ProposeAllocatedMemory()
       # Error message
       Report.Error(_("Cannot read available memory.")) if total_memory.zero?
 
       return false if Abort()
+
       # Progress finished
       Progress.NextStage
 
       return false if Abort()
+
       @modified = false
       true
     end
@@ -646,6 +645,7 @@ module Yast
 
       # write settings
       return false if Abort()
+
       Progress.NextStage
       # Error message
       if !WriteKdumpSettings()
@@ -655,6 +655,7 @@ module Yast
 
       # write/delete bootloader options for kernel - "crashkernel" and "fadump"
       return false if Abort()
+
       Progress.NextStage
       # Error message
       if !WriteKdumpBootParameter()
@@ -662,10 +663,12 @@ module Yast
       end
 
       return false if Abort()
+
       # Progress finished
       Progress.NextStage
 
       return false if Abort()
+
       true
     end
 
@@ -685,7 +688,7 @@ module Yast
     def ProposeCrashkernelParam
       # proposing disabled kdump because it does not work with systemd-boot together
       if Bootloader.getLoaderType == "systemd-boot"
-        log.info ("kdump disabled because systemd-boot is active.")
+        log.info("kdump disabled because systemd-boot is active.")
         false
       # proposing disabled kdump if product wants it (bsc#1071242)
       elsif !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
@@ -726,21 +729,7 @@ module Yast
     def CheckPackages
       # remove duplicates
       @kdump_packages.uniq!
-      if !@add_crashkernel_param
-        Builtins.y2milestone(
-          "deselect packages for installation: %1",
-          @kdump_packages
-        )
-        @kdump_packages.each do |p|
-          PackagesProposal.RemoveResolvables("yast2-kdump", :package, [p])
-        end
-        if !@kdump_packages.empty?
-          Builtins.y2milestone(
-            "Deselected kdump packages for installation: %1",
-            @kdump_packages
-          )
-        end
-      else
+      if @add_crashkernel_param
         Builtins.y2milestone(
           "select packages for installation: %1",
           @kdump_packages
@@ -751,6 +740,20 @@ module Yast
         if !@kdump_packages.empty?
           Builtins.y2milestone(
             "Selected kdump packages for installation: %1",
+            @kdump_packages
+          )
+        end
+      else
+        Builtins.y2milestone(
+          "deselect packages for installation: %1",
+          @kdump_packages
+        )
+        @kdump_packages.each do |p|
+          PackagesProposal.RemoveResolvables("yast2-kdump", :package, [p])
+        end
+        if !@kdump_packages.empty?
+          Builtins.y2milestone(
+            "Deselected kdump packages for installation: %1",
             @kdump_packages
           )
         end
@@ -880,7 +883,7 @@ module Yast
     # @return [Integer] bytes
     def space_requested_for_dump_b
       # Total memory is in MB, converting to bytes
-      total_memory * 1024**2 + RESERVED_DISK_SPACE_BUFFER_B
+      (total_memory * (1024**2)) + RESERVED_DISK_SPACE_BUFFER_B
     end
 
     # Returns installation proposal warning as part of the MakeProposal map result
@@ -902,19 +905,14 @@ module Yast
       if free_space < requested_space
         # TRANSLATORS: warning message in installation proposal. Do not translate %{requested} and
         # %{available} - they are replaced with actual sizes later.
-        warning_string = _(
+        warning_string = format(_(
           "Warning! There might not be enough free space to have kdump enabled. " \
           "%{required} required for saving a kernel dump, but only %{available} are available."
-        ) % {
-          required:  String.FormatSizeWithPrecision(requested_space, 2, true),
-          available: String.FormatSizeWithPrecision(free_space, 2, true)
-        }
+        ), required: String.FormatSizeWithPrecision(requested_space, 2, true), available: String.FormatSizeWithPrecision(free_space, 2, true))
       end
 
       if Bootloader.getLoaderType == "systemd-boot" && @add_crashkernel_param
-        if warning_string.length > 0
-          warning_string += "<br>"
-        end
+        warning_string += "<br>" if warning_string.length > 0
         warning_string += _("Kdump will not be installed correctly if Systemd Boot is used.")
       end
 
@@ -991,11 +989,11 @@ module Yast
         @crashkernel_param_values = Array(crash_kernel_values)
       end
 
-      if settings.key?("crash_xen_kernel")
+      @crashkernel_xen_param_values = if settings.key?("crash_xen_kernel")
         # Make sure it's an array
-        @crashkernel_xen_param_values = Array(settings.fetch("crash_xen_kernel", ""))
+        Array(settings.fetch("crash_xen_kernel", ""))
       else
-        @crashkernel_xen_param_values = Array(crash_xen_kernel_values)
+        Array(crash_xen_kernel_values)
       end
 
       @add_crashkernel_param = if settings.key?("add_crash_kernel")
@@ -1222,9 +1220,7 @@ module Yast
       if values.is_a?(Array)
         values.map! do |value|
           pieces = value.split("@")
-          if pieces.size > 1
-            Builtins.y2milestone("Delete offset crashkernel value: %1", value)
-          end
+          Builtins.y2milestone("Delete offset crashkernel value: %1", value) if pieces.size > 1
           pieces.first
         end
       end

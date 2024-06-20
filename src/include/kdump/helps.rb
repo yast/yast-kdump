@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2006 Novell, Inc. All Rights Reserved.
 #
@@ -35,8 +33,8 @@ module Yast
         # Enable/Disable Kdump - RadioButtons 1/1
         "StartRadioBut"          => _(
           "<p><b>Enable/Disable Kdump</b><br>\n" \
-            "    Enable or disable kdump. The \"crashkernel\" boot parameter is added/removed. \n" \
-            "    To apply changes, a reboot is necessary.<br></p>\n"
+          "    Enable or disable kdump. The \"crashkernel\" boot parameter is added/removed. \n" \
+          "    To apply changes, a reboot is necessary.<br></p>\n"
         ),
         # Kdump Memor&y [MB] - IntField 1/1
         "KdumpMemory"            => _(
@@ -55,29 +53,29 @@ module Yast
           # T: help text for a combo box
           # description taken from http://lparbox.com/how-to/aix/19
           "<p><b>Firmware-Assisted Dump</b><br>\n" \
-            "    Dumps are not generated before the partition is reinitialized but take place " \
-            "    when the partition is restarting. When performing a firmware-assisted dump, " \
-            "    system memory is frozen and the partition rebooted, which allows a new instance " \
-            "    of the operating system to dump data from the previous kernel crash." \
-            "    This feature is suitable only when the system has more than 1.5 GB of memory.</p>"
+          "    Dumps are not generated before the partition is reinitialized but take place " \
+          "    when the partition is restarting. When performing a firmware-assisted dump, " \
+          "    system memory is frozen and the partition rebooted, which allows a new instance " \
+          "    of the operating system to dump data from the previous kernel crash." \
+          "    This feature is suitable only when the system has more than 1.5 GB of memory.</p>"
         ),
         # Kdump Memor&y [MB] - IntField 1/1
         "DumpLevel"              => _(
           "<p><b>Dump Level</b><br>\n" \
-            "    Specify the type of necessary page for analysis.\n" \
-            "    Pages of the specified type are copied to the dumpfile. \n" \
-            "    The page type marked in the following table is included. <br></p>"
+          "    Specify the type of necessary page for analysis.\n" \
+          "    Pages of the specified type are copied to the dumpfile. \n" \
+          "    The page type marked in the following table is included. <br></p>"
         ),
         # Dump Format - RadioButtons  1/1
         "DumpFormat"             => _(
           "<p><b>Dump Format</b><br>\n" \
-            "    <i>No Dump</i> - Only save the kernel log.<br>\n" \
-            "    <i>ELF Format</i> - Create dump file in ELF format.<br>\n" \
-            "    <i>Compressed Format</i> - Compress dump data by each page with gzip.<br>\n" \
-            "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>" \
-            "    <i>Snappy Compressed Format</i> - Considerably faster, 64-bit optimized.<br>\n</p>" \
-            "    <i>Zstandard Compressed Format</i> - Smaller files, slower.<br>\n</p>" \
-            "    <i>Raw copy of /proc/vmcore</i> - does not use makedumpfile.<br>\n</p>"
+          "    <i>No Dump</i> - Only save the kernel log.<br>\n" \
+          "    <i>ELF Format</i> - Create dump file in ELF format.<br>\n" \
+          "    <i>Compressed Format</i> - Compress dump data by each page with gzip.<br>\n" \
+          "    <i>LZO Compressed Format</i> - Slightly bigger files but much faster.<br>\n</p>" \
+          "    <i>Snappy Compressed Format</i> - Considerably faster, 64-bit optimized.<br>\n</p>" \
+          "    <i>Zstandard Compressed Format</i> - Smaller files, slower.<br>\n</p>" \
+          "    <i>Raw copy of /proc/vmcore</i> - does not use makedumpfile.<br>\n</p>"
         ),
         # Dump Format - RadioButtons  1/7
         "TargetKdump"            => _(
@@ -86,36 +84,36 @@ module Yast
           # Dump Format - RadioButtons  2/7
           _(
             "<p><b>Local Filesystem</b> - Save the kdump image in the local filesystem.\n" \
-              "    <i>Directory for Saving Dumps</i> - The path for saving kdump images.\n" \
-              "    Selecting directory for saving kdump images via dialog by pressing <i>Browse</i>\n" \
-              "    <br></p>"
+            "    <i>Directory for Saving Dumps</i> - The path for saving kdump images.\n" \
+            "    Selecting directory for saving kdump images via dialog by pressing <i>Browse</i>\n" \
+            "    <br></p>"
           ) +
           # Dump Format - RadioButtons  3/7
           _(
             "<p><b>FTP</b> - Save kdump image via FTP.\n" \
-              "    <i>Server Name</i> - The name of the ftp server.\n" \
-              "    <i>Port</i> - The port number for the connection.\n" \
-              "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
-              "    <i>Enable Anonymous FTP</i> enables anonymous connection to the server.\n" \
-              "    <i>User Name</i> for ftp connection. <i>Password</i> for ftp connection.<br></p>"
+            "    <i>Server Name</i> - The name of the ftp server.\n" \
+            "    <i>Port</i> - The port number for the connection.\n" \
+            "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
+            "    <i>Enable Anonymous FTP</i> enables anonymous connection to the server.\n" \
+            "    <i>User Name</i> for ftp connection. <i>Password</i> for ftp connection.<br></p>"
           ) +
           # Dump Format - RadioButtons  4/7
           _(
             "<p><b>SSH</b> - Save kdump image via SSH and 'dd' on target machine.\n" \
-              "    <i>Server Name</i> - The name of the server.\n" \
-              "    <i>Port</i> - The port number for the connection.\n" \
-              "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
-              "    <i>User Name</i> for SSH connection.  \n" \
-              "    <i>Password</i> for SSH connection.<br></p>\n"
+            "    <i>Server Name</i> - The name of the server.\n" \
+            "    <i>Port</i> - The port number for the connection.\n" \
+            "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
+            "    <i>User Name</i> for SSH connection.  \n" \
+            "    <i>Password</i> for SSH connection.<br></p>\n"
           ) +
           # Dump Format - RadioButtons  5/7
           _(
             "<p><b>SFTP</b> - Save kdump image via SFTP.\n" \
-              "    <i>Server Name</i> - The name of the server.\n" \
-              "    <i>Port</i> - The port number for the connection.\n" \
-              "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
-              "    <i>User Name</i> for SSH connection.  \n" \
-              "    <i>Password</i> for SSH connection.<br></p>\n"
+            "    <i>Server Name</i> - The name of the server.\n" \
+            "    <i>Port</i> - The port number for the connection.\n" \
+            "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
+            "    <i>User Name</i> for SSH connection.  \n" \
+            "    <i>Password</i> for SSH connection.<br></p>\n"
           ) +
           _(
             "<p>The choice between SSH and SFTP depends\n" \
@@ -125,23 +123,23 @@ module Yast
           # Dump Format - RadioButtons  6/7
           _(
             "<p><b>NFS</b> - Save kdump image on NFS.\n" \
-              "    <i>Server Name</i> - The name of the nfs server.\n" \
-              "    <i>Directory on Server</i> - The path for saving kdump images.<br></p>"
+            "    <i>Server Name</i> - The name of the nfs server.\n" \
+            "    <i>Directory on Server</i> - The path for saving kdump images.<br></p>"
           ) +
           # Dump Format - RadioButtons  7/7
           _(
             "<p><b>CIFS</b> - Save kdump image via CIFS.\n" \
-              "    <i>Server Name</i> - The name of the server.\n" \
-              "    <i>Exported Share</i> - The windows share name.\n" \
-              "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
-              "    <i>Use Authentication</i> enables authenticated connection to the server.\n" \
-              "    <i>User Name</i> for the connection. <i>Password</i> for the connection.<br></p>"
+            "    <i>Server Name</i> - The name of the server.\n" \
+            "    <i>Exported Share</i> - The windows share name.\n" \
+            "    <i>Directory on Server</i> - The path for saving kdump images.\n" \
+            "    <i>Use Authentication</i> enables authenticated connection to the server.\n" \
+            "    <i>User Name</i> for the connection. <i>Password</i> for the connection.<br></p>"
           ),
         # Custom Kdump Kernel - TextEntry 1/1
         "InitrdKernel"           => _(
           "<p><b>Custom Kdump Kernel</b> The user can enter the custom kernel.\n" \
-            "    The naming scheme is:<i>/boot/vmlinu[zx]-<kernel_string>[.gz]</i>\n" \
-            "    Please enter only <i>kernel_string</i>.<br></p>"
+          "    The naming scheme is:<i>/boot/vmlinu[zx]-<kernel_string>[.gz]</i>\n" \
+          "    Please enter only <i>kernel_string</i>.<br></p>"
         ),
         # Kdump Command Line - TextEntry 1/1
         "KdumpCommandLine"       => _(
@@ -150,9 +148,9 @@ module Yast
         # Kdump Command Line Append - TextEntry 1/1
         "KdumpCommandLineAppend" => _(
           "<p><b>Kdump Command Line Append</b>\n" \
-            "    Set this option to _append_ values to the default command line string. \n" \
-            "    The string will be appended if the <i>Kdump Command Line</i>\n" \
-            "    is set. <br></p>\n"
+          "    Set this option to _append_ values to the default command line string. \n" \
+          "    The string will be appended if the <i>Kdump Command Line</i>\n" \
+          "    is set. <br></p>\n"
         ),
         # Enable Immediate Reboot After Saving the Core - CheckBox 1/1
         "EnableReboot"           => _(
@@ -161,8 +159,8 @@ module Yast
         # Enable Delete Old Dump Images - CheckBox 1/1
         "EnableDeleteImages"     => _(
           "<p><b>Enable Delete Old Dump Images</b> - \n" \
-            "    Enable Delete Old Dump Images. If the number of dump files in \n" \
-            "    <i>Number of Old Dumps</i> exceeds this number, older dumps are removed.<br></p>"
+          "    Enable Delete Old Dump Images. If the number of dump files in \n" \
+          "    <i>Number of Old Dumps</i> exceeds this number, older dumps are removed.<br></p>"
         ),
         # SMTP Server
         "SMTPServer"             => _(
@@ -203,9 +201,9 @@ module Yast
           # Write dialog help 2/2
           _(
             "<p><b><big>Aborting Saving:</big></b><br>\n" \
-              "Abort the save procedure by pressing <b>Abort</b>.\n" \
-              "An additional dialog informs whether it is safe to do so.\n" \
-              "</p>\n"
+            "Abort the save procedure by pressing <b>Abort</b>.\n" \
+            "An additional dialog informs whether it is safe to do so.\n" \
+            "</p>\n"
           ),
         # Summary dialog help 1/3
         "summary"                => _(
@@ -214,21 +212,21 @@ module Yast
           # Summary dialog help 2/3
           _(
             "<p><b><big>Adding a Kdump:</big></b><br>\n" \
-              "Choose an kdump from the list of detected kdumps.\n" \
-              "If your kdump was not detected, select <b>Other (not detected)</b>.\n" \
-              "Then press <b>Configure</b>.</p>\n"
+            "Choose an kdump from the list of detected kdumps.\n" \
+            "If your kdump was not detected, select <b>Other (not detected)</b>.\n" \
+            "Then press <b>Configure</b>.</p>\n"
           ) +
           # Summary dialog help 3/3
           _(
             "<p><b><big>Editing or Deleting:</big></b><br>\n" \
-              "If you press <b>Edit</b>, an additional dialog in which to change\n" \
-              "the configuration opens.</p>\n"
+            "If you press <b>Edit</b>, an additional dialog in which to change\n" \
+            "the configuration opens.</p>\n"
           ),
         # Ovreview dialog help 1/3
         "overview"               => _(
           "<p><b><big>Kdump Configuration Overview</big></b><br>\n" \
-            "Obtain an overview of installed kdumps. Additionally\n" \
-            "edit their configurations.<br></p>\n"
+          "Obtain an overview of installed kdumps. Additionally\n" \
+          "edit their configurations.<br></p>\n"
         ) +
           # Ovreview dialog help 2/3
           _(
@@ -237,8 +235,8 @@ module Yast
           # Ovreview dialog help 3/3
           _(
             "<p><b><big>Editing or Deleting:</big></b><br>\n" \
-              "Choose a kdump to change or remove.\n" \
-              "Then press <b>Edit</b> or <b>Delete</b> as desired.</p>\n"
+            "Choose a kdump to change or remove.\n" \
+            "Then press <b>Edit</b> or <b>Delete</b> as desired.</p>\n"
           )
       }
     end
