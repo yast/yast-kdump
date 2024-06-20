@@ -829,7 +829,7 @@ module Yast
     # @return [Integer] free space in bytes or nil if filesystem is not local or no
     #                   packages proposal is made yet
     def free_space_for_dump_b
-      kdump_savedir = @KDUMP_SETTINGS.fetch("KDUMP_SAVEDIR", "file:///var/log/dump")
+      kdump_savedir = @KDUMP_SETTINGS.fetch("KDUMP_SAVEDIR", "file:///var/log/dump").dup
       log.info "Using savedir #{kdump_savedir}"
 
       if kdump_savedir.start_with?("/")
