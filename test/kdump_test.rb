@@ -54,6 +54,9 @@ describe Yast::Kdump do
       allow(Yast::Arch).to receive(:aarch64).and_return false
       allow(Yast::ProductFeatures).to receive(:GetBooleanFeature).with("globals", "enable_kdump")
         .and_return(true)
+      allow(Yast::ProductFeatures).to receive(:GetBooleanFeature)
+        .with("globals", "enable_systemd_boot")
+        .and_return(false)
     end
 
     context "while running on machine with less than 1024 MB memory" do
