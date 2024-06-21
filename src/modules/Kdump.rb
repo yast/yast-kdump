@@ -36,10 +36,10 @@ module Yast
   class KdumpClass < Module
     include Yast::Logger
 
-    FADUMP_KEY = "KDUMP_FADUMP"
-    KDUMP_SERVICE_NAME = "kdump"
+    FADUMP_KEY = "KDUMP_FADUMP".freeze
+    KDUMP_SERVICE_NAME = "kdump".freeze
     KDUMP_PACKAGES = ["kexec-tools", "kdump"].freeze
-    TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig"
+    TEMPORARY_CONFIG_FILE = "/var/lib/YaST2/kdump.sysconfig".freeze
     TEMPORARY_CONFIG_PATH = Path.new(".temporary.sysconfig.kdump")
 
     # Space on disk reserved for dump additionally to memory size in bytes
