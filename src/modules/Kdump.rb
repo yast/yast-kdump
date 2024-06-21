@@ -180,7 +180,7 @@ module Yast
     # Abort function
     # @return [Boolean] return true if abort
     def Abort
-      return @AbortFunction.call == true if !@AbortFunction.nil?
+      return @AbortFunction.call == true unless @AbortFunction.nil?
 
       false
     end
@@ -210,12 +210,12 @@ module Yast
     #	FileUtils::Chmod ("/etc/sysconfig/kdump", "600") -> true
     #	FileUtils::Chmod ("/tmp/doesnt_exist", "644") -> false
     def Chmod(target, permissions)
-      if !FileUtils.Exists(target)
+      unless FileUtils.Exists(target)
         Builtins.y2error("Target %1 doesn't exist", target)
         return false
       end
 
-      if !FileUtils.Exists("/bin/chmod")
+      unless FileUtils.Exists("/bin/chmod")
         Builtins.y2error("tool: /bin/chmod not found")
         return false
       end
@@ -245,7 +245,7 @@ module Yast
         return false
       end
 
-      return false if !Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "").include?("@")
+      return false unless Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", "").include?("@")
 
       temp = Builtins.splitstring(
         Ops.get(@KDUMP_SETTINGS, "KDUMP_SAVEDIR", ""),
@@ -491,7 +491,7 @@ module Yast
           Bootloader.modify_kernel_params(:common, :recovery, "crashkernel" => crash_values)
           Bootloader.modify_kernel_params(:xen_host, "crashkernel" => crash_xen_values)
           # do mass write in installation to speed up, so skip this one
-          if !Stage.initial
+          unless Stage.initial
             old_progress = Progress.set(false)
             Bootloader.Write
             Progress.set(old_progress)
@@ -512,7 +512,7 @@ module Yast
         if @crashkernel_param
           # delete crashkernel parameter from bootloader
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, :xen_host, "crashkernel" => :missing)
-          if !Stage.initial
+          unless Stage.initial
             old_progress = Progress.set(false)
             Bootloader.Write
             Progress.set(old_progress)
@@ -567,14 +567,14 @@ module Yast
 
       Progress.NextStage
       # Error message
-      Report.Error(_("Cannot read config file /etc/sysconfig/kdump")) if !ReadKdumpSettings()
+      Report.Error(_("Cannot read config file /etc/sysconfig/kdump")) unless ReadKdumpSettings()
 
       # read another database
       return false if Abort()
 
       Progress.NextStep
       # Error message
-      Report.Error(_("Cannot read kernel boot options.")) if !ReadKdumpKernelParam()
+      Report.Error(_("Cannot read kernel boot options.")) unless ReadKdumpKernelParam()
 
       # read another database
       return false if Abort()
@@ -647,7 +647,7 @@ module Yast
 
       Progress.NextStage
       # Error message
-      if !WriteKdumpSettings()
+      unless WriteKdumpSettings()
         Report.Error(_("Cannot write settings."))
         return false
       end
@@ -657,7 +657,7 @@ module Yast
 
       Progress.NextStage
       # Error message
-      if !WriteKdumpBootParameter()
+      unless WriteKdumpBootParameter()
         Report.Error(_("Adding crashkernel parameter to bootloader fault."))
       end
 
@@ -736,7 +736,7 @@ module Yast
         @kdump_packages.each do |p|
           PackagesProposal.AddResolvables("yast2-kdump", :package, [p])
         end
-        if !@kdump_packages.empty?
+        unless @kdump_packages.empty?
           Builtins.y2milestone(
             "Selected kdump packages for installation: %1",
             @kdump_packages
@@ -750,7 +750,7 @@ module Yast
         @kdump_packages.each do |p|
           PackagesProposal.RemoveResolvables("yast2-kdump", :package, [p])
         end
-        if !@kdump_packages.empty?
+        unless @kdump_packages.empty?
           Builtins.y2milestone(
             "Deselected kdump packages for installation: %1",
             @kdump_packages
@@ -911,11 +911,11 @@ module Yast
       end
 
       if Bootloader.getLoaderType == "systemd-boot" && @add_crashkernel_param
-        warning_string += "<br>" if !warning_string.empty?
+        warning_string += "<br>" unless warning_string.empty?
         warning_string += _("Kdump will not be installed correctly if Systemd Boot is used.")
       end
 
-      if !warning_string.empty?
+      unless warning_string.empty?
         warning = {
           "warning_level" => :warning,
           "warning"       => "<ul><li>" + warning_string + "</li></ul>"
