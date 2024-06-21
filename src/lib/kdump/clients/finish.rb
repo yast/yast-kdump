@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2017 SUSE LLC
 #
@@ -25,6 +23,7 @@ module Y2Kdump
         Yast.import "Kdump"
         Yast.import "Mode"
         Yast.import "Progress"
+        super
       end
 
       def title

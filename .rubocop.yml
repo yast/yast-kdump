@@ -1,6 +1,9 @@
 # use the shared Yast defaults
 inherit_from:
-  /usr/share/YaST2/data/devtools/data/rubocop_yast_style.yml
+  /usr/share/YaST2/data/devtools/data/rubocop-1.24.1_yast_style.yml
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
 
 Metrics/AbcSize:
   Max: 129

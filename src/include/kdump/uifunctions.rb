@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2006 Novell, Inc. All Rights Reserved.
 #
@@ -239,11 +237,7 @@ module Yast
       radiobut = Convert.to_string(
         UI.QueryWidget(Id("EnableDisalbeKdump"), :Value)
       )
-      Kdump.add_crashkernel_param = if radiobut == "enable_kdump"
-        true
-      else
-        false
-      end
+      Kdump.add_crashkernel_param = radiobut == "enable_kdump"
 
       nil
     end
@@ -296,7 +290,13 @@ module Yast
           user_pas = Builtins.substring(parse_target, 0, pos)
           pos1 = Builtins.search(user_pas, ":")
 
-          if !pos1.nil?
+          if pos1.nil?
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "user_name",
+              Builtins.substring(user_pas, 0, pos)
+            )
+          else
             Ops.set(
               @KDUMP_SAVE_TARGET,
               "user_name",
@@ -307,12 +307,6 @@ module Yast
               "password",
               Builtins.substring(user_pas, Ops.add(pos1, 1), pos)
             )
-          else
-            Ops.set(
-              @KDUMP_SAVE_TARGET,
-              "user_name",
-              Builtins.substring(user_pas, 0, pos)
-            )
           end
           parse_target = Builtins.substring(parse_target, Ops.add(pos, 1))
         end
@@ -321,7 +315,13 @@ module Yast
           pos1 = Builtins.search(parse_target, ":")
           pos = Builtins.search(parse_target, "/")
 
-          if !pos1.nil?
+          if pos1.nil?
+            Ops.set(
+              @KDUMP_SAVE_TARGET,
+              "server",
+              Builtins.substring(parse_target, 0, pos)
+            )
+          else
             Ops.set(
               @KDUMP_SAVE_TARGET,
               "server",
@@ -335,12 +335,6 @@ module Yast
                 Ops.add(pos1, 1),
                 Ops.subtract(pos, Ops.add(pos1, 1))
               )
-            )
-          else
-            Ops.set(
-              @KDUMP_SAVE_TARGET,
-              "server",
-              Builtins.substring(parse_target, 0, pos)
             )
           end
           # only cifs
@@ -417,13 +411,13 @@ module Yast
         end
 
         # add port if it is set...
-        if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
-          result = Ops.add(
+        result = if Ops.get(@KDUMP_SAVE_TARGET, "port") == ""
+          Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
+        else
+          Ops.add(
             Ops.add(Ops.add(result, ":"), Ops.get(@KDUMP_SAVE_TARGET, "port")),
             Ops.get(@KDUMP_SAVE_TARGET, "dir")
           )
-        else
-          result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
         end
         # ssh
       elsif ["ssh", "sftp"].include?(@KDUMP_SAVE_TARGET["target"])
@@ -448,13 +442,13 @@ module Yast
         end
         result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "server"))
         # add port if it is set...
-        if Ops.get(@KDUMP_SAVE_TARGET, "port") != ""
-          result = Ops.add(
+        result = if Ops.get(@KDUMP_SAVE_TARGET, "port") == ""
+          Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
+        else
+          Ops.add(
             Ops.add(Ops.add(result, ":"), Ops.get(@KDUMP_SAVE_TARGET, "port")),
             Ops.get(@KDUMP_SAVE_TARGET, "dir")
           )
-        else
-          result = Ops.add(result, Ops.get(@KDUMP_SAVE_TARGET, "dir"))
         end
 
         # nfs
@@ -720,9 +714,9 @@ module Yast
             Popup.Error(_("You need to specify \"User Name\""))
             UI.SetFocus(Id("user_name"))
             return false
-          end # end of if ((value == nil) || (value == ""))
-        end # end of if (anon)
-      end # end of } else if (radiobut == "cifs")
+          end
+        end
+      end
 
       true
     end
@@ -742,12 +736,12 @@ module Yast
         value = Convert.to_boolean(UI.QueryWidget(Id("anonymous"), :Value))
         target = Builtins.tostring(UI.QueryWidget(Id("TargetKdump"), :Value))
 
-        if value && target == "ftp" || !value && target == "cifs"
+        if (value && target == "ftp") || (!value && target == "cifs")
           UI.ChangeWidget(Id("user_name"), :Enabled, false)
           UI.ChangeWidget(Id("password"), :Enabled, false)
           # KDUMP_SAVE_TARGET["user_name"]="";
           # KDUMP_SAVE_TARGET["password"]="";
-        elsif value && target == "cifs" || !value && target == "ftp"
+        elsif (value && target == "cifs") || (!value && target == "ftp")
           UI.ChangeWidget(Id("user_name"), :Enabled, true)
           UI.ChangeWidget(Id("password"), :Enabled, true)
         end
@@ -848,50 +842,48 @@ module Yast
         # directory
         value = Builtins.tostring(UI.QueryWidget(Id("dir"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "dir", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
         end
       elsif radiobut == "ftp"
         Ops.set(@KDUMP_SAVE_TARGET, "target", "ftp")
 
         # server
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "server", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
         end
 
         # port
-        if Builtins.tostring(UI.QueryWidget(Id("port"), :Value)) != "21"
+        if Builtins.tostring(UI.QueryWidget(Id("port"), :Value)) == "21"
+          Ops.set(@KDUMP_SAVE_TARGET, "port", "")
+        else
           Ops.set(
             @KDUMP_SAVE_TARGET,
             "port",
             Builtins.tostring(UI.QueryWidget(Id("port"), :Value))
           )
-        else
-          Ops.set(@KDUMP_SAVE_TARGET, "port", "")
         end
 
         # directory
         value = Builtins.tostring(UI.QueryWidget(Id("dir"), :Value))
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "dir", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
         end
 
         # user_name vs. anonymous
         value = Builtins.tostring(UI.QueryWidget(Id("user_name"), :Value))
 
-        if Convert.to_boolean(UI.QueryWidget(Id("anonymous"), :Value))
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "user_name", "")
-        elsif !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "user_name", value)
         else
-          Ops.set(@KDUMP_SAVE_TARGET, "user_name", "")
+          Ops.set(@KDUMP_SAVE_TARGET, "user_name", value)
         end
 
         # password
@@ -919,39 +911,39 @@ module Yast
         # server
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "server", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
         end
 
         # port
-        if Builtins.tostring(UI.QueryWidget(Id("port"), :Value)) != "22"
+        if Builtins.tostring(UI.QueryWidget(Id("port"), :Value)) == "22"
+          Ops.set(@KDUMP_SAVE_TARGET, "port", "")
+        else
           Ops.set(
             @KDUMP_SAVE_TARGET,
             "port",
             Builtins.tostring(UI.QueryWidget(Id("port"), :Value))
           )
-        else
-          Ops.set(@KDUMP_SAVE_TARGET, "port", "")
         end
 
         # directory
         value = Builtins.tostring(UI.QueryWidget(Id("dir"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "dir", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
         end
 
         # user_name
         value = Builtins.tostring(UI.QueryWidget(Id("user_name"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "user_name", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "user_name", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "user_name", value)
         end
 
         # password
@@ -968,19 +960,19 @@ module Yast
         # server
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "server", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
         end
 
         # directory
         value = Builtins.tostring(UI.QueryWidget(Id("dir"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "dir", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
         end
       elsif radiobut == "cifs"
         Ops.set(@KDUMP_SAVE_TARGET, "target", "cifs")
@@ -988,39 +980,37 @@ module Yast
         # server
         value = Builtins.tostring(UI.QueryWidget(Id("server"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "server", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "server", value)
         end
 
         # share
         value = Builtins.tostring(UI.QueryWidget(Id("share"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "share", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "share", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "share", value)
         end
 
         # directory
         value = Builtins.tostring(UI.QueryWidget(Id("dir"), :Value))
 
-        if !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
-        else
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "dir", "")
+        else
+          Ops.set(@KDUMP_SAVE_TARGET, "dir", value)
         end
 
         # user_name vs. anonymous
         value = Builtins.tostring(UI.QueryWidget(Id("user_name"), :Value))
 
-        if !Convert.to_boolean(UI.QueryWidget(Id("anonymous"), :Value))
+        if value.nil?
           Ops.set(@KDUMP_SAVE_TARGET, "user_name", "")
-        elsif !value.nil?
-          Ops.set(@KDUMP_SAVE_TARGET, "user_name", value)
         else
-          Ops.set(@KDUMP_SAVE_TARGET, "user_name", "")
+          Ops.set(@KDUMP_SAVE_TARGET, "user_name", value)
         end
 
         # password
@@ -1154,7 +1144,7 @@ module Yast
       ) do |key|
         counter = Ops.add(counter, 1)
         one_bit = Builtins.substring(bit_number, counter, 1)
-        UI.ChangeWidget(Id(key), :Value, one_bit == "1" ? false : true)
+        UI.ChangeWidget(Id(key), :Value, one_bit != "1")
       end
 
       nil
@@ -1215,9 +1205,7 @@ module Yast
       while Ops.less_than(counter, 5)
         counter = Ops.add(counter, 1)
         one_bit = Builtins.substring(value, counter, 1)
-        if one_bit == "1"
-          dumplevel = Ops.add(dumplevel, Ops.get(@bit_weight_row, counter, 0))
-        end
+        dumplevel = Ops.add(dumplevel, Ops.get(@bit_weight_row, counter, 0)) if one_bit == "1"
       end
 
       if Ops.greater_than(dumplevel, 0) || dumplevel.nil?
@@ -1235,25 +1223,25 @@ module Yast
           package_list = []
           package_list = Builtins.add(package_list, "makedumpfile")
 
-          if !Package.CheckAndInstallPackages(package_list)
+          if Package.CheckAndInstallPackages(package_list)
+            result = true
+          else
             result = false
 
-            if !Mode.commandline
-              Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
-            else
+            if Mode.commandline
               CommandLine.Error(
                 Message.CannotContinueWithoutPackagesInstalled
               )
+            else
+              Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
             end
             Builtins.y2error(
               "[kdump] (ValidDumpLevel) Installation of package list %1 failed or aborted",
               package_list
             )
-          else
-            result = true
           end
         end
-      end # end of if ((dumplevel >0 ) || (dumplevel == nil))
+      end
       result
     end
 
@@ -1266,9 +1254,7 @@ module Yast
       while Ops.less_than(counter, 5)
         counter = Ops.add(counter, 1)
         one_bit = Builtins.substring(value, counter, 1)
-        if one_bit == "1"
-          int_value = Ops.add(int_value, Ops.get(@bit_weight_row, counter, 0))
-        end
+        int_value = Ops.add(int_value, Ops.get(@bit_weight_row, counter, 0)) if one_bit == "1"
       end
 
       ret = Builtins.tostring(int_value)
@@ -1290,9 +1276,7 @@ module Yast
         value_cache_page = Convert.to_boolean(
           UI.QueryWidget(Id("cache_page"), :Value)
         )
-        if value_cache_private && !value_cache_page
-          UI.ChangeWidget(Id("cache_page"), :Value, true)
-        end
+        UI.ChangeWidget(Id("cache_page"), :Value, true) if value_cache_private && !value_cache_page
       end
 
       if ret == "cache_page"
@@ -1435,21 +1419,21 @@ module Yast
 
     # Initializes FADump settings in UI
     def InitFADump(_key)
-      if Kdump.fadump_supported? && UI.WidgetExists(Id("FADump"))
-        UI.ReplaceWidget(
-          Id("FADump"),
-          VBox(
-            CheckBox(
-              Id("use_fadump"),
-              Opt(:notify),
-              # T: Checkbox label
-              _("Use &Firmware-Assisted Dump"),
-              Kdump.using_fadump?
-            ),
-            VSpacing(1)
-          )
+      return unless Kdump.fadump_supported? && UI.WidgetExists(Id("FADump"))
+
+      UI.ReplaceWidget(
+        Id("FADump"),
+        VBox(
+          CheckBox(
+            Id("use_fadump"),
+            Opt(:notify),
+            # T: Checkbox label
+            _("Use &Firmware-Assisted Dump"),
+            Kdump.using_fadump?
+          ),
+          VSpacing(1)
         )
-      end
+      )
     end
 
     def HandleFADump(_key, event)
@@ -1552,25 +1536,25 @@ module Yast
           package_list = []
           package_list = Builtins.add(package_list, "makedumpfile")
 
-          if !Package.CheckAndInstallPackages(package_list)
+          if Package.CheckAndInstallPackages(package_list)
+            result = true
+          else
             result = false
 
-            if !Mode.commandline
-              Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
-            else
+            if Mode.commandline
               CommandLine.Error(
                 Message.CannotContinueWithoutPackagesInstalled
               )
+            else
+              Popup.Error(Message.CannotContinueWithoutPackagesInstalled)
             end
             Builtins.y2error(
               "[kdump] (ValidDumpFormat) Installation of package list %1 failed or aborted",
               package_list
             )
-          else
-            result = true
           end
         end
-      end # end of if ((value != "elf_format") || (value == nil))
+      end
       result
     end
 
@@ -1579,17 +1563,18 @@ module Yast
 
     def StoreDumpFormat(_key, _event)
       value = Builtins.tostring(UI.QueryWidget(Id("DumpFormat"), :Value))
-      if value == "elf_format"
+      case value
+      when "elf_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "ELF")
-      elsif value == "compressed_format"
+      when "compressed_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "compressed")
-      elsif value == "lzo_format"
+      when "lzo_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "lzo")
-      elsif value == "snappy_format"
+      when "snappy_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "snappy")
-      elsif value == "zstd_format"
+      when "zstd_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "zstd")
-      elsif value == "raw_format"
+      when "raw_format"
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "raw")
       else
         Ops.set(Kdump.KDUMP_SETTINGS, "KDUMP_DUMPFORMAT", "none")
@@ -1603,12 +1588,12 @@ module Yast
 
     def InitEnableDeleteImages(_key)
       UI.ChangeWidget(Id("EnableDeleteImages"), :Notify, true)
-      if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_KEEP_OLD_DUMPS") != "0"
-        UI.ChangeWidget(Id("NumberDumps"), :Enabled, true)
-        UI.ChangeWidget(Id("EnableDeleteImages"), :Value, true)
-      else
+      if Ops.get(Kdump.KDUMP_SETTINGS, "KDUMP_KEEP_OLD_DUMPS") == "0"
         UI.ChangeWidget(Id("EnableDeleteImages"), :Value, false)
         UI.ChangeWidget(Id("NumberDumps"), :Enabled, false)
+      else
+        UI.ChangeWidget(Id("NumberDumps"), :Enabled, true)
+        UI.ChangeWidget(Id("EnableDeleteImages"), :Value, true)
       end
 
       nil
@@ -1623,10 +1608,7 @@ module Yast
         value = Convert.to_boolean(
           UI.QueryWidget(Id("EnableDeleteImages"), :Value)
         )
-        if !value
-          UI.ChangeWidget(Id("NumberDumps"), :Value, Builtins.tointeger("0"))
-          UI.ChangeWidget(Id("NumberDumps"), :Enabled, false)
-        else
+        if value
           UI.ChangeWidget(
             Id("NumberDumps"),
             :Value,
@@ -1635,6 +1617,9 @@ module Yast
             )
           )
           UI.ChangeWidget(Id("NumberDumps"), :Enabled, true)
+        else
+          UI.ChangeWidget(Id("NumberDumps"), :Value, Builtins.tointeger("0"))
+          UI.ChangeWidget(Id("NumberDumps"), :Enabled, false)
         end
       end
 

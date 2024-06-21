@@ -1,5 +1,4 @@
 #!/usr/bin/env rspec
-
 require_relative "./test_helper"
 
 Yast.import "Kdump"
@@ -54,6 +53,9 @@ describe Yast::Kdump do
       allow(Yast::Arch).to receive(:aarch64).and_return false
       allow(Yast::ProductFeatures).to receive(:GetBooleanFeature).with("globals", "enable_kdump")
         .and_return(true)
+      allow(Yast::ProductFeatures).to receive(:GetBooleanFeature)
+        .with("globals", "enable_systemd_boot")
+        .and_return(false)
     end
 
     context "while running on machine with less than 1024 MB memory" do
@@ -168,13 +170,13 @@ describe Yast::Kdump do
     it "returns space in bytes requested for kernel dump" do
       allow(Yast::Kdump).to receive(:total_memory).and_return(total_memory_size_mb)
 
-      expect(Yast::Kdump.space_requested_for_dump_b).to eq(total_memory_size_mb * 1024**2 + 4 * 1024**3)
+      expect(Yast::Kdump.space_requested_for_dump_b).to eq((total_memory_size_mb * (1024**2)) + (4 * (1024**3)))
     end
   end
 
   describe "#proposal_warning" do
     before do
-      allow(Yast::Kdump).to receive(:space_requested_for_dump_b).and_return(4 * 1024**3)
+      allow(Yast::Kdump).to receive(:space_requested_for_dump_b).and_return(4 * (1024**3))
       Yast::Kdump.instance_variable_set("@add_crashkernel_param", true)
     end
 
@@ -189,7 +191,7 @@ describe Yast::Kdump do
 
     context "when free space is smaller than requested" do
       it "returns hash with warning and warning_level keys" do
-        allow(Yast::Kdump).to receive(:free_space_for_dump_b).and_return(3978 * 1024**2)
+        allow(Yast::Kdump).to receive(:free_space_for_dump_b).and_return(3978 * (1024**2))
 
         warning = Yast::Kdump.proposal_warning
         expect(warning["warning"]).to match(/There might not be enough free space.*only.*are available/)
@@ -199,7 +201,7 @@ describe Yast::Kdump do
 
     context "when free space is bigger or equal to requested size" do
       it "returns empty hash" do
-        allow(Yast::Kdump).to receive(:free_space_for_dump_b).and_return(120 * 1024**3)
+        allow(Yast::Kdump).to receive(:free_space_for_dump_b).and_return(120 * (1024**3))
 
         warning = Yast::Kdump.proposal_warning
         expect(warning).to eq({})

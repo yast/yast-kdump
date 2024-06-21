@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # ------------------------------------------------------------------------------
 # Copyright (c) 2019 SUSE LLC
 #
@@ -28,6 +26,7 @@ module Y2Kdump
         textdomain "kdump"
 
         Yast.include self, "kdump/wizards.rb" # needed for auto sequence
+        super
       end
 
       def import(profile)
