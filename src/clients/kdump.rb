@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # Copyright (c) [2006-2021] SUSE LLC
 #
 # All Rights Reserved.
