@@ -2,7 +2,7 @@
 Wed Jun 19 15:36:03 UTC 2024 - Stefan Schubert <schubi@suse.com>
 
 - Do not suggest Kdump if Systemd-Boot is used. Kdump is not stable
-  if Systemd-Bootloader is used.
+  if Systemd-Bootloader is used. (bsc#1226676, bsc#1228242)
 - 5.0.1
 
 -------------------------------------------------------------------
