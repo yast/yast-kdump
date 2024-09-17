@@ -1223,6 +1223,7 @@ module Yast
       if fadump_supported?
         # If fdump is selected and we want to enable kdump
         value = "on" if using_fadump? && @add_crashkernel_param
+        value ||= :missing
         Bootloader.modify_kernel_params(:common, :recovery, "fadump" => value)
         Bootloader.Write unless Yast::Stage.initial # do mass write in installation to speed up
       end

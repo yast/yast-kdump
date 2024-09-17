@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 12 14:10:18 UTC 2024 - Stefan Hundhammer <shundhammer@suse.com>
+
+- Don't write empty  fadump=""  kernel parameter (bsc#1230359)
+- 4.6.3
+
+-------------------------------------------------------------------
 Mon Nov 13 15:35:53 UTC 2023 - Josef Reidinger <jreidinger@suse.com>
 
 - Bump properly version as old 4.6.1 contains removal of keys from
