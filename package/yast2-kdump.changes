@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Thu Feb 27 11:48:40 UTC 2025 - Stefan Hundhammer <shundhammer@suse.com>
 
-- Applied patch from jbohac for bsc#1237754
+- Applied patch from jbohac for bsc#1237754, let KDUMP_CPUS=0
 - 4.7.2
 
 -------------------------------------------------------------------
