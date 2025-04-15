@@ -147,7 +147,7 @@ module Yast
 
       @DEFAULT_CONFIG = {
         "KDUMP_KERNELVER"          => "",
-        "KDUMP_CPUS"               => "0",
+        "KDUMP_CPUS"               => "32",
         "KDUMP_COMMANDLINE"        => "",
         "KDUMP_COMMANDLINE_APPEND" => "",
         "KDUMP_AUTO_RESIZE"        => "false",
