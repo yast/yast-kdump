@@ -12,6 +12,7 @@ Yast.import "Arch"
 describe Yast::Kdump do
   before do
     Yast::Kdump.reset
+    allow(Yast::Bootloader).to receive(:getLoaderType).and_return "grub2-efi"
   end
 
   subject { Yast::Kdump }
