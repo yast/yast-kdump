@@ -681,10 +681,6 @@ module Yast
     # @return [Boolean] the default proposed state
 
     def ProposeCrashkernelParam
-      # proposing disabled kdump because it does not work with systemd-boot together
-      if Bootloader.getLoaderType == "systemd-boot"
-        log.info("kdump disabled because systemd-boot is active.")
-        false
       # proposing disabled kdump if product wants it (bsc#1071242)
       elsif !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
         log.info "Kdump disabled in control file"
@@ -904,11 +900,6 @@ module Yast
           "Warning! There might not be enough free space to have kdump enabled. " \
           "%{required} required for saving a kernel dump, but only %{available} are available."
         ), required: String.FormatSizeWithPrecision(requested_space, 2, true), available: String.FormatSizeWithPrecision(free_space, 2, true))
-      end
-
-      if Bootloader.getLoaderType == "systemd-boot" && @add_crashkernel_param
-        warning_string += "<br>" unless warning_string.empty?
-        warning_string += _("Kdump will not be installed correctly if Systemd Boot is used.")
       end
 
       unless warning_string.empty?
