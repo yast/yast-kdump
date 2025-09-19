@@ -465,19 +465,15 @@ module Yast
       # Then, do the same for the crashkernel param
       #
       # If we need to add crashkernel param
-      Builtins.y2milestone("WriteKdumpBootParameter:1")
       if @add_crashkernel_param
-        Builtins.y2milestone("WriteKdumpBootParameter:2")        
         if Mode.autoinst || Mode.autoupgrade
           # Use the value(s) read by import
           crash_values = @crashkernel_param_values
           crash_xen_values = @crashkernel_xen_param_values
           # Always write the value
           skip_crash_values = false
-          Builtins.y2milestone("WriteKdumpBootParameter:3")          
         else
           # Calculate the param values based on @allocated_memory
-      Builtins.y2milestone("WriteKdumpBootParameter:4")          
           crash_values = crash_kernel_values
           crash_xen_values = crash_xen_kernel_values
           remove_offsets!(crash_values) if Mode.update
@@ -488,12 +484,10 @@ module Yast
         end
 
         if skip_crash_values
-          Builtins.y2milestone("WriteKdumpBootParameter:5")          
           # start kdump at boot
           Service.Enable(KDUMP_SERVICE_NAME)
           Service.Restart(KDUMP_SERVICE_NAME) if Service.active?(KDUMP_SERVICE_NAME)
         else
-          Builtins.y2milestone("WriteKdumpBootParameter:6")          
           Bootloader.modify_kernel_params(:common, :recovery, "crashkernel" => crash_values)
           Bootloader.modify_kernel_params(:xen_host, "crashkernel" => crash_xen_values)
           # do mass write in installation to speed up, so skip this one
@@ -512,7 +506,6 @@ module Yast
           Service.Enable(KDUMP_SERVICE_NAME)
         end
       else
-        Builtins.y2milestone("WriteKdumpBootParameter:7")        
         # If we don't need the param but it is there
         if @crashkernel_param
           # delete crashkernel parameter from bootloader
@@ -670,7 +663,7 @@ module Yast
       Progress.NextStage
 
       return false if Abort()
-Report.Error(_("HAlt."))
+
       true
     end
 
