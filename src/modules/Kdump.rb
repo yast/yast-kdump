@@ -415,14 +415,14 @@ module Yast
       y2milestone("Running command: #{run_command}")
       ret = SCR.Execute(path(".target.bash"), run_command)
 
-#      if ret != 0
+      if ret != 0
         y2error("Error updating initrd, see #{update_logfile} or call #{update_command} manually")
         Report.Error(format(_(
           "Error updating initrd while calling '%{cmd}'.\n" \
           "See %{log} for details."
         ), :cmd => update_command, :log => update_logfile))
-#        return false
-#      end
+        return false
+      end
 
       true
     end
@@ -674,7 +674,7 @@ module Yast
       Progress.NextStage
 
       return false if Abort()
-
+Report.Error(_("HAlt."))
       true
     end
 
