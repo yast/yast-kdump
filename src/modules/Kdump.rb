@@ -682,7 +682,7 @@ module Yast
 
     def ProposeCrashkernelParam
       # proposing disabled kdump if product wants it (bsc#1071242)
-      elsif !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
+      if !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
         log.info "Kdump disabled in control file"
         false
       # proposing disabled kdump if PC has less than 1024MB RAM
