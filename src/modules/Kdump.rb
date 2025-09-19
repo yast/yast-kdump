@@ -497,11 +497,9 @@ module Yast
           Bootloader.modify_kernel_params(:common, :recovery, "crashkernel" => crash_values)
           Bootloader.modify_kernel_params(:xen_host, "crashkernel" => crash_xen_values)
           # do mass write in installation to speed up, so skip this one
-          unless Stage.initial
-            old_progress = Progress.set(false)
-            Bootloader.Write
-            Progress.set(old_progress)
-          end
+          old_progress = Progress.set(false)
+          Bootloader.Write
+          Progress.set(old_progress)
           Builtins.y2milestone(
             "[kdump] (WriteKdumpBootParameter) adding crashkernel options with values: %1",
             crash_values
@@ -519,11 +517,9 @@ module Yast
         if @crashkernel_param
           # delete crashkernel parameter from bootloader
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, :xen_host, "crashkernel" => :missing)
-          unless Stage.initial
-            old_progress = Progress.set(false)
-            Bootloader.Write
-            Progress.set(old_progress)
-          end
+          old_progress = Progress.set(false)
+          Bootloader.Write
+          Progress.set(old_progress)
           reboot_needed = true
         end
         Service.Disable(KDUMP_SERVICE_NAME)
