@@ -491,11 +491,11 @@ module Yast
           Bootloader.modify_kernel_params(:common, :recovery, "crashkernel" => crash_values)
           Bootloader.modify_kernel_params(:xen_host, "crashkernel" => crash_xen_values)
           # do mass write in installation to speed up, so skip this one
-          unless Stage.initial
-            old_progress = Progress.set(false)
-            Bootloader.Write
-            Progress.set(old_progress)
-          end
+          old_progress = Progress.set(false)
+          # Has also to be called while installation because Kdbump finish will be called
+          # after Bootloader finish. (bsc#1249370, bsc#1226676)
+          Bootloader.Write
+          Progress.set(old_progress)
           Builtins.y2milestone(
             "[kdump] (WriteKdumpBootParameter) adding crashkernel options with values: %1",
             crash_values
@@ -512,11 +512,11 @@ module Yast
         if @crashkernel_param
           # delete crashkernel parameter from bootloader
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, :xen_host, "crashkernel" => :missing)
-          unless Stage.initial
-            old_progress = Progress.set(false)
-            Bootloader.Write
-            Progress.set(old_progress)
-          end
+          old_progress = Progress.set(false)
+          # Has also to be called while installation because Kdbump finish will be called
+          # after Bootloader finish. (bsc#1249370, bsc#1226676)
+          Bootloader.Write
+          Progress.set(old_progress)
           reboot_needed = true
         end
         Service.Disable(KDUMP_SERVICE_NAME)
@@ -685,12 +685,8 @@ module Yast
     # @return [Boolean] the default proposed state
 
     def ProposeCrashkernelParam
-      # proposing disabled kdump because it does not work with systemd-boot together
-      if Bootloader.getLoaderType == "systemd-boot"
-        log.info("kdump disabled because systemd-boot is active.")
-        false
       # proposing disabled kdump if product wants it (bsc#1071242)
-      elsif !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
+      if !ProductFeatures.GetBooleanFeature("globals", "enable_kdump")
         log.info "Kdump disabled in control file"
         false
       # proposing disabled kdump if PC has less than 1024MB RAM
@@ -908,11 +904,6 @@ module Yast
           "Warning! There might not be enough free space to have kdump enabled. " \
           "%{required} required for saving a kernel dump, but only %{available} are available."
         ), required: String.FormatSizeWithPrecision(requested_space, 2, true), available: String.FormatSizeWithPrecision(free_space, 2, true))
-      end
-
-      if Bootloader.getLoaderType == "systemd-boot" && @add_crashkernel_param
-        warning_string += "<br>" unless warning_string.empty?
-        warning_string += _("Kdump will not be installed correctly if Systemd Boot is used.")
       end
 
       unless warning_string.empty?
