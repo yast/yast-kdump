@@ -493,7 +493,7 @@ module Yast
           # do mass write in installation to speed up, so skip this one
           old_progress = Progress.set(false)
           # Has also to be called while installation because Kdbump finish will be called
-          # after Bootloader finish. (bsc#1249370, bsc#1226676, bsc#1226676)
+          # after Bootloader finish. (bsc#1249370, bsc#1226676)
           Bootloader.Write
           Progress.set(old_progress)
           Builtins.y2milestone(
@@ -514,7 +514,7 @@ module Yast
           Bootloader.modify_kernel_params(:common, :xen_guest, :recovery, :xen_host, "crashkernel" => :missing)
           old_progress = Progress.set(false)
           # Has also to be called while installation because Kdbump finish will be called
-          # after Bootloader finish. (bsc#1249370, bsc#1226676, bsc#1226676)
+          # after Bootloader finish. (bsc#1249370, bsc#1226676)
           Bootloader.Write
           Progress.set(old_progress)
           reboot_needed = true
